@@ -9,6 +9,7 @@
     <javac srcdir="${utils.src}"/>
   </target>
 
+  <!-- ======================== javadoc ========================= -->
   <target name="javadoc">
   <!-- Add utils internal javadoc -->
     <mkdir dir="${utils.src}/doc" />
@@ -26,9 +27,9 @@
 
   <!-- ==================== Administrative targets ======================= -->
 
-  <target name="archive" depends="compile">
+  <target name="archive" depends="compile, javadoc">
     <jar jarfile="${utils.src}/irutils.jar"
-	 basedir="utils"/>
+	 basedir="${utils.src}"/>
   </target>
 
   <target name="clean">
@@ -36,7 +37,9 @@
      <fileset dir="." includes="**/*.class"/>
     </delete>
   </target>
-  <target name="all" depends="clean,compile"/>
+
+  <target name="all" depends="clean,compile,javadoc,archive"/>
+
   <target name="main" depends="compile"/>
 
 </project>
