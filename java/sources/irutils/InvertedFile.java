@@ -54,7 +54,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.6 2002/10/08 19:07:45 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.7 2002/10/08 20:01:51 wrogers Exp $
  * @see irutils.InvertedFileContainer
  */
 
@@ -91,10 +91,10 @@ public class InvertedFile implements Serializable
   String indexname;
 
   /** name of table index is derived from */
-  String tablefilename;
+  transient String tablefilename;
 
   /** directory path of parent directory for index */
-  String indexParentDirectoryPath;
+  transient String indexParentDirectoryPath;
 
   /** format for data */
   List indexFormat;
