@@ -6,7 +6,7 @@ import java.util.Iterator;
 /** IFQuery, a sample command line interface for the InvertedFile class.
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IFQuery.java,v 1.3 2001/09/20 15:02:57 wrogers Exp $
+ * @version $Id: IFQuery.java,v 1.4 2001/11/15 15:50:09 wrogers Exp $
  */
 
 public class IFQuery {
@@ -22,11 +22,15 @@ public class IFQuery {
   {
 
     String words[] = { };	// empty array
-    String indexRoot = "/home/wrogers/devel/exper/irutils/java/indices";
-    String tableRoot = "/home/wrogers/devel/exper/irutils/java/tables";
+    String indexRoot = 
+      System.getProperty("index.path", 
+			 "/home/wrogers/devel/exper/irutils/java/indices");
+    String tableRoot =
+      System.getProperty("table.path",
+			 "/home/wrogers/devel/exper/irutils/java/tables");
 
     if (args.length < 2) {
-      System.out.println("usage: utils.CL2 <indexname> <queryterm> [| <queryterm>]");
+      System.out.println("usage: irutils.IFQuery <indexname> <queryterm> [| <queryterm>]");
       System.exit(0);
     }
 
