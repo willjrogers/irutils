@@ -3,6 +3,10 @@ package utils;
 /** command line interface for bspIndex */
 public class CL {
 
+  /**
+   * main program 
+   * @param args argument vector.
+   */
   public static void main(String[] args)
     throws java.io.FileNotFoundException,
     java.io.IOException, BSPIndexCreateException, ClassNotFoundException

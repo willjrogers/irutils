@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *
  * @author Will Rogers
- * @version $Id: BSPContainer.java,v 1.2 2001/07/25 18:45:39 wrogers Exp $
+ * @version $Id: BSPContainer.java,v 1.3 2001/07/26 19:03:14 wrogers Exp $
  */
 
 public class BSPContainer {
@@ -32,7 +32,11 @@ public class BSPContainer {
   public BSPContainer()
   {
   }
-  
+
+  /**
+   * @param tableRoot directory where indices reside.
+   * @param indexRoot directory where table reside.
+   */
   public BSPContainer(String tableRoot, String indexRoot)
     throws NumberFormatException, FileNotFoundException, IOException
   { 
@@ -66,16 +70,29 @@ public class BSPContainer {
     reader.close();
   }
 
+  /**
+   * set directory where indices reside.
+   * @param root directory where indices reside.
+   */
   public void setIndexRoot(String root) 
   {
     this.indexRoot = root;
   }
 
+  /**
+   * set directory where tables reside.
+   * @param root directory where tables reside.
+   */
   public void setTableRoot(String root)
   {
     this.tableRoot = root;
   }
 
+  /** 
+   * get index object for index specified by indexname.
+   * @param indexname name of index to be instantiated.
+   * @return index instance.
+   */
   public BSPIndex get(String indexname)
     throws FileNotFoundException, StreamCorruptedException, IOException,
            ClassNotFoundException, OptionalDataException
@@ -105,6 +122,10 @@ public class BSPContainer {
     return null;
   }
 
+  /**
+   * Print configuration of index object instance.
+   * @param out print stream to write configuration to.
+   */
   public void printConfig(java.io.PrintStream out)
   {
     out.println("Table Root: " + this.tableRoot);
@@ -116,20 +137,18 @@ public class BSPContainer {
     }
   }
 
+  /**
+   * Print configuration of index object instance.
+   */
   public void printConfig()
   {
     printConfig(System.out);
   }
 
-  public static void main(String[] argv) 
-    throws FileNotFoundException, IOException
-  {
-    BSPContainer bspMap = 
-      new BSPContainer("/home/wrogers/devel/exper/utils/java/tables",
-		       "/home/wrogers/devel/exper/utils/java/indices");
-    bspMap.printConfig();
-  }
-
+  /**
+   * Implementation of statndard method toString().
+   * @return string representation of container object.
+   */
   public String toString()
   {
     StringBuffer sb = new StringBuffer();
@@ -141,6 +160,19 @@ public class BSPContainer {
       sb.append(iter.next()).append("\n");
     }
     return sb.toString();
+  }
+
+  /**
+   * main program 
+   * @param argv argument vector.
+   */
+  public static void main(String[] argv) 
+    throws FileNotFoundException, IOException
+  {
+    BSPContainer bspMap = 
+      new BSPContainer("/home/wrogers/devel/exper/utils/java/tables",
+		       "/home/wrogers/devel/exper/utils/java/indices");
+    bspMap.printConfig();
   }
 
 } // BSPContainer
