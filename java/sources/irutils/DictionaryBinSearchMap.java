@@ -8,7 +8,7 @@ import java.io.*;
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: DictionaryBinSearchMap.java,v 1.1 2001/08/29 02:28:31 wrogers Exp $
+ * @version $Id: DictionaryBinSearchMap.java,v 1.2 2001/08/31 19:17:57 wrogers Exp $
  */
 
 public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
@@ -22,7 +22,7 @@ public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
   //  Term Length, # of postings And addr are the same for all records in a partition.
 
   /** length of integer in bytes */
-  public static final int DATALENGTH = 4; /* is this right */
+  public static final int DATALENGTH = 4; /* is this right? */
   /** data output stream for writing map. */
   private transient DataOutputStream mapWriter;
   /** random access file for reading map. */
@@ -63,7 +63,7 @@ public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
     throws IOException
   {
     // write dictionary entry
-    this.mapWriter.writeChars(term);
+    this.mapWriter.writeBytes(term);
     this.mapWriter.writeInt(numOfPostings);
     this.mapWriter.writeInt(data);
     this.numberOfRecords++;
