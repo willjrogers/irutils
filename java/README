@@ -42,7 +42,6 @@ adrenal|2.39843
 
 Then create an ifconfig file in /Users/will/Library/jdtables of the
 form:
-
 NUM_TABLES: 1
 #
 word_signal.txt|word_signal|2|0|word|weight|TXT|INT
@@ -60,6 +59,19 @@ Field Types are:
 Key Fields: a comma separated list of columns to be used as key,
              currently must be type TXT
 
+Annotated example of a config entry:
+^<<
+       +-------------------------------------------- input file
+       |	     +------------------------------ tablename
+       |	     |      +----------------------- number of fields
+       |	     |      | +--------------------- key fields
+       |	     |      | |  +------------------ field name         
+       |	     |      | |  |     +------------ field name
+       |	     |      | |  |     |     +------ field type
+       |	     |      | |  |     |     |   +-- field type
+       |	     |      | |  |     |     |   |
+word_signal.txt|word_signal|2|0|word|weight|TXT|INT
+^>>
 
 then use the command:
 
