@@ -1,4 +1,4 @@
-$Id: README,v 1.13 2002/04/08 15:21:24 wrogers Exp $
+$Id: README,v 1.14 2002/04/17 17:11:50 wrogers Exp $
 
 README - readme about java version of IR Utils
 
@@ -76,8 +76,8 @@ word_signal.txt|word_signal|2|0|word|weight|TXT|INT
 
 then use the command:
 
- $ java irutils.IFBuild -Dindex.path=/Users/will/Library/jdindex \
-       -Dtable.path=/Users/will/Library/jdtables word_signal
+ $ java -Dindex.path=/Users/will/Library/jdindex \
+        -Dtable.path=/Users/will/Library/jdtables irutils.IFBuild word_signal
 
 
 ** IFBuild usage
