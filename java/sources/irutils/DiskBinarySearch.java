@@ -8,7 +8,7 @@ import java.io.*;
  * Created: Wed Jul 25 11:15:59 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: DiskBinarySearch.java,v 1.1 2001/07/25 19:36:52 wrogers Exp $
+ * @version $Id: DiskBinarySearch.java,v 1.2 2001/08/29 02:26:36 wrogers Exp $
  */
 
 public final class DiskBinarySearch extends Object
@@ -96,4 +96,45 @@ public final class DiskBinarySearch extends Object
     return -1;
   }
 
+  /**
+   *  Disk based binary search implementation
+   *
+   * @param bsfp       file pointer for binary search table
+   * @param word       search word
+   * @param wordlen    wordlength
+   * @param numrecs    number of records in table
+   * @return int containing address of posting, -1 if not found.
+   */
+  public static DictionaryEntry
+    dictionaryBinarySearch(RandomAccessFile bsfp, String word, 
+			   int wordlen, int numrecs)
+    throws IOException
+  {
+    int datalen = 8; // postings (integer[4 bytes]) + address (integer[4 bytes])
+    int low = 0;
+    int high = numrecs;
+    int cond;
+    int mid;
+    byte[] wordbuf = new byte[wordlen];
+    String tstword;
+
+    while ( low < high )
+      {
+	mid = low + (high- low) / 2;
+	bsfp.seek(mid * (wordlen+datalen));
+	bsfp.read(wordbuf);
+	tstword = new String(wordbuf);
+	cond = word.compareTo(tstword);
+	if (cond < 0) {
+	  high = mid;
+	} else if (cond > 0) {
+	  low = mid + 1;
+	} else {
+	  int count = bsfp.readInt();
+	  int address = bsfp.readInt();
+	  return new DictionaryEntry(tstword, count, address);
+	}
+      }
+    return null;
+  }
 } // DiskBinarySearch
