@@ -101,7 +101,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *</p>
  * @author Will Rogers
- * @version $Id: InvertedFileContainer.java,v 1.4 2001/12/20 21:52:01 wrogers Exp $
+ * @version $Id: InvertedFileContainer.java,v 1.5 2002/03/13 20:56:16 wrogers Exp $
  */
 
 public class InvertedFileContainer {
@@ -118,7 +118,10 @@ public class InvertedFileContainer {
   int numTables;
 
   /** map of tables and their configurations */
-  HashMap tableMap = new HashMap(20);
+  HashMap tableMap = new HashMap(10);
+  
+  /** map of open indices */
+  HashMap openIndexMap = new HashMap(10);
 
   /** default constructor for serialization purposes. */
   public InvertedFileContainer()
@@ -199,7 +202,12 @@ public class InvertedFileContainer {
     throws FileNotFoundException, StreamCorruptedException, IOException,
            ClassNotFoundException, OptionalDataException
   {
+    /** index open? if so then use it. */
+    InvertedFile invertedFile = (InvertedFile)openIndexMap.get(indexname);
+    if (invertedFile != null)
+      return invertedFile;
 
+    /** otherwise instantiate index */
     String line = (String)this.tableMap.get(indexname);
     if (line != null) {
       List formatList = utils.StringUtils.split(line, "|");
@@ -212,13 +220,16 @@ public class InvertedFileContainer {
 	ObjectInputStream p = new ObjectInputStream(istream);
 	InvertedFile index = (InvertedFile)p.readObject();
 	istream.close();
-	// System.out.println("index:\n" + index);
+	this.openIndexMap.put(indexname, index);
 	return index;
       } else {
-	return new InvertedFile((String)formatList.get(1), 
-			    this.tableRoot + "/" + (String)formatList.get(0),
-			    this.indexRoot,
-			    formatList);
+	InvertedFile index = 
+	  new InvertedFile((String)formatList.get(1), 
+			   this.tableRoot + "/" + (String)formatList.get(0),
+			   this.indexRoot,
+			   formatList);
+	this.openIndexMap.put(indexname, index);
+	return index;
       }
     } 
     return null;
@@ -262,6 +273,18 @@ public class InvertedFileContainer {
       sb.append(iter.next()).append("\n");
     }
     return sb.toString();
+  }
+
+  /**
+   * implementation of Object's finalize method.
+   */
+  protected void finalize()
+    throws Throwable
+  {
+    for (Iterator iterator = openIndexMap.keySet().iterator(); 
+	 iterator.hasNext(); 
+	 ((InvertedFile)iterator.next()).finalize());
+    super.finalize();
   }
 
   /**
