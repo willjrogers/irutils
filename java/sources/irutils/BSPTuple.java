@@ -7,7 +7,7 @@ package utils;
  * Created: Wed Jul 18 13:10:42 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPTuple.java,v 1.4 2001/08/27 18:50:19 wrogers Exp $
+ * @version $Id: BSPTuple.java,v 1.5 2001/08/31 19:18:40 wrogers Exp $
  */
 
 public class BSPTuple {
@@ -22,6 +22,16 @@ public class BSPTuple {
   {
     this.key = key;
     this.value = value;
+  }
+
+  public String getKey()
+  {
+    return this.key;
+  }
+
+  public Object getValue()
+  {
+    return this.value;
   }
 
   /**
