@@ -1,4 +1,4 @@
-$Id: README,v 1.12 2002/04/08 14:52:03 wrogers Exp $
+$Id: README,v 1.13 2002/04/08 15:21:24 wrogers Exp $
 
 README - readme about java version of IR Utils
 
@@ -62,7 +62,7 @@ Key Fields: a comma separated list of columns to be used as key,
              currently must be type TXT
 
 Annotated example of a config entry:
-^<<
+
        +-------------------------------------------- input file
        |	     +------------------------------ tablename
        |	     |      +----------------------- number of fields
@@ -73,7 +73,6 @@ Annotated example of a config entry:
        |	     |      | |  |     |     |   +-- field type
        |	     |      | |  |     |     |   |
 word_signal.txt|word_signal|2|0|word|weight|TXT|INT
-^>>
 
 then use the command:
 
