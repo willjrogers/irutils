@@ -1,0 +1,40 @@
+NUM_TABLES: 1
+#
+############################################################################
+#
+# Format:
+#
+# input_file|tablename|num_fields|key fields|fieldname1|...|N|fieldtype1|...|N|
+#
+#          E.g.: stopwords.txt|stpwrds|2|0|word|score|TXT|TXT
+# 
+# Field Types: 
+#     TXT  -- data you wish to be accessed as text (or floats)
+#     INT  -- data you wish to be accessed as integers
+# 
+# Maximum Number of Columns: 10
+# Maximum Filename Length: 30
+# Maximum Filename Length: 30
+# Maximum Fieldname Length: 20
+#
+# Key Fields: a comma separated list of columns to be used as key,
+#             currently must be type TXT
+#
+# Processing:
+#
+#   To Add Entries:
+#     1) Add line(s) @ bottom of file with your new table information
+#     2) Increment first line (NUM_TABLES) to reflect additions
+#     3) Run create_bulk from this directory
+#
+#   To Remove Entries:
+#     1) Remove line(s) from file as necessary
+#     2) Decrement first line (NUM_TABLES) to reflect deletions
+#     3) There is no need to rerun create_bulk
+#
+############################################################################
+#
+# examples:
+# j.INDR|dcmsrecommendations|2|0|pmid|recommendations|TXT|TXT
+# recommendations.txt|recommendations|3|0|pmid|marsid|recommendations|TXT|TXT|TXT
+smallrecommend.txt|smallrecommend|3|0|pmid|marsid|recommendations
