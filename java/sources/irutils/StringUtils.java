@@ -11,7 +11,7 @@ import java.util.Iterator;
  * Created: Tue Jul 10 09:05:44 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: StringUtils.java,v 1.6 2001/09/20 15:00:22 wrogers Exp $
+ * @version $Id: StringUtils.java,v 1.7 2001/11/15 15:45:41 wrogers Exp $
  */
 
 public final class StringUtils extends Object
@@ -82,7 +82,7 @@ public final class StringUtils extends Object
     if (previousToken.indexOf(delimitchars) > -1 && i == pos) {
       return "";
     }
-    return null;
+    return "";
   }
 
   /**
