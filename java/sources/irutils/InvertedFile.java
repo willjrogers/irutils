@@ -55,7 +55,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.10 2002/12/04 15:49:13 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.11 2003/05/28 17:12:45 wrogers Exp $
  * @see irutils.InvertedFileContainer
  */
 
@@ -76,10 +76,10 @@ public class InvertedFile implements Serializable
    }
 
   /** hashlist of hash or tree maps for generating new indices. */
-  transient HashMap hashlist = new HashMap(5);
+  transient Map hashlist = new HashMap(350, 0.96f);
 
   /** hashmap of open partition files. */
-  transient HashMap partitionFiles = new HashMap(5);
+  transient Map partitionFiles = new HashMap(5);
 
   /** postings file */
   transient RandomAccessFile postingsFile;
@@ -106,10 +106,10 @@ public class InvertedFile implements Serializable
   int wordnum;
 
   /** number of records in each partition */
-  HashMap numrecs;
+  Map numrecs;
 
   /** datalen in dictionary part of each partition */
-  HashMap dataLength;
+  Map dataLength;
 
   /** list of key indices (Integer)  used for this index. (default is [0]) */
   List keyIndices = null;		// if null, key index is zero
