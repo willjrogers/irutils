@@ -1,6 +1,6 @@
 package irutils;
 import java.util.StringTokenizer;
-import java.util.AbstractList;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -11,7 +11,7 @@ import java.util.Iterator;
  * Created: Tue Jul 10 09:05:44 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: StringUtils.java,v 1.5 2001/09/07 13:35:25 wrogers Exp $
+ * @version $Id: StringUtils.java,v 1.6 2001/09/20 15:00:22 wrogers Exp $
  */
 
 public final class StringUtils extends Object
@@ -23,13 +23,13 @@ public final class StringUtils extends Object
    *
    * @param textstring string to be split.
    * @param delimitchars delimitor characters.
-   * @return AbstractList containing substrings or empty list if no strings
+   * @return List containing substrings or empty list if no strings
    *         were split.
    */
-  public static AbstractList split(String textstring, String delimitchars)
+  public static List split(String textstring, String delimitchars)
   {
     StringTokenizer st = new StringTokenizer(textstring, delimitchars, true);
-    AbstractList list = new ArrayList(st.countTokens());
+    List list = new ArrayList(st.countTokens());
     String previousToken = "";
     while (st.hasMoreTokens()) 
       {
@@ -94,7 +94,7 @@ public final class StringUtils extends Object
    * @return string joined strings of array list separated by spaces
    *         encapsulated by braces.
    */
-  public static String list(AbstractList list)
+  public static String list(List list)
   {
     StringBuffer sb = new StringBuffer();
     Iterator it = list.iterator();
@@ -125,7 +125,7 @@ public final class StringUtils extends Object
    * @return string containing joined strings of array list separated by
    *         joinstring.
    */
-  public static String join(AbstractList list, String joinString)
+  public static String join(List list, String joinString)
   {
     StringBuffer sb = new StringBuffer();
     Iterator it = list.iterator();
@@ -144,7 +144,7 @@ public final class StringUtils extends Object
       String separator = args[0];
       for (int i = 1; i < args.length; i++)
 	{
-	  AbstractList keyIndices = split(args[i], separator);
+	  List keyIndices = split(args[i], separator);
 	  if (debug) {
 	    System.out.println("string : " + args[i] + 
 			       ", separator: " + separator +

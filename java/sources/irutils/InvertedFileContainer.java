@@ -101,7 +101,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *</p>
  * @author Will Rogers
- * @version $Id: InvertedFileContainer.java,v 1.2 2001/09/07 13:32:20 wrogers Exp $
+ * @version $Id: InvertedFileContainer.java,v 1.3 2001/09/20 15:00:22 wrogers Exp $
  */
 
 public class InvertedFileContainer {
@@ -202,7 +202,7 @@ public class InvertedFileContainer {
 
     String line = (String)this.tableMap.get(indexname);
     if (line != null) {
-      AbstractList formatList = irutils.StringUtils.split(line, "|");
+      List formatList = irutils.StringUtils.split(line, "|");
       
       String serializedInfo =  indexRoot + "/" + indexname + "/" + 
 	InvertedFile.canonicalSerializedName;

@@ -2,24 +2,26 @@ package irutils;
 import java.io.*;
 
 /**
- * IntBinSearchMap.java
+ * Integer Binaray Search Map
+ *<p>
+ * organization of one record:
+ * <pre>
+ *  +------------------------+-------------------+
+ *  | term                   |      data         |
+ *  +------------------------+-------------------+
+ *  |<---- term length ----->|<---- 4 bytes ---->|
+ *  |<------------- record length -------------->|
+ * </pre>
  *
- *
+ *  Term Length And Data Length Is The Same For All Records In Map.
+ * </p>
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IntBinSearchMap.java,v 1.5 2001/09/07 13:32:20 wrogers Exp $
+ * @version $Id: IntBinSearchMap.java,v 1.6 2001/09/20 15:03:23 wrogers Exp $
  */
 
 public class IntBinSearchMap implements BinSearchMap, Serializable {
-  // organization of one record:
-  //  +------------------------+-------------------+
-  //  | term                   |      data         |
-  //  +------------------------+-------------------+
-  //  |<---- term length ----->|<---- 4 bytes ---->|
-  //  |<------------- record length -------------->|
-  //
-  //  Term Length And Data Length Is The Same For All Records In Map.
 
   /** length of integer in bytes */
   public static final int DATALENGTH = 4; /* is this right */

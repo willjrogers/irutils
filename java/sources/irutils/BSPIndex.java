@@ -27,7 +27,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.7 2001/09/07 13:32:20 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.8 2001/09/20 15:01:50 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
@@ -69,7 +69,7 @@ public class BSPIndex implements Serializable
   String indexParentDirectoryPath;
 
   /** format for data */
-  AbstractList indexFormat;
+  List indexFormat;
   
   /** number of words in index */
   int wordnum;
@@ -99,7 +99,7 @@ public class BSPIndex implements Serializable
    * @param format         table data format
    */
   public BSPIndex(String indexname, String tablefilename, 
-		  String indexParentDir, AbstractList format)
+		  String indexParentDir, List format)
   {
     this.indexname = indexname;
     this.tablefilename = tablefilename;
@@ -145,7 +145,7 @@ public class BSPIndex implements Serializable
     // first element (key) of the record.
     String line;
     String key = null;
-    AbstractList lineList;
+    List lineList;
     int i = 0;
     // System.out.println("loading map " + this.indexname );
     BufferedReader reader = 
@@ -313,7 +313,7 @@ public class BSPIndex implements Serializable
    * @param aTermMap    Map containing key/value pairs to be stored in index.
    * @param partitionId     partition identifier.
    */
-  private void buildFileArray( AbstractList dataFormat, Map aTermMap, String partitionId)
+  private void buildFileArray( List dataFormat, Map aTermMap, String partitionId)
     throws IOException
   {
     BinSearchMap writer = 
@@ -323,7 +323,7 @@ public class BSPIndex implements Serializable
     while (keyIter.hasNext()) {
       String key = (String)keyIter.next();
       String dataRecord = (String)aTermMap.get(key);
-      AbstractList dataList = StringUtils.split(dataRecord, "|");
+      List dataList = StringUtils.split(dataRecord, "|");
       Iterator iter = dataFormat.iterator();
       //writer.writeEntry(key, );
     }

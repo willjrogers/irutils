@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *
  * @author Will Rogers
- * @version $Id: BSPContainer.java,v 1.6 2001/09/07 13:32:19 wrogers Exp $
+ * @version $Id: BSPContainer.java,v 1.7 2001/09/20 15:01:50 wrogers Exp $
  */
 
 public class BSPContainer {
@@ -111,7 +111,7 @@ public class BSPContainer {
 
     String line = (String)this.tableMap.get(indexname);
     if (line != null) {
-      AbstractList formatList = irutils.StringUtils.split(line, "|");
+      List formatList = irutils.StringUtils.split(line, "|");
       
       String serializedInfo =  indexRoot + "/" + indexname + "/" + 
 	"bspIndexInfo.ser";

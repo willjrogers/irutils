@@ -3,25 +3,27 @@ import java.io.*;
 
 /**
  * DataBinSearchMap.java
+ * <p>
+ * organization of one record:
+ * <pre>
+ *  +------------------------+-------------------+
+ *  | term                   |      data         |
+ *  +------------------------+-------------------+
+ *  |<---- term length ----->|<-- data length -->|
+ *  |<------------- record length -------------->|
+ * </pre>
  *
+ *  Term Length And Data Length Is The Same For All Records In Map.
+ *  </p>
  *
  * Created: Wed Jul 25 09:11:23 2001
  *
  * @author <a href="mailto: "Willie Rogers</a>
- * @version $Id: DataBinSearchMap.java,v 1.3 2001/09/07 13:32:20 wrogers Exp $
+ * @version $Id: DataBinSearchMap.java,v 1.4 2001/09/20 15:03:23 wrogers Exp $
  */
 
 public class DataBinSearchMap implements BinSearchMap, Serializable 
 {
-  // organization of one record:
-  //  +------------------------+-------------------+
-  //  | term                   |      data         |
-  //  +------------------------+-------------------+
-  //  |<---- term length ----->|<-- data length -->|
-  //  |<------------- record length -------------->|
-  //
-  //  Term Length And Data Length Is The Same For All Records In Map.
-  //  
 
   /** data output stream for writing map. */
   private transient DataOutputStream mapWriter;
