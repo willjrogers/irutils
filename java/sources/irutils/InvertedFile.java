@@ -26,6 +26,7 @@ import java.io.*;
  *   // setup index for retrieval.
  *   index.setup();
  *   
+ *   // lookup "C00001403"
  *   BSPTuple result = index.lookup("C00001403");
  *   List list = (List)result.getValue();
  *   for (Iterator j = list.iterator(); j.hasNext(); ) {
@@ -54,7 +55,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.8 2002/10/09 17:23:17 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.9 2002/12/04 15:44:34 wrogers Exp $
  * @see irutils.InvertedFileContainer
  */
 
@@ -140,8 +141,12 @@ public class InvertedFile implements Serializable
     }
   }
 
-  /** load table into in-memory term -> value map.
-      Column zero is used as key for index. */
+  /**
+   * load table into in-memory term -> value map.
+   Column zero is used as key for index.
+   * @exception FileNotFoundException if an error occurs
+   * @exception IOException if an error occurs
+   */
   public void load_map()
      throws FileNotFoundException, IOException
   {
@@ -215,7 +220,8 @@ public class InvertedFile implements Serializable
 
   /**
    * Generate disk-based word map from existing map in memory
-   * @exception InvertedFileCreateException occurs if index cannot be created.
+   * @exception BSPIndexCreateException if an error occurs
+   * @exception IOException if an error occurs
    */
   public void create()
     throws BSPIndexCreateException, IOException
@@ -366,6 +372,8 @@ public class InvertedFile implements Serializable
   /**
    * If modification time of table file is later than index then rebuild index
    * using lisp file. See method "create".
+   * @exception IOException if an error occurs
+   * @exception BSPIndexCreateException if an error occurs
    */
   public void update()
     throws IOException, BSPIndexCreateException
@@ -391,6 +399,7 @@ public class InvertedFile implements Serializable
 
   /**
    * setup newly read serialized index.
+   * @exception BSPIndexInvalidException if an error occurs
    */
   public void setup()
     throws BSPIndexInvalidException
@@ -408,6 +417,8 @@ public class InvertedFile implements Serializable
    * found, null if otherwise.
    * @param word word to lookup in index.
    * @return tuple containing key/value pair, null if key not found.
+   * @exception FileNotFoundException if an error occurs
+   * @exception IOException if an error occurs
    */
   public BSPTuple lookup(String word)
     throws FileNotFoundException, IOException
@@ -421,6 +432,8 @@ public class InvertedFile implements Serializable
    * @param word word to lookup in index.
    * @param loadAllData if true then load all the data.
    * @return tuple containing key/value pair, null if key not found.
+   * @exception FileNotFoundException if an error occurs
+   * @exception IOException if an error occurs
    */
   public BSPTuple lookup(String word, boolean loadAllData)
     throws FileNotFoundException, IOException
@@ -480,6 +493,11 @@ public class InvertedFile implements Serializable
     return new BSPTuple(word, postings );
   }
 
+  /**
+   * Describe <code>setDeferClosing</code> method here.
+   *
+   * @param status a <code>boolean</code> value
+   */
   public void setDeferClosing(boolean status)
   {
     this.deferClosing = status;
@@ -487,8 +505,8 @@ public class InvertedFile implements Serializable
 
   /**
    * Attempt to release resources used in index generation.
+   * @exception IOException if an error occurs
    */
-
   public void release() 
     throws IOException
   {
@@ -504,6 +522,11 @@ public class InvertedFile implements Serializable
     }
   }
 
+  /**
+   * Describe <code>listKeys</code> method here.
+   *
+   * @return a <code>List</code> value
+   */
   public List listKeys()
   {
     Iterator iter = this.partitionFiles.values().iterator();
@@ -517,6 +540,7 @@ public class InvertedFile implements Serializable
   
   /**
    * implementation of Object's finalize() method.
+   * @exception Throwable if an error occurs
    */
   protected void finalize()
     throws Throwable
