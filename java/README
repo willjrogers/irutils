@@ -16,22 +16,24 @@ irutils.jar -  class and source file in jar
 Add irutils.jar to your java classpath.
 
 On unix (csh):
-  $ setenv CLASSPATH ${CLASSPATH}:<dist dir>/irutils/irutils.jar
+  $ setenv CLASSPATH ${CLASSPATH}:<dist dir>/irutils/java/irutils.jar
 
 If you want to try the sample program (utils.CL):
 
-  $ cd <dist dir>/irutils
+  $ cd <dist dir>/irutils/java
   $ java -classpath ./irutils.jar utils.CL
   
-The source to utils.CL is in <dist dir>/irutils/utils/CL.java
+The source to utils.CL is in <dist dir>/irutils/java/utils/CL.java
 
 * building the irutils.jar file
 
+  $ cd <dist dir>/irutils/java
   $ javac utils/*.java
   $ jar cvf irutils.jar utils/*.java utils/*.class
 
   or if you have ANT installed:
 
+  $ cd <dist dir>/irutils/java
   $ ant archive
 
 
