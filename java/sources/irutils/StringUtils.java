@@ -1,5 +1,5 @@
 package irutils;
-import irutils.StringTokenizer;
+import java.util.StringTokenizer;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import java.util.Iterator;
  * Created: Tue Jul 10 09:05:44 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: StringUtils.java,v 1.4 2001/09/07 13:32:21 wrogers Exp $
+ * @version $Id: StringUtils.java,v 1.5 2001/09/07 13:35:25 wrogers Exp $
  */
 
 public final class StringUtils extends Object
