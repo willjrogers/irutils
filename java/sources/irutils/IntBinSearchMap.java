@@ -8,10 +8,19 @@ import java.io.*;
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IntBinSearchMap.java,v 1.1 2001/07/26 19:04:02 wrogers Exp $
+ * @version $Id: IntBinSearchMap.java,v 1.2 2001/07/26 20:13:28 wrogers Exp $
  */
 
 public class IntBinSearchMap implements Serializable {
+  // organization of one record:
+  //  +------------------------+-------------------+
+  //  | term                   |      data         |
+  //  +------------------------+-------------------+
+  //  |<---- term length ----->|<---- 4 bytes ---->|
+  //  |<------------- record length -------------->|
+  //
+  //  Term Length And Data Length Is The Same For All Records In Map.
+
   /** open map for reading */
   public static final int READ = 0;
   /** open map for writing */
