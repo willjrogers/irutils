@@ -8,8 +8,8 @@ public class CL {
     java.io.IOException, BSPIndexCreateException, ClassNotFoundException
   {
     String words[];
-    String indexRoot = "/home/wrogers/devel/exper/utils/java/indices";
-    String tableRoot = "/home/wrogers/devel/exper/utils/java/tables";
+    String indexRoot = "/home/wrogers/devel/exper/irutils/java/indices";
+    String tableRoot = "/home/wrogers/devel/exper/irutils/java/tables";
     String indexname = "recommendations";
       
     BSPContainer bspContainer = new BSPContainer(tableRoot, indexRoot);
