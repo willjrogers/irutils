@@ -8,7 +8,7 @@ import java.util.*;
  * Created: Tue Jul 10 09:05:44 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: StringUtils.java,v 1.2 2001/07/25 18:44:23 wrogers Exp $
+ * @version $Id: StringUtils.java,v 1.3 2001/08/31 19:16:12 wrogers Exp $
  */
 
 public final class StringUtils extends Object
@@ -106,6 +106,27 @@ public final class StringUtils extends Object
 	if (it.hasNext()) sb.append(joinString);
       }
     return sb.toString();
+  }
+
+  public static void main(String[] args)
+  {
+    boolean debug = false;
+    if (args.length > 1) {
+      String separator = args[0];
+      for (int i = 1; i < args.length; i++)
+	{
+	  ArrayList keyIndices = utils.StringUtils.split(args[i], separator);
+	  if (debug) {
+	    System.out.println("string : " + args[i] + 
+			       ", separator: " + separator +
+			       " => " + utils.StringUtils.list(keyIndices) );
+	  } else  {
+	    System.out.println(utils.StringUtils.list(keyIndices));
+	  }
+	}
+    } else {
+      System.out.println("usage: utils.StringUtils <separator> list [|list]");
+    }
   }
 
 } // StringUtils
