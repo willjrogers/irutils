@@ -54,8 +54,8 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.2 2001/09/07 13:32:20 wrogers Exp $
- * @see utils.InvertedFileContainer
+ * @version $Id: InvertedFile.java,v 1.3 2001/09/20 15:00:52 wrogers Exp $
+ * @see irutils.InvertedFileContainer
  */
 
 public class InvertedFile implements Serializable
@@ -81,6 +81,9 @@ public class InvertedFile implements Serializable
   /** postings file */
   transient RandomAccessFile postingsFile;
 
+  /** if true, don't close index file pointer after release(). */
+  transient boolean deferClosing = false;
+
   /** Is current index valid? */
   boolean valid = false;
 
@@ -94,7 +97,7 @@ public class InvertedFile implements Serializable
   String indexParentDirectoryPath;
 
   /** format for data */
-  AbstractList indexFormat;
+  List indexFormat;
   
   /** number of words in index */
   int wordnum;
@@ -106,7 +109,7 @@ public class InvertedFile implements Serializable
   HashMap dataLength;
 
   /** list of key indices (Integer)  used for this index. (default is [0]) */
-  AbstractList keyIndices = null;		// if null, key index is zero
+  List keyIndices = null;		// if null, key index is zero
 
   /** default constructor for serialization purposes only. */
   public InvertedFile()
@@ -121,13 +124,13 @@ public class InvertedFile implements Serializable
    * @param format         table data format
    */
   public InvertedFile(String indexname, String tablefilename, 
-		  String indexParentDir, AbstractList format)
+		  String indexParentDir, List format)
   {
     this.indexname = indexname;
     this.tablefilename = tablefilename;
     this.indexParentDirectoryPath = indexParentDir;
     this.indexFormat = format;
-    AbstractList keyList = irutils.StringUtils.split((String)format.get(3), ",");
+    List keyList = irutils.StringUtils.split((String)format.get(3), ",");
     // convert key indices to Integer.
     this.keyIndices = new ArrayList();
     for (int i = 0; i < keyList.size(); i++) {
@@ -145,7 +148,7 @@ public class InvertedFile implements Serializable
     // first element (key) of the record.
     String line;
     String key = null;
-    AbstractList lineList;
+    List lineList;
     int i = 0;
     // System.out.println("loading map " + this.indexname );
     BufferedReader reader = 
@@ -178,18 +181,18 @@ public class InvertedFile implements Serializable
 	if (bucket == null ) {
 	  bucket = new TreeMap();
 	  this.hashlist.put(this.indexname+keyLength, bucket);
-	  AbstractList postings = new ArrayList();
+	  List postings = new ArrayList();
 	  postings.add(line);
 	  bucket.put(key, postings);
 	} else {
 	if ( bucket.containsKey(key) )
 	  {
-	    AbstractList postings = (AbstractList)bucket.get(key);
+	    List postings = (List)bucket.get(key);
 	    postings.add(line);
 	  }
 	else
 	  {
-	    AbstractList postings = new ArrayList();
+	    List postings = new ArrayList();
 	    postings.add(line);
 	    bucket.put(key, postings);
 	  }
@@ -216,9 +219,9 @@ public class InvertedFile implements Serializable
     throws BSPIndexCreateException, IOException
   {
     RunLengthPostingsWriter postingsWriter = null;
-    AbstractList dictDataFormat = new ArrayList(1);
+    List dictDataFormat = new ArrayList(1);
     int rowLen = Integer.parseInt((String)indexFormat.get(2));
-    AbstractList typeList = new ArrayList(rowLen);
+    List typeList = new ArrayList(rowLen);
     this.dataLength = new HashMap(5);
     this.numrecs = new HashMap(5);
     for (int i = 3 + rowLen, j = 0; i < 4 + rowLen + rowLen; i++, j++)
@@ -229,7 +232,7 @@ public class InvertedFile implements Serializable
     // System.out.println("indexFormat: " + StringUtils.list(indexFormat));
     // System.out.println("typeList: " + StringUtils.list(typeList));
     int dataLen = 0;
-    AbstractList dataFormatList = new ArrayList(10);
+    List dataFormatList = new ArrayList(10);
     for (int i = 1; i < rowLen; i++ )
       {
 	String fieldtype = (String)typeList.get(i);
@@ -297,7 +300,7 @@ public class InvertedFile implements Serializable
     this.valid = true;
     // System.out.println("Index info: \n" + this);
 
-    /* serialize info on object to indexname/<Canonical Serialized Name */
+    /* serialize info on object to indexname/<Canonical Serialized Name> */
     FileOutputStream ostream = 
       new FileOutputStream(this.indexParentDirectoryPath + "/" + this.indexname +
 			   "/" + canonicalSerializedName);
@@ -316,7 +319,7 @@ public class InvertedFile implements Serializable
    * @param partitionId     partition identifier.
    * @param postingsWriter  postings file writer.
    */
-  private void buildInvertedFile( AbstractList dataFormat, 
+  private void buildInvertedFile( List dataFormat, 
 				  Map aTermMap, 
 				  String partitionId, 
 				  RunLengthPostingsWriter postingsWriter)
@@ -331,7 +334,7 @@ public class InvertedFile implements Serializable
     Iterator keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
       String termKey = (String)keyIter.next();
-      AbstractList postings = (AbstractList)aTermMap.get(termKey);
+      List postings = (List)aTermMap.get(termKey);
       Iterator postingIter = postings.iterator();
       
       if (postingIter.hasNext()) 
@@ -416,7 +419,7 @@ public class InvertedFile implements Serializable
     RandomAccessFile dictionaryFile;
     String keyLength = new Integer (word.length()).toString();
     String key = this.indexname + keyLength;
-    AbstractList postings;
+    List postings;
     // System.out.println("this.partitionFiles: " + this.partitionFiles );
     if ( this.partitionFiles.containsKey(key) ) 
       {
@@ -468,9 +471,15 @@ public class InvertedFile implements Serializable
     return new BSPTuple(word, postings );
   }
 
+  public void setDeferClosing(boolean status)
+  {
+    this.deferClosing = status;
+  }
+
   /**
    * Attempt to release resources used in index generation.
    */
+
   public void release() 
     throws IOException
   {
@@ -480,7 +489,7 @@ public class InvertedFile implements Serializable
       ((RandomAccessFile)this.partitionFiles.get(key)).close();
       this.partitionFiles.remove(key);
     }
-    if (this.postingsFile != null)  {
+    if (this.postingsFile != null && deferClosing == false)  {
       this.postingsFile.close();
       this.postingsFile = null;
     }
