@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.1 2001/07/25 13:05:01 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.1.1.1 2001/07/25 13:05:01 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
