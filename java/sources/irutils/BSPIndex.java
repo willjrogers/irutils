@@ -27,7 +27,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.9 2001/12/20 21:52:01 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.10 2002/10/08 20:32:58 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
@@ -219,7 +219,7 @@ public class BSPIndex implements Serializable
       }
     // create index
 
-    File indexDirectory = new File(this.indexParentDirectoryPath + "/" + this.indexname);
+    File indexDirectory = new File(this.indexParentDirectoryPath + File.separator + this.indexname);
     if (indexDirectory.mkdir() == false)
       {
 	throw new BSPIndexCreateException("unable to create index directory");
@@ -232,21 +232,21 @@ public class BSPIndex implements Serializable
       case INVERTED_FILE:
 	dictDataFormat.add(binFormats.get("PTR"));
 	postingsWriter = new RunLengthPostingsWriter 
-	  (indexParentDirectoryPath + "/" + this.indexname );
+	  (indexParentDirectoryPath + File.separator + this.indexname );
 	break;
       }
     PrintWriter statfp = new PrintWriter
-      (new BufferedWriter(new FileWriter( indexParentDirectoryPath + "/" +
-					  this.indexname + "/partition.stats")));
-    statfp.println( "# " + this.indexname + "/partition.log -- bsp_map.tcl status file" );
+      (new BufferedWriter(new FileWriter( indexParentDirectoryPath + File.separator +
+					  this.indexname + File.separator + "partition.stats")));
+    statfp.println( "# " + this.indexname + File.separator + "partition.log -- bsp_map.tcl status file" );
     statfp.println( "# total number of terms: " + this.wordnum );
     statfp.println( "#" );
     statfp.println( "# table format: " );
     statfp.println( "#  partition_filename termlen nterms" );
 
     PrintWriter rcfp = new PrintWriter
-      (new BufferedWriter(new FileWriter( indexParentDirectoryPath + "/" +
-					  this.indexname + "/mapinforc.tcl")));
+      (new BufferedWriter(new FileWriter( indexParentDirectoryPath + File.separator +
+					  this.indexname + File.separator + "mapinforc.tcl")));
     rcfp.println( "# Tcl rc file for bsp_map." );
     rcfp.println( "#" );
     rcfp.println( "# record format:" );
@@ -297,8 +297,8 @@ public class BSPIndex implements Serializable
 
     /* serialize info on object to indexname/bspIndexInfo.ser */
     FileOutputStream ostream = 
-      new FileOutputStream(this.indexParentDirectoryPath + "/" + this.indexname +
-			   "/" + "bspIndexInfo.ser");
+      new FileOutputStream(this.indexParentDirectoryPath + File.separator + this.indexname +
+			   File.separator + "bspIndexInfo.ser");
     ObjectOutputStream p = new ObjectOutputStream(ostream);
     
     p.writeObject(this);
@@ -317,8 +317,8 @@ public class BSPIndex implements Serializable
     throws IOException
   {
     BinSearchMap writer = 
-      new DataBinSearchMap ( this.indexParentDirectoryPath + "/" +
-			 this.indexname + "/partition_" + partitionId, BinSearchMap.WRITE );
+      new DataBinSearchMap ( this.indexParentDirectoryPath + File.separator +
+			 this.indexname + File.separator + "partition_" + partitionId, BinSearchMap.WRITE );
     Iterator keyIter = aTermMap.values().iterator();
     while (keyIter.hasNext()) {
       String key = (String)keyIter.next();
@@ -346,8 +346,9 @@ public class BSPIndex implements Serializable
     int nextpost = 0;
     int numrecs = 0;
     IntBinSearchMap intPartition = 
-      new IntBinSearchMap ( indexParentDirectoryPath + "/" +
-			    this.indexname + "/partition_" + partitionId, BinSearchMap.WRITE );
+      new IntBinSearchMap ( indexParentDirectoryPath + File.separator +
+			    this.indexname + File.separator + "partition_" 
+                            + partitionId, BinSearchMap.WRITE );
     Iterator keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
       String termKey = (String)keyIter.next();
@@ -370,7 +371,7 @@ public class BSPIndex implements Serializable
   public void update()
     throws IOException, BSPIndexCreateException
   {
-    String indexDir = this.indexParentDirectoryPath + "/" + this.indexname;
+    String indexDir = this.indexParentDirectoryPath + File.separator + this.indexname;
     // System.out.println("updating index: " + this.indexname );
     File tablefile = new File(this.tablefilename);
     File mapfile = new File(indexDir);
@@ -419,7 +420,7 @@ public class BSPIndex implements Serializable
     else 
       {
 	dictionaryFile = 
-	  new RandomAccessFile ( indexParentDirectoryPath + "/" +
+	  new RandomAccessFile ( indexParentDirectoryPath + File.separator +
 				 indexname + "/partition_" + key, "r" );
 	this.partitionFiles.put(key, dictionaryFile);
       } 
@@ -434,7 +435,7 @@ public class BSPIndex implements Serializable
 	  return null;
 	// System.out.println("address : " + address);
 	if ( this.postingsFile == null ) {
-	  this.postingsFile = new RandomAccessFile ( indexParentDirectoryPath + "/" +
+	  this.postingsFile = new RandomAccessFile ( indexParentDirectoryPath + File.separator +
 						     indexname + "/postings", "r" );
 	}
 	postingsFile.seek(address);
