@@ -101,7 +101,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *</p>
  * @author Will Rogers
- * @version $Id: InvertedFileContainer.java,v 1.7 2002/10/08 20:03:17 wrogers Exp $
+ * @version $Id: InvertedFileContainer.java,v 1.8 2002/10/09 17:24:49 wrogers Exp $
  */
 
 public class InvertedFileContainer {
@@ -219,8 +219,8 @@ public class InvertedFileContainer {
 	FileInputStream istream = new FileInputStream(serializedInfo);
 	ObjectInputStream p = new ObjectInputStream(istream);
 	InvertedFile index = (InvertedFile)p.readObject();
-        index.tablefilename = indexRoot;
-        index.indexParentDirectoryPath = tableRoot;
+        index.tablefilename = tableRoot + File.separator + indexname;
+        index.indexParentDirectoryPath = indexRoot;
 	istream.close();
 	this.openIndexMap.put(indexname, index);
 	return index;
