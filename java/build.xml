@@ -11,10 +11,10 @@
 
   <target name="javadoc">
   <!-- Add utils internal javadoc -->
-    <mkdir dir="${utils.src}/javadoc" />
+    <mkdir dir="${utils.src}/doc" />
     <javadoc packagenames="utils.*"
              sourcepath="."
-             destdir="${utils.src}/javadoc"
+             destdir="${utils.src}/doc"
              author="true"
              version="true"
              use="true"
