@@ -40,12 +40,21 @@ The source to utils.CL is in <dist dir>/irutils/java/utils/CL.java
 
 1. Build Unit tests for critical sections of classes.
 
+
+* Appendix 1 - Inverted File Organization
+
+** Dictionary
+
+*** Organization of one dictionary record:
+  +------------------------+--------------------+-------------------+
+  | term                   | number of postings |     address       |
+  +------------------------+--------------------+-------------------+
+  |<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
+  |<-------------------------- record length ---------------------->|
+
+  Term Length, # of postings And addr are the same for all records in a partition.
+
+** Postings
+
+--  
 Will Rogers
-
-
-
-
-
-
-
-
