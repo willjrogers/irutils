@@ -27,7 +27,7 @@
   <!-- ==================== Administrative targets ======================= -->
 
   <target name="archive" depends="compile">
-    <jar jarfile="${utils.src}/irtools.jar"
+    <jar jarfile="${utils.src}/irutils.jar"
 	 basedir="utils"/>
   </target>
 
