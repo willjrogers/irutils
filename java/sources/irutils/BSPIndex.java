@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.3 2001/07/26 19:02:26 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.4 2001/07/27 14:23:19 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
@@ -37,6 +37,9 @@ public class BSPIndex implements Serializable
 
   /** postings file */
   transient RandomAccessFile postingsFile;
+
+  /** Is current index valid? */
+  boolean valid = false;
 
   /** name of index */
   String indexname;
@@ -294,6 +297,7 @@ public class BSPIndex implements Serializable
     // System.out.println("key: " + key );
     this.dataLength.put(partitionId, new Integer(4));
     intPartition.close();
+    this.valid = true;
   }
 
   /**
@@ -319,10 +323,14 @@ public class BSPIndex implements Serializable
 
 
   /**
-   * setup unserialized index.
+   * setup newly read serialized index.
    */
   public void setup()
+    throws BSPIndexInvalidException
   {
+    if ( this.valid == false ) {
+      throw new BSPIndexInvalidException("Index is not valid. run method update()");
+    }
     if ( this.partitionFiles == null ) {
       this.partitionFiles = new HashMap(4);
     }
