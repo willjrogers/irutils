@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *
  * @author Will Rogers
- * @version
+ * @version $Id: BSPContainer.java,v 1.2 2001/07/25 18:45:39 wrogers Exp $
  */
 
 public class BSPContainer {

@@ -7,7 +7,7 @@ package utils;
  * Created: Wed Jul 18 13:10:42 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version
+ * @version $Id: BSPTuple.java,v 1.2 2001/07/25 18:45:39 wrogers Exp $
  */
 
 public class BSPTuple {
