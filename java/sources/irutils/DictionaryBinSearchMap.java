@@ -2,25 +2,28 @@ package irutils;
 import java.io.*;
 
 /**
- * DictionaryBinSearchMap.java
- *
- *
+ * Dictionary Binary Search Map.
+ * <p>s
+
+ * Organization of one dictionary record:
+ * <pre>
+ *  +------------------------+--------------------+---------------------+
+ *  | term                   | number of postings | address of postings |
+ *  +------------------------+--------------------+---------------------+
+ *  |<---- term length ----->|<---- 4 bytes ----->|<----- 4 bytes ----->|
+ *  |<--------------------------- record length ----------------------->|
+ * </pre>
+ * Term Length, # of postings length and address length are the same
+ * for all records in a partition.
+ * </p>
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: DictionaryBinSearchMap.java,v 1.3 2001/09/07 13:32:20 wrogers Exp $
+ * @version $Id: DictionaryBinSearchMap.java,v 1.4 2001/09/20 15:02:37 wrogers Exp $
  */
 
 public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
-  // Organization of dictionary one record:
-  //  +------------------------+--------------------+-------------------+
-  //  | term                   | number of postings |     address       |
-  //  +------------------------+--------------------+-------------------+
-  //  |<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
-  //  |<-------------------------- record length ---------------------->|
-  //
-  //  Term Length, # of postings And addr are the same for all records in a partition.
-
+ 
   /** length of integer in bytes */
   public static final int DATALENGTH = 4; /* is this right? */
   /** data output stream for writing map. */
