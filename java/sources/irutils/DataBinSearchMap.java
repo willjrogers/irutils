@@ -1,4 +1,4 @@
-package utils;
+package irutils;
 import java.io.*;
 
 /**
@@ -8,7 +8,7 @@ import java.io.*;
  * Created: Wed Jul 25 09:11:23 2001
  *
  * @author <a href="mailto: "Willie Rogers</a>
- * @version $Id: DataBinSearchMap.java,v 1.2 2001/08/29 02:26:05 wrogers Exp $
+ * @version $Id: DataBinSearchMap.java,v 1.3 2001/09/07 13:32:20 wrogers Exp $
  */
 
 public class DataBinSearchMap implements BinSearchMap, Serializable 

@@ -1,4 +1,4 @@
-package utils;
+package irutils;
 
  /**
  * DictionaryEntry.java
@@ -7,7 +7,7 @@ package utils;
  * Created: Mon Aug 27 13:07:37 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: DictionaryEntry.java,v 1.1 2001/08/29 02:28:31 wrogers Exp $
+ * @version $Id: DictionaryEntry.java,v 1.2 2001/09/07 13:32:20 wrogers Exp $
  */
 
 public class DictionaryEntry

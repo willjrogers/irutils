@@ -1,4 +1,4 @@
-package utils;
+package irutils;
 
 import java.io.*;
 
@@ -9,7 +9,7 @@ import java.io.*;
  * Created: Wed Jul 25 09:13:06 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: RunLengthPostingsWriter.java,v 1.1 2001/07/26 19:04:02 wrogers Exp $
+ * @version $Id: RunLengthPostingsWriter.java,v 1.2 2001/09/07 13:32:21 wrogers Exp $
  */
 // organization:
 //  +------------------------+-------------------+------+

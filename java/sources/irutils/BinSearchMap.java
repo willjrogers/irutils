@@ -1,14 +1,14 @@
-package utils;
+package irutils;
 import java.io.*;
 
 /**
- * BinSearchMap.java
+ * Signatures for Binary Search Map classes.
  *
  *
  * Created: Wed Jul 25 09:11:23 2001
  *
- * @author <a href="mailto: "Willie Rogers</a>
- * @version $Id: BinSearchMap.java,v 1.3 2001/08/17 17:19:14 wrogers Exp $
+ * @author <a href="mailto:wrogers@nlm.nih.gov">"Willie Rogers</a>
+ * @version $Id: BinSearchMap.java,v 1.4 2001/09/07 13:32:20 wrogers Exp $
  */
 
 public interface BinSearchMap 

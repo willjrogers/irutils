@@ -1,4 +1,4 @@
-package utils;
+package irutils;
 
 import java.util.*;
 import java.io.*;
@@ -50,13 +50,58 @@ import java.io.*;
  * mrcon_filtered.txt|mrcon_filtered|8|0|cui|lat|ts|lui|stt|sui|str|lrl|TXT|TXT|TXT|TXT|TXT|TXT|TXT|TXT
  * mrcon_filtered.txt|mrcon_filtered_lat_ts_stt|8|1,2,3|cui|lat|ts|lui|stt|sui|str|lrl|TXT|TXT|TXT|TXT|TXT|TXT|TXT|TXT
  * MRSO|mrso_lat_ts_stt|7|4|cui|lui|sui|sab|tty|scd|srl|TXT|TXT|TXT|TXT|TXT|TXT|TXT
+ * MRCON|mrcon|8|0|cui|lat|ts|lui|stt|sui|str|lrl|TXT|TXT|TXT|TXT|TXT|TXT|TXT|TXT
+ * </pre>
+ * Example of use:
+ * <pre>
+ *   String indexRoot = "/home/wrogers/devel/exper/irutils/java/indices";
+ *   String tableRoot = "/home/wrogers/devel/exper/irutils/java/tables";
+ *   String indexname = "mrcon";
+ *   // open a container to keep track of the indices       
+ *   InvertedFileContainer bspContainer =
+ *           new InvertedFileContainer(tableRoot, indexRoot);
+ *
+ *   // get a index instance for "MRCON"
+ *   InvertedFile index = container.get(indexname);
+ *   if (index == null) 
+ *     System.out.println("index is null");
+ *
+ *   // check to see if index exists, if not then create it. 
+ *   index.update();
+ *
+ *   // setup index for retrieval.
+ *   index.setup();
+ *   
+ *   BSPTuple result = index.lookup("C00001403");
+ *   ArrayList list = (ArrayList)result.getValue();
+ *   for (Iterator j = list.iterator(); j.hasNext(); ) {
+ *     System.out.println(j.next());
+ *   }
+ * </pre>
+ * Resulting output:
+ * <pre>
+ *  C0001403|ENG|P|L0001403|PF|S0010794|Addison's Disease|0
+ *  C0001403|ENG|P|L0001403|VC|S0352253|ADDISON'S DISEASE|0
+ *  C0001403|ENG|P|L0001403|VC|S0354372|Addison's disease|0
+ *  C0001403|ENG|P|L0001403|VO|S0010792|Addison Disease|0
+ *  C0001403|ENG|P|L0001403|VO|S0010796|Addisons Disease|0
+ *  C0001403|ENG|P|L0001403|VO|S0033587|Disease, Addison|0
+ *  C0001403|ENG|P|L0001403|VO|S0352252|ADDISON DISEASE|0
+ *  C0001403|ENG|P|L0001403|VO|S0469271|Addison's disease, NOS|3
+ *  C0001403|ENG|P|L0001403|VO|S1911394|Disease;Addisons|3
+ *   ... output truncated ...
+ * </pre>
+ * ifconfig for this table (see utils.InvertedFileContainer):
+ * <pre>
+ * NUM_TABLES: 1
+ * MRCON|mrcon|8|0|cui|lat|ts|lui|stt|sui|str|lrl|TXT|TXT|TXT|TXT|TXT|TXT|TXT|TXT
  * </pre>
  *</p>
  *<p>
  * Created: Mon Jul  9 21:57:05 2001
  *</p>
  * @author Will Rogers
- * @version $Id: InvertedFileContainer.java,v 1.1 2001/08/31 19:21:53 wrogers Exp $
+ * @version $Id: InvertedFileContainer.java,v 1.2 2001/09/07 13:32:20 wrogers Exp $
  */
 
 public class InvertedFileContainer {
@@ -101,7 +146,7 @@ public class InvertedFileContainer {
     BufferedReader reader = 
       new BufferedReader(new FileReader( this.tableRoot + "/" + CONFIG_FILENAME ));
     if ( (line = reader.readLine()) != null ) {
-      this.numTables = Integer.parseInt((String)utils.StringUtils.getToken(line, " ", 1));
+      this.numTables = Integer.parseInt((String)irutils.StringUtils.getToken(line, " ", 1));
     } else {
       // should throw an exception here...
       System.err.println("invalid config file, first line: \"NUM_TABLES: <n>\" missing");
@@ -110,7 +155,7 @@ public class InvertedFileContainer {
     while ( (line = reader.readLine()) != null )
       {
 	if ( line.length() > 0 && line.charAt(0) != '#' ) {
-	  String tablename = utils.StringUtils.getToken(line, "|", 1);
+	  String tablename = irutils.StringUtils.getToken(line, "|", 1);
 	  // System.out.println("table: " + tablename);
 	  this.tableMap.put(tablename, line);
 	}
@@ -157,10 +202,10 @@ public class InvertedFileContainer {
 
     String line = (String)this.tableMap.get(indexname);
     if (line != null) {
-      ArrayList formatList = utils.StringUtils.split(line, "|");
+      AbstractList formatList = irutils.StringUtils.split(line, "|");
       
       String serializedInfo =  indexRoot + "/" + indexname + "/" + 
-	"bspIndexInfo.ser";
+	InvertedFile.canonicalSerializedName;
       if ( new File(serializedInfo).exists() ) {
 	// System.out.println(" loading " + serializedInfo);
 	FileInputStream istream = new FileInputStream(serializedInfo);

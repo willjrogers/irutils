@@ -1,4 +1,4 @@
-package utils;
+package irutils;
 
 /**
  * BSPIndexInvalidException.java
@@ -7,7 +7,7 @@ package utils;
  * Invalidd: Fri Jul 20 10:51:39 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndexInvalidException.java,v 1.1 2001/08/17 17:21:02 wrogers Exp $
+ * @version $Id: BSPIndexInvalidException.java,v 1.2 2001/09/07 13:32:20 wrogers Exp $
  */
 
 public class BSPIndexInvalidException extends Exception {

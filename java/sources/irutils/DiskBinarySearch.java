@@ -1,4 +1,4 @@
-package utils;
+package irutils;
 import java.io.*;
 
 /**
@@ -8,7 +8,7 @@ import java.io.*;
  * Created: Wed Jul 25 11:15:59 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: DiskBinarySearch.java,v 1.2 2001/08/29 02:26:36 wrogers Exp $
+ * @version $Id: DiskBinarySearch.java,v 1.3 2001/09/07 13:32:20 wrogers Exp $
  */
 
 public final class DiskBinarySearch extends Object
@@ -124,6 +124,7 @@ public final class DiskBinarySearch extends Object
 	bsfp.seek(mid * (wordlen+datalen));
 	bsfp.read(wordbuf);
 	tstword = new String(wordbuf);
+	// System.out.println("tstword: " + tstword + ", word: " + word);
 	cond = word.compareTo(tstword);
 	if (cond < 0) {
 	  high = mid;

@@ -1,5 +1,8 @@
-package utils;
-import java.util.*;
+package irutils;
+import irutils.StringTokenizer;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * StringUtils.java
@@ -8,7 +11,7 @@ import java.util.*;
  * Created: Tue Jul 10 09:05:44 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: StringUtils.java,v 1.3 2001/08/31 19:16:12 wrogers Exp $
+ * @version $Id: StringUtils.java,v 1.4 2001/09/07 13:32:21 wrogers Exp $
  */
 
 public final class StringUtils extends Object
@@ -19,18 +22,28 @@ public final class StringUtils extends Object
    * resulting substrings are placed in array list in order of appearance.
    *
    * @param textstring string to be split.
-   * @param chars delimitor characters.
-   * @return ArrayList containing substrings or empty list if no strings
+   * @param delimitchars delimitor characters.
+   * @return AbstractList containing substrings or empty list if no strings
    *         were split.
    */
-  public static ArrayList split(String textstring, String chars)
+  public static AbstractList split(String textstring, String delimitchars)
   {
-    StringTokenizer st = new StringTokenizer(textstring, chars);
-    ArrayList list = new ArrayList(st.countTokens());
+    StringTokenizer st = new StringTokenizer(textstring, delimitchars, true);
+    AbstractList list = new ArrayList(st.countTokens());
+    String previousToken = "";
     while (st.hasMoreTokens()) 
       {
-	list.add(st.nextToken());
+	String token = st.nextToken();
+	if (token.indexOf(delimitchars) < 0 ) {
+	  list.add(token);
+	} else if (previousToken.indexOf(delimitchars) > -1) {
+	  list.add("");
+	} 
+	previousToken = token;
       }
+    if (previousToken.indexOf(delimitchars) > -1) {
+      list.add("");
+    } 
     return list;
   }
 
@@ -40,19 +53,34 @@ public final class StringUtils extends Object
    * pos then return null.
    *
    * @param textstring string to be split.
-   * @param chars delimitor characters.  
+   * @param delimitchars delimitor characters.  
    * @param pos position of substring to be returned.
    * @return substring at position pos or null if string has less tokens than pos.
    */
 
-  public static String getToken(String textstring, String chars, int pos)
+  public static String getToken(String textstring, String delimitchars, int pos)
   {
     int i = 0;
-    StringTokenizer st = new StringTokenizer(textstring, chars);
+    StringTokenizer st = new StringTokenizer(textstring, delimitchars, true); 
+    String previousToken = "";
     while (st.hasMoreTokens()) {
       String tok = (String)st.nextToken();
-      if (i == pos) return tok;
-      i++;
+
+      if (tok.indexOf(delimitchars) < 0 ) {
+	if (i == pos) {
+	  return tok;
+	}
+	i++;
+      } else if (previousToken.indexOf(delimitchars) > -1) {
+	if (i == pos) {
+	  return "";
+	}
+	i++;
+      }
+      previousToken = tok;
+    }
+    if (previousToken.indexOf(delimitchars) > -1 && i == pos) {
+      return "";
     }
     return null;
   }
@@ -66,7 +94,7 @@ public final class StringUtils extends Object
    * @return string joined strings of array list separated by spaces
    *         encapsulated by braces.
    */
-  public static String list(ArrayList list)
+  public static String list(AbstractList list)
   {
     StringBuffer sb = new StringBuffer();
     Iterator it = list.iterator();
@@ -74,13 +102,14 @@ public final class StringUtils extends Object
     while ( it.hasNext() )
       {
 	String token = (String)it.next();
-	if ( token.indexOf(" ") == -1 ) {
-	  sb.append(token);
-	} else {
-	  // if token contains spaces then encapsulate token with braces.
+	if (token.length() == 0 || token.indexOf(" ") > -1 ) {
+	  // if token contains spaces or is of length zero 
+	  // then encapsulate token with braces.
 	  sb.append("{");
 	  sb.append(token);
 	  sb.append("}");
+	} else {
+	  sb.append(token);
 	}
 	if (it.hasNext()) sb.append(" ");
       }
@@ -96,7 +125,7 @@ public final class StringUtils extends Object
    * @return string containing joined strings of array list separated by
    *         joinstring.
    */
-  public static String join(ArrayList list, String joinString)
+  public static String join(AbstractList list, String joinString)
   {
     StringBuffer sb = new StringBuffer();
     Iterator it = list.iterator();
@@ -115,17 +144,17 @@ public final class StringUtils extends Object
       String separator = args[0];
       for (int i = 1; i < args.length; i++)
 	{
-	  ArrayList keyIndices = utils.StringUtils.split(args[i], separator);
+	  AbstractList keyIndices = split(args[i], separator);
 	  if (debug) {
 	    System.out.println("string : " + args[i] + 
 			       ", separator: " + separator +
-			       " => " + utils.StringUtils.list(keyIndices) );
+			       " => " + list(keyIndices) );
 	  } else  {
-	    System.out.println(utils.StringUtils.list(keyIndices));
+	    System.out.println(list(keyIndices));
 	  }
 	}
     } else {
-      System.out.println("usage: utils.StringUtils <separator> list [|list]");
+      System.out.println("usage: irutils.StringUtils <separator> list [|list]");
     }
   }
 

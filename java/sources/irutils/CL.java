@@ -1,9 +1,9 @@
-package utils;
+package irutils;
 
 /** sample command line interface for bspIndex
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: CL.java,v 1.5 2001/07/27 14:22:22 wrogers Exp $
+ * @version $Id: CL.java,v 1.6 2001/09/07 13:32:20 wrogers Exp $
  */
 public class CL {
 

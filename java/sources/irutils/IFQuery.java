@@ -1,12 +1,12 @@
-package utils;
+package irutils;
 
-import java.util.ArrayList;
+import java.util.AbstractList;
 import java.util.Iterator;
 
 /** IFQuery, a sample command line interface for the InvertedFile class.
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IFQuery.java,v 1.1 2001/08/31 19:21:53 wrogers Exp $
+ * @version $Id: IFQuery.java,v 1.2 2001/09/07 13:32:20 wrogers Exp $
  */
 
 public class IFQuery {
@@ -57,7 +57,7 @@ public class IFQuery {
     for (int i = 0; i < words.length; i++) {
       // lookup each term in index.
       BSPTuple result = index.lookup(words[i]);
-      ArrayList list = (ArrayList)result.getValue();
+      AbstractList list = (AbstractList)result.getValue();
       for (Iterator j = list.iterator(); j.hasNext(); ) {
 	System.out.println(j.next());
       }

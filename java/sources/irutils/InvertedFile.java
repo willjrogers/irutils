@@ -1,4 +1,4 @@
-package utils;
+package irutils;
 
 import java.util.*;
 import java.io.*;
@@ -12,15 +12,21 @@ import java.io.*;
  *   String tableRoot = "/home/wrogers/devel/exper/irutils/java/tables";
  *   String indexname = "mrcon";
  *   // open a container to keep track of the indices       
- *   BSPContainer bspContainer = new BSPContainer(tableRoot, indexRoot);
+ *   InvertedFileContainer bspContainer =
+ *           new InvertedFileContainer(tableRoot, indexRoot);
+ *
+ *   // get a index instance for "MRCON"
+ *   InvertedFile index = container.get(indexname);
+ *   if (index == null) 
+ *     System.out.println("index is null");
  *
  *   // check to see if index exists, if not then create it. 
- *   bspIndex.update();
+ *   index.update();
  *
  *   // setup index for retrieval.
- *   bspIndex.setup();
+ *   index.setup();
  *   
- *   BSPTuple result = bspIndex.lookup("C00001403");
+ *   BSPTuple result = index.lookup("C00001403");
  *   ArrayList list = (ArrayList)result.getValue();
  *   for (Iterator j = list.iterator(); j.hasNext(); ) {
  *     System.out.println(j.next());
@@ -48,12 +54,14 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.1 2001/08/31 19:21:53 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.2 2001/09/07 13:32:20 wrogers Exp $
  * @see utils.InvertedFileContainer
  */
 
 public class InvertedFile implements Serializable
 {
+  /** canonical name of Serialized version of object */
+  public static String canonicalSerializedName = "InvertedFileInfo.ser";
   /** list of supportted binary formats */
   static HashMap binFormats = new HashMap(4);
   /** do this once at class instantiation */
@@ -86,7 +94,7 @@ public class InvertedFile implements Serializable
   String indexParentDirectoryPath;
 
   /** format for data */
-  ArrayList indexFormat;
+  AbstractList indexFormat;
   
   /** number of words in index */
   int wordnum;
@@ -98,7 +106,7 @@ public class InvertedFile implements Serializable
   HashMap dataLength;
 
   /** list of key indices (Integer)  used for this index. (default is [0]) */
-  ArrayList keyIndices = null;		// if null, key index is zero
+  AbstractList keyIndices = null;		// if null, key index is zero
 
   /** default constructor for serialization purposes only. */
   public InvertedFile()
@@ -113,13 +121,13 @@ public class InvertedFile implements Serializable
    * @param format         table data format
    */
   public InvertedFile(String indexname, String tablefilename, 
-		  String indexParentDir, ArrayList format)
+		  String indexParentDir, AbstractList format)
   {
     this.indexname = indexname;
     this.tablefilename = tablefilename;
     this.indexParentDirectoryPath = indexParentDir;
     this.indexFormat = format;
-    ArrayList keyList = utils.StringUtils.split((String)format.get(3), ",");
+    AbstractList keyList = irutils.StringUtils.split((String)format.get(3), ",");
     // convert key indices to Integer.
     this.keyIndices = new ArrayList();
     for (int i = 0; i < keyList.size(); i++) {
@@ -137,7 +145,7 @@ public class InvertedFile implements Serializable
     // first element (key) of the record.
     String line;
     String key = null;
-    ArrayList lineList;
+    AbstractList lineList;
     int i = 0;
     // System.out.println("loading map " + this.indexname );
     BufferedReader reader = 
@@ -170,18 +178,18 @@ public class InvertedFile implements Serializable
 	if (bucket == null ) {
 	  bucket = new TreeMap();
 	  this.hashlist.put(this.indexname+keyLength, bucket);
-	  ArrayList postings = new ArrayList();
+	  AbstractList postings = new ArrayList();
 	  postings.add(line);
 	  bucket.put(key, postings);
 	} else {
 	if ( bucket.containsKey(key) )
 	  {
-	    ArrayList postings = (ArrayList)bucket.get(key);
+	    AbstractList postings = (AbstractList)bucket.get(key);
 	    postings.add(line);
 	  }
 	else
 	  {
-	    ArrayList postings = new ArrayList();
+	    AbstractList postings = new ArrayList();
 	    postings.add(line);
 	    bucket.put(key, postings);
 	  }
@@ -208,9 +216,9 @@ public class InvertedFile implements Serializable
     throws BSPIndexCreateException, IOException
   {
     RunLengthPostingsWriter postingsWriter = null;
-    ArrayList dictDataFormat = new ArrayList(1);
+    AbstractList dictDataFormat = new ArrayList(1);
     int rowLen = Integer.parseInt((String)indexFormat.get(2));
-    ArrayList typeList = new ArrayList(rowLen);
+    AbstractList typeList = new ArrayList(rowLen);
     this.dataLength = new HashMap(5);
     this.numrecs = new HashMap(5);
     for (int i = 3 + rowLen, j = 0; i < 4 + rowLen + rowLen; i++, j++)
@@ -221,7 +229,7 @@ public class InvertedFile implements Serializable
     // System.out.println("indexFormat: " + StringUtils.list(indexFormat));
     // System.out.println("typeList: " + StringUtils.list(typeList));
     int dataLen = 0;
-    ArrayList dataFormatList = new ArrayList(10);
+    AbstractList dataFormatList = new ArrayList(10);
     for (int i = 1; i < rowLen; i++ )
       {
 	String fieldtype = (String)typeList.get(i);
@@ -289,10 +297,10 @@ public class InvertedFile implements Serializable
     this.valid = true;
     // System.out.println("Index info: \n" + this);
 
-    /* serialize info on object to indexname/bspIndexInfo.ser */
+    /* serialize info on object to indexname/<Canonical Serialized Name */
     FileOutputStream ostream = 
       new FileOutputStream(this.indexParentDirectoryPath + "/" + this.indexname +
-			   "/" + "bspIndexInfo.ser");
+			   "/" + canonicalSerializedName);
     ObjectOutputStream p = new ObjectOutputStream(ostream);
     
     p.writeObject(this);
@@ -308,7 +316,7 @@ public class InvertedFile implements Serializable
    * @param partitionId     partition identifier.
    * @param postingsWriter  postings file writer.
    */
-  private void buildInvertedFile( ArrayList dataFormat, 
+  private void buildInvertedFile( AbstractList dataFormat, 
 				  Map aTermMap, 
 				  String partitionId, 
 				  RunLengthPostingsWriter postingsWriter)
@@ -323,7 +331,7 @@ public class InvertedFile implements Serializable
     Iterator keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
       String termKey = (String)keyIter.next();
-      ArrayList postings = (ArrayList)aTermMap.get(termKey);
+      AbstractList postings = (AbstractList)aTermMap.get(termKey);
       Iterator postingIter = postings.iterator();
       
       if (postingIter.hasNext()) 
@@ -392,9 +400,23 @@ public class InvertedFile implements Serializable
   public BSPTuple lookup(String word)
     throws FileNotFoundException, IOException
   {
+    return lookup(word, false); // don't load everything at once.
+  }
+
+  /**
+   * Look up word in index, return corresponding key and value pair if
+   * found, null if otherwise.
+   * @param word word to lookup in index.
+   * @param loadAllData if true then load all the data.
+   * @return tuple containing key/value pair, null if key not found.
+   */
+  public BSPTuple lookup(String word, boolean loadAllData)
+    throws FileNotFoundException, IOException
+  {
     RandomAccessFile dictionaryFile;
     String keyLength = new Integer (word.length()).toString();
     String key = this.indexname + keyLength;
+    AbstractList postings;
     // System.out.println("this.partitionFiles: " + this.partitionFiles );
     if ( this.partitionFiles.containsKey(key) ) 
       {
@@ -427,15 +449,21 @@ public class InvertedFile implements Serializable
 	    new RandomAccessFile ( indexParentDirectoryPath + "/" +
 				   indexname + "/postings", "r" );
     }
-    ArrayList postings = new ArrayList(count);
-    postingsFile.seek(address);
-    for (int i = 0; i < count; i++)
+    if (loadAllData)
       {
-	int postingsLen = postingsFile.readInt();
-	// System.out.println("postingsLen : " + postingsLen);
-	byte[] databuf = new byte[postingsLen];
-	postingsFile.read(databuf);
-	postings.add(new String(databuf));
+	postings = new ArrayList(count);
+	postingsFile.seek(address);
+	for (int i = 0; i < count; i++)
+	  {
+	    int postingsLen = postingsFile.readInt();
+	    // System.out.println("postingsLen : " + postingsLen);
+	    byte[] databuf = new byte[postingsLen];
+	    postingsFile.read(databuf);
+	    postings.add(new String(databuf));
+	  }
+      } else {
+	// System.out.println("postingsFile: " + postingsFile);
+	postings = new PostingsList(postingsFile, address, count);
       }
     return new BSPTuple(word, postings );
   }
@@ -456,6 +484,22 @@ public class InvertedFile implements Serializable
       this.postingsFile.close();
       this.postingsFile = null;
     }
+  }
+  
+  /**
+   * implementation of Object's finalize() method.
+   */
+  protected void finalize()
+    throws Throwable
+  {
+    // try to release what we can and then call superclass's version
+    // of this method. 
+    try {
+      this.release();
+    } catch (IOException exception) {
+      throw new java.lang.RuntimeException(exception.getMessage());
+    }
+    super.finalize();
   }
 
   /**

@@ -1,4 +1,4 @@
-package utils;
+package irutils;
 import java.io.*;
 
 /**
@@ -8,7 +8,7 @@ import java.io.*;
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: DictionaryBinSearchMap.java,v 1.2 2001/08/31 19:17:57 wrogers Exp $
+ * @version $Id: DictionaryBinSearchMap.java,v 1.3 2001/09/07 13:32:20 wrogers Exp $
  */
 
 public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
