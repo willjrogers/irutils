@@ -14,11 +14,13 @@
 
   <property name="utils" value=".."/>
   <property name="utils.src" value="."/>
+  <property name="infojavadoc.home"   value="/usr/local/share/java/info/irutils"/>
 
 
   <!-- ======================== compile ========================= -->
   <target name="compile">  
     <javac srcdir="${utils.src}"
+           debug="true"
 	   excludes="indices/*, CVS, **/*~,
 	   **/tables/*, README,
 	   doc/*, *.xml, *.xmi, *.pgml, *.argo"
@@ -29,7 +31,7 @@
   <target name="javadoc">
   <!-- Add utils internal javadoc -->
     <mkdir dir="${utils.src}/doc" />
-    <javadoc packagenames="irutils.*"
+    <javadoc packagenames="irutils.*, utils.*"
 	     private="yes"
              sourcepath="."
              destdir="${utils.src}/doc"
@@ -40,6 +42,14 @@
              doctitle="IR Utils Internal"
              bottom="Copyright &#169; 2000 National Library of Medicine."
     />
+  </target>
+  <target name="infojavadoc" depends="compile">
+    <mkdir dir="${infojavadoc.home}"/>
+    <javadoc sourcepath="." packagenames="irutils.*, utils.*"
+    	     additionalparam="-tocbase irutilspackages"
+             docletpath="/usr/local/share/java/TexiDoclet.jar"
+             doclet="gnu.texidoclet.Driver"
+             destdir="${infojavadoc.home}"/>
   </target>
 
   <!-- ==================== Administrative targets ======================= -->
