@@ -1,0 +1,38 @@
+<project name="utils" default="main" basedir=".">
+
+  <!-- ==================== Initialization properties ===================== -->
+  <property name="utils.src" value="."/>
+
+
+  <!-- ======================== Copy static files ========================= -->
+  <target name="compile">  
+    <javac srcdir="${utils.src}"/>
+  </target>
+
+  <target name="javadoc">
+
+
+  <!-- Add utils internal javadoc -->
+    <mkdir dir="${utils.src}/javadoc" />
+    <javadoc packagenames="utils.*"
+             sourcepath="."
+             destdir="${utils.src}/javadoc"
+             author="true"
+             version="true"
+             use="true"
+             windowtitle="IR Utils API"
+             doctitle="IR Utils Internal"
+             bottom="Copyright &#169; 2000 National Library of Medicine."
+    />
+  </target>
+
+  <!-- ==================== Administrative targets  ======================= -->
+  <target name="clean">
+    <delete>
+     <fileset dir="." includes="**/*.class"/>
+    </delete>
+  </target>
+  <target name="all" depends="clean,compile"/>
+  <target name="main" depends="compile"/>
+
+</project>
