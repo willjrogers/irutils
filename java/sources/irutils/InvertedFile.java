@@ -27,7 +27,7 @@ import java.io.*;
  *   index.setup();
  *   
  *   BSPTuple result = index.lookup("C00001403");
- *   ArrayList list = (ArrayList)result.getValue();
+ *   List list = (List)result.getValue();
  *   for (Iterator j = list.iterator(); j.hasNext(); ) {
  *     System.out.println(j.next());
  *   }
@@ -54,7 +54,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.5 2001/12/20 21:52:01 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.6 2002/10/08 19:07:45 wrogers Exp $
  * @see irutils.InvertedFileContainer
  */
 
@@ -240,7 +240,7 @@ public class InvertedFile implements Serializable
       }
     // create index
 
-    File indexDirectory = new File(this.indexParentDirectoryPath + "/" + this.indexname);
+    File indexDirectory = new File(this.indexParentDirectoryPath + File.separator + this.indexname);
     if ((! indexDirectory.exists()) && (! indexDirectory.isDirectory()))
       {
 	if (indexDirectory.mkdir() == false)
@@ -250,19 +250,19 @@ public class InvertedFile implements Serializable
       }
     dictDataFormat.add(binFormats.get("PTR"));
     postingsWriter = new RunLengthPostingsWriter 
-      (indexParentDirectoryPath + "/" + this.indexname );
+      (indexParentDirectoryPath + File.separator + this.indexname );
     PrintWriter statfp = new PrintWriter
-      (new BufferedWriter(new FileWriter( indexParentDirectoryPath + "/" +
-					  this.indexname + "/partition.stats")));
-    statfp.println( "# " + this.indexname + "/partition.log -- bsp_map.tcl status file" );
+      (new BufferedWriter(new FileWriter( indexParentDirectoryPath + File.separator +
+					  this.indexname + File.separator + "partition.stats")));
+    statfp.println( "# " + this.indexname + File.separator + "partition.log -- bsp_map.tcl status file" );
     statfp.println( "# total number of terms: " + this.wordnum );
     statfp.println( "#" );
     statfp.println( "# table format: " );
     statfp.println( "#  partition_filename termlen nterms" );
 
     PrintWriter rcfp = new PrintWriter
-      (new BufferedWriter(new FileWriter( indexParentDirectoryPath + "/" +
-					  this.indexname + "/mapinforc.tcl")));
+      (new BufferedWriter(new FileWriter( indexParentDirectoryPath + File.separator +
+					  this.indexname + File.separator + "mapinforc.tcl")));
     rcfp.println( "# Tcl rc file for bsp_map." );
     rcfp.println( "#" );
     rcfp.println( "# record format:" );
@@ -305,8 +305,8 @@ public class InvertedFile implements Serializable
 
     /* serialize info on object to indexname/<Canonical Serialized Name> */
     FileOutputStream ostream = 
-      new FileOutputStream(this.indexParentDirectoryPath + "/" + this.indexname +
-			   "/" + canonicalSerializedName);
+      new FileOutputStream(this.indexParentDirectoryPath + File.separator + this.indexname +
+			   File.separator + canonicalSerializedName);
     ObjectOutputStream p = new ObjectOutputStream(ostream);
     
     p.writeObject(this);
@@ -331,8 +331,8 @@ public class InvertedFile implements Serializable
     int nextpost = 0;
     int numrecs = 0;
     DictionaryBinSearchMap intPartition = 
-      new DictionaryBinSearchMap ( indexParentDirectoryPath + "/" +
-				   this.indexname + "/partition_" + partitionId, 
+      new DictionaryBinSearchMap ( indexParentDirectoryPath + File.separator +
+				   this.indexname + File.separator + "partition_" + partitionId, 
 				   BinSearchMap.WRITE );
     Iterator keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
@@ -368,7 +368,7 @@ public class InvertedFile implements Serializable
   public void update()
     throws IOException, BSPIndexCreateException
   {
-    String indexDir = this.indexParentDirectoryPath + "/" + this.indexname;
+    String indexDir = this.indexParentDirectoryPath + File.separator + this.indexname;
     // System.out.println("updating index: " + this.indexname );
     File tablefile = new File(this.tablefilename);
     File mapfile = new File(indexDir);
@@ -436,8 +436,8 @@ public class InvertedFile implements Serializable
       {
 	try {
 	  dictionaryFile = 
-	    new RandomAccessFile ( indexParentDirectoryPath + "/" +
-				   indexname + "/partition_" + key, "r" );
+	    new RandomAccessFile ( indexParentDirectoryPath + File.separator +
+				   indexname + File.separator + "partition_" + key, "r" );
 	  this.partitionFiles.put(key, dictionaryFile);
 	} catch (FileNotFoundException exception) {
 	  return new BSPTuple(word, new ArrayList(0)); // partition not found, return an empty list
@@ -456,8 +456,8 @@ public class InvertedFile implements Serializable
     // System.out.println("address : " + address);
     if ( this.postingsFile == null ) {
 	  this.postingsFile = 
-	    new RandomAccessFile ( indexParentDirectoryPath + "/" +
-				   indexname + "/postings", "r" );
+	    new RandomAccessFile ( indexParentDirectoryPath + File.separator +
+				   indexname + File.separator + "postings", "r" );
     }
     if (loadAllData)
       {
