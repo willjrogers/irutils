@@ -27,7 +27,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.8 2001/09/20 15:01:50 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.9 2001/12/20 21:52:01 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
@@ -155,7 +155,7 @@ public class BSPIndex implements Serializable
 	Map bucket;
 	i++;
 	if (line.trim().length() > 0) {
-	  lineList = StringUtils.split(line, "|");
+	  lineList = utils.StringUtils.split(line, "|");
 	  if (lineList.size() > 0) {
 	    key = (String)lineList.get(keyIndex);
 	  } else {
@@ -250,12 +250,12 @@ public class BSPIndex implements Serializable
     rcfp.println( "# Tcl rc file for bsp_map." );
     rcfp.println( "#" );
     rcfp.println( "# record format:" );
-    rcfp.println( "#   " + StringUtils.join(indexFormat, "|") );
+    rcfp.println( "#   " + utils.StringUtils.join(indexFormat, "|") );
     rcfp.println( "bsp_map::mapformat " + this.indexname + " " +
-		  StringUtils.list(indexFormat));
+		  utils.StringUtils.list(indexFormat));
     rcfp.println( "bsp_map::index_org " + this.indexname + " " + indexOrgTypeString[indexOrg] );
     rcfp.println( "bsp_map::dictdataformat " + this.indexname + " " +
-		  StringUtils.join(dictDataFormat, " ") + " " + dataLen );
+		  utils.StringUtils.join(dictDataFormat, " ") + " " + dataLen );
     
     rcfp.println( "# quick load partition map for Tcl" );
     rcfp.println( "# format: " );
@@ -323,7 +323,7 @@ public class BSPIndex implements Serializable
     while (keyIter.hasNext()) {
       String key = (String)keyIter.next();
       String dataRecord = (String)aTermMap.get(key);
-      List dataList = StringUtils.split(dataRecord, "|");
+      List dataList = utils.StringUtils.split(dataRecord, "|");
       Iterator iter = dataFormat.iterator();
       //writer.writeEntry(key, );
     }

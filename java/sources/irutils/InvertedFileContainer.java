@@ -101,7 +101,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *</p>
  * @author Will Rogers
- * @version $Id: InvertedFileContainer.java,v 1.3 2001/09/20 15:00:22 wrogers Exp $
+ * @version $Id: InvertedFileContainer.java,v 1.4 2001/12/20 21:52:01 wrogers Exp $
  */
 
 public class InvertedFileContainer {
@@ -146,7 +146,7 @@ public class InvertedFileContainer {
     BufferedReader reader = 
       new BufferedReader(new FileReader( this.tableRoot + "/" + CONFIG_FILENAME ));
     if ( (line = reader.readLine()) != null ) {
-      this.numTables = Integer.parseInt((String)irutils.StringUtils.getToken(line, " ", 1));
+      this.numTables = Integer.parseInt((String)utils.StringUtils.getToken(line, " ", 1));
     } else {
       // should throw an exception here...
       System.err.println("invalid config file, first line: \"NUM_TABLES: <n>\" missing");
@@ -155,7 +155,7 @@ public class InvertedFileContainer {
     while ( (line = reader.readLine()) != null )
       {
 	if ( line.length() > 0 && line.charAt(0) != '#' ) {
-	  String tablename = irutils.StringUtils.getToken(line, "|", 1);
+	  String tablename = utils.StringUtils.getToken(line, "|", 1);
 	  // System.out.println("table: " + tablename);
 	  this.tableMap.put(tablename, line);
 	}
@@ -202,7 +202,7 @@ public class InvertedFileContainer {
 
     String line = (String)this.tableMap.get(indexname);
     if (line != null) {
-      List formatList = irutils.StringUtils.split(line, "|");
+      List formatList = utils.StringUtils.split(line, "|");
       
       String serializedInfo =  indexRoot + "/" + indexname + "/" + 
 	InvertedFile.canonicalSerializedName;

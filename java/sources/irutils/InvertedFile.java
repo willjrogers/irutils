@@ -54,7 +54,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.4 2001/12/13 15:24:00 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.5 2001/12/20 21:52:01 wrogers Exp $
  * @see irutils.InvertedFileContainer
  */
 
@@ -130,7 +130,7 @@ public class InvertedFile implements Serializable
     this.tablefilename = tablefilename;
     this.indexParentDirectoryPath = indexParentDir;
     this.indexFormat = format;
-    List keyList = irutils.StringUtils.split((String)format.get(3), ",");
+    List keyList = utils.StringUtils.split((String)format.get(3), ",");
     // convert key indices to Integer.
     this.keyIndices = new ArrayList();
     for (int i = 0; i < keyList.size(); i++) {
@@ -158,7 +158,7 @@ public class InvertedFile implements Serializable
 	Map bucket;
 	i++;
 	if (line.trim().length() > 0) {
-	  lineList = StringUtils.split(line, "|");
+	  lineList = utils.StringUtils.split(line, "|");
 	  if (lineList.size() > 0) {
 	    if (this.keyIndices == null || 
 		(this.keyIndices.size() == 1 && 
@@ -266,12 +266,12 @@ public class InvertedFile implements Serializable
     rcfp.println( "# Tcl rc file for bsp_map." );
     rcfp.println( "#" );
     rcfp.println( "# record format:" );
-    rcfp.println( "#   " + StringUtils.join(indexFormat, "|") );
+    rcfp.println( "#   " + utils.StringUtils.join(indexFormat, "|") );
     rcfp.println( "bsp_map::mapformat " + this.indexname + " " +
-		  StringUtils.list(indexFormat));
+		  utils.StringUtils.list(indexFormat));
     rcfp.println( "bsp_map::index_org " + this.indexname + " TRUE INVERTED FILE ");
     rcfp.println( "bsp_map::dictdataformat " + this.indexname + " " +
-		  StringUtils.join(dictDataFormat, " ") + " " + dataLen );
+		  utils.StringUtils.join(dictDataFormat, " ") + " " + dataLen );
     
     rcfp.println( "# quick load partition map for Tcl" );
     rcfp.println( "# format: " );
