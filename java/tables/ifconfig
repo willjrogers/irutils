@@ -37,4 +37,5 @@ NUM_TABLES: 1
 # examples:
 # j.INDR|dcmsrecommendations|2|0|pmid|recommendations|TXT|TXT
 # recommendations.txt|recommendations|3|0|pmid|marsid|recommendations|TXT|TXT|TXT
-smallrecommend.txt|smallrecommend|3|0|pmid|marsid|recommendations
+smallrecommend.txt|smallrecommend|3|0|pmid|marsid|recommendations|TXT|TXT|TXT
+
