@@ -7,18 +7,18 @@ package utils;
  * Created: Wed Jul 18 13:10:42 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPTuple.java,v 1.3 2001/07/26 19:03:15 wrogers Exp $
+ * @version $Id: BSPTuple.java,v 1.4 2001/08/27 18:50:19 wrogers Exp $
  */
 
 public class BSPTuple {
   private String key;
-  private String value;
+  private Object value;
   /**
    * instantiate new key/value pair object (tuple)
    * @param key   key for tuple.
    * @param value value for key
    */
-  public BSPTuple (String key, String value)
+  public BSPTuple (String key, Object value)
   {
     this.key = key;
     this.value = value;
