@@ -11,7 +11,7 @@ import java.util.Iterator;
  * Created: Tue Jul 10 09:05:44 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: StringUtils.java,v 1.2 2002/03/15 20:56:39 wrogers Exp $
+ * @version $Id: StringUtils.java,v 1.3 2002/03/15 21:00:03 wrogers Exp $
  */
 
 public final class StringUtils extends Object
@@ -126,8 +126,8 @@ public final class StringUtils extends Object
   }
 
   /**
-   * Write out string elements of arraylist separated by joinstring specified
-   * by user.
+   * Join string elements of arraylist separated by joinstring specified
+   * by user, return string containing joined elements.
    * @param list       array list of strings to be joined
    * @param joinString character to join strings together
    * @return string containing joined strings of array list separated by
