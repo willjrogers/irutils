@@ -47,14 +47,16 @@ The source to utils.CL is in <dist dir>/irutils/java/utils/CL.java
 
 *** Organization of one dictionary record:
   +------------------------+--------------------+-------------------+
-  | term                   | number of postings |     address       |
+  | term                   | number of postings |address of postings|
   +------------------------+--------------------+-------------------+
   |<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
   |<-------------------------- record length ---------------------->|
 
   Term Length, # of postings And addr are the same for all records in a partition.
 
-** Postings
+** Organization of Postings file
+
+TBD
 
 --  
 Will Rogers
