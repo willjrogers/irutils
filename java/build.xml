@@ -14,7 +14,8 @@
   <target name="javadoc">
   <!-- Add utils internal javadoc -->
     <mkdir dir="${utils.src}/doc" />
-    <javadoc packagenames="utils.*"
+    <javadoc packagenames="irutils.*"
+	     private="yes"
              sourcepath="."
              destdir="${utils.src}/doc"
              author="true"
@@ -31,7 +32,8 @@
   <target name="archive" depends="compile, javadoc">
     <jar jarfile="${utils}/irutils.jar"
 	 basedir="${utils.src}"
-	 excludes="indices/*, CVS, **/*~"
+	 excludes="indices/*, CVS, **/*~,
+	 **/tables/mr*, **/tables/MR*"
 	 />
   </target>
 
