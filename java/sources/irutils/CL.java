@@ -1,6 +1,6 @@
 package utils;
 
-/** command line interface for bspIndex */
+/** sample command line interface for bspIndex */
 public class CL {
 
   /**
@@ -9,17 +9,24 @@ public class CL {
    */
   public static void main(String[] args)
     throws java.io.FileNotFoundException,
-    java.io.IOException, BSPIndexCreateException, ClassNotFoundException
+    java.io.IOException, BSPIndexCreateException, BSPIndexInvalidException, 
+    ClassNotFoundException
   {
     String words[];
     String indexRoot = "/home/wrogers/devel/exper/irutils/java/indices";
     String tableRoot = "/home/wrogers/devel/exper/irutils/java/tables";
     String indexname = "recommendations";
-      
+
+    // open a container to keep track of the indices       
     BSPContainer bspContainer = new BSPContainer(tableRoot, indexRoot);
-    bspContainer.printConfig();
+
+    // get a index instance for "recommendations"
     BSPIndex bspIndex = bspContainer.get(indexname);
+
+    // check to see if index exists, if not then create it. 
     bspIndex.update();
+
+    // setup index for retrieval.
     bspIndex.setup();
 
     if ( args.length == 0 ) {
@@ -28,6 +35,7 @@ public class CL {
       words = args;
     }
     for (int i = 0; i < words.length; i++) {
+      // lookup each term in index.
       BSPTuple result = bspIndex.lookup(words[i]);
       System.out.println("result: " + result);
     }
