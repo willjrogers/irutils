@@ -6,7 +6,7 @@ import java.util.Iterator;
 /** IFQuery, a sample command line interface for the InvertedFile class.
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IFQuery.java,v 1.4 2001/11/15 15:50:09 wrogers Exp $
+ * @version $Id: IFQuery.java,v 1.5 2001/12/13 15:24:00 wrogers Exp $
  */
 
 public class IFQuery {
@@ -14,6 +14,11 @@ public class IFQuery {
   /**
    * main program 
    * @param args argument vector.
+   *
+   * usage: irutils.IFQuery <indexname> <queryterm> [| <queryterm>]
+   * properties:
+   *   index.path=<directory path> : where path of indices resides
+   *   table.path=<directory path> : where tables reside
    */
   public static void main(String[] args)
     throws java.io.FileNotFoundException,
@@ -22,15 +27,18 @@ public class IFQuery {
   {
 
     String words[] = { };	// empty array
-    String indexRoot = 
+    String indexPath = 
       System.getProperty("index.path", 
 			 "/home/wrogers/devel/exper/irutils/java/indices");
-    String tableRoot =
+    String tablePath =
       System.getProperty("table.path",
 			 "/home/wrogers/devel/exper/irutils/java/tables");
 
     if (args.length < 2) {
       System.out.println("usage: irutils.IFQuery <indexname> <queryterm> [| <queryterm>]");
+      System.out.println("properties: ");
+      System.out.println("  -Dindex.path=<directory path> : where path indices resides");
+      System.out.println("  -Dtable.path=<directory path> : where tables reside");
       System.exit(0);
     }
 
@@ -38,7 +46,7 @@ public class IFQuery {
 
     // open a container to keep track of the indices       
     InvertedFileContainer container = 
-      new InvertedFileContainer(tableRoot, indexRoot);
+      new InvertedFileContainer(tablePath, indexPath);
 
     // get a index instance for "recommendations"
     InvertedFile index = container.get(indexname);
@@ -47,6 +55,8 @@ public class IFQuery {
 	System.err.println("error creating index for " + indexname);
 	System.exit(1);
       }
+    System.out.println("using index: " + index);
+
     // check to see if index exists, if not then create it. 
     index.update();
 

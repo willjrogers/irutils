@@ -54,7 +54,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.3 2001/09/20 15:00:52 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.4 2001/12/13 15:24:00 wrogers Exp $
  * @see irutils.InvertedFileContainer
  */
 
@@ -73,7 +73,7 @@ public class InvertedFile implements Serializable
    }
 
   /** hashlist of hash or tree maps for generating new indices. */
-  transient HashMap hashlist= new HashMap(5);
+  transient HashMap hashlist = new HashMap(5);
 
   /** hashmap of open partition files. */
   transient HashMap partitionFiles = new HashMap(5);
@@ -241,9 +241,12 @@ public class InvertedFile implements Serializable
     // create index
 
     File indexDirectory = new File(this.indexParentDirectoryPath + "/" + this.indexname);
-    if (indexDirectory.mkdir() == false)
+    if ((! indexDirectory.exists()) && (! indexDirectory.isDirectory()))
       {
-	throw new BSPIndexCreateException("unable to create index directory");
+	if (indexDirectory.mkdir() == false)
+	  {
+	    throw new BSPIndexCreateException("unable to create index directory");
+	  }
       }
     dictDataFormat.add(binFormats.get("PTR"));
     postingsWriter = new RunLengthPostingsWriter 
@@ -372,6 +375,10 @@ public class InvertedFile implements Serializable
     // System.out.println("mapfile.exists(): " + mapfile.exists());
     if (mapfile.exists() == false ||
 	tablefile.lastModified() > mapfile.lastModified())  {
+      if (this.hashlist == null) 
+	{
+	  this.hashlist = new HashMap(5);
+	}
       this.load_map();
       this.create();
     } else if (mapfile.isFile())  {
@@ -387,7 +394,7 @@ public class InvertedFile implements Serializable
     throws BSPIndexInvalidException
   {
     if ( this.valid == false ) {
-      throw new BSPIndexInvalidException("Index is not valid. run method update(), "+ this);
+      throw new BSPIndexInvalidException("Index is not valid. run method update(), " + this);
     }
     if ( this.partitionFiles == null ) {
       this.partitionFiles = new HashMap(4);
@@ -494,6 +501,17 @@ public class InvertedFile implements Serializable
       this.postingsFile = null;
     }
   }
+
+  public List listKeys()
+  {
+    Iterator iter = this.partitionFiles.values().iterator();
+    while (iter.hasNext()) 
+      {
+ 	RandomAccessFile dictionaryFile = (RandomAccessFile)iter.next();
+      }
+    return new ArrayList();
+  }
+
   
   /**
    * implementation of Object's finalize() method.
