@@ -4,13 +4,30 @@ import java.util.*;
 import java.io.*;
 
 /**
- * BSPIndex.java
+ * Implementation of Binary Search Parition Index.
+ * <p>
+ * Example of use:
+ * <pre>
+ *   String indexRoot = "/home/wrogers/devel/exper/irutils/java/indices";
+ *   String tableRoot = "/home/wrogers/devel/exper/irutils/java/tables";
+ *   String indexname = "recommendations";
+ *   // open a container to keep track of the indices       
+ *   BSPContainer bspContainer = new BSPContainer(tableRoot, indexRoot);
  *
+ *   // check to see if index exists, if not then create it. 
+ *   bspIndex.update();
  *
+ *   // setup index for retrieval.
+ *   bspIndex.setup();
+ *  
+ *   BSPTuple result = bspIndex.lookup("zytoplasm");
+ *   System.out.println("result: " + result);
+ * </pre>
+ * </p>
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.4 2001/07/27 14:23:19 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.5 2001/08/03 18:54:05 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
@@ -23,11 +40,12 @@ public class BSPIndex implements Serializable
   /** list of supportted binary formats */
   static HashMap binFormats = new HashMap(4);
   /** do this once at class instantiation */
-  static {
-    binFormats.put("INT", "d1");
-    binFormats.put("TXT", "a");
-    binFormats.put("PTR", "i1");
-  }
+  static
+   {
+     binFormats.put("INT", "d1");
+     binFormats.put("TXT", "a");
+     binFormats.put("PTR", "i1");
+   }
 
   /** hashlist of hash or tree maps for generating new indices. */
   transient HashMap hashlist= new HashMap(5);
@@ -94,7 +112,7 @@ public class BSPIndex implements Serializable
     // a TreeMap where record is stored by the ordinal value of the
     // first element (key) of the record.
     String line;
-    String key;
+    String key = null;
     ArrayList lineList;
     int i = 0;
     // System.out.println("loading map " + this.indexname );
@@ -102,12 +120,18 @@ public class BSPIndex implements Serializable
       new BufferedReader(new FileReader( this.tablefilename ));
     while ( (line = reader.readLine()) != null )
       {
-	TreeMap bucket;
+	Map bucket;
 	i++;
-	lineList = StringUtils.split(line, "|");
-	key = (String)lineList.get(0);
+	if (line.trim().length() > 0) {
+	  lineList = StringUtils.split(line, "|");
+	  if (lineList.size() > 0) {
+	    key = (String)lineList.get(0);
+	  } else {
+	    System.err.println("lineList size <= 0, line = " + line);
+	  }
+	}
 	String keyLength = new Integer (key.length()).toString();
-	bucket = (TreeMap)this.hashlist.get(this.indexname+keyLength);
+	bucket = (Map)this.hashlist.get(this.indexname+keyLength);
 	if (bucket == null ) {
 	  bucket = new TreeMap();
 	  this.hashlist.put(this.indexname+keyLength, bucket);
@@ -210,29 +234,33 @@ public class BSPIndex implements Serializable
     while (iter.hasNext()) 
       {
 	String key = (String)iter.next();
-	TreeMap tree = (TreeMap)hashlist.get(key);
+	Map map = (Map)hashlist.get(key);
 	
 	switch (indexOrg)
 	  {
 	  case FILEARRAY:
-	    buildFileArray(dictDataFormat, tree, key);
+	    buildFileArray(dictDataFormat, map, key);
 	    break;
 	  case INVERTED_FILE:
-	    buildInvertedFile(dictDataFormat, tree, key, postingsWriter);
+	    buildInvertedFile(dictDataFormat, map, key, postingsWriter);
 	    break;
 	  }
-	int keylength = ((String)tree.firstKey()).length();
+	int keylength = 0;
+	Iterator mapIter = map.keySet().iterator();
+	if (mapIter.hasNext()) {
+	  keylength = ((String)mapIter.next()).length();
+	}
 	statfp.println( "partition_" + key + " " + 
-			keylength + " " + tree.size());
+			keylength + " " + map.size());
 	rcfp.println( "bsp_map::partition " + this.indexname + " " +
-		      keylength + " partition_" + key + " " + tree.size());
+		      keylength + " partition_" + key + " " + map.size());
       }
     
     postingsWriter.close();
     statfp.close();
     rcfp.close();
 
-    /** serialize info on object to indexname/bspIndexInfo.ser */
+    /* serialize info on object to indexname/bspIndexInfo.ser */
     FileOutputStream ostream = 
       new FileOutputStream(this.indexParentDirectoryPath + "/" + this.indexname +
 			   "/" + "bspIndexInfo.ser");
@@ -348,7 +376,7 @@ public class BSPIndex implements Serializable
     RandomAccessFile dictionaryFile;
     String keyLength = new Integer (word.length()).toString();
     String key = this.indexname + keyLength;
-    // System.out.println("this.partitionFiles: " + this.partitionFiles );
+    System.out.println("this.partitionFiles: " + this.partitionFiles );
     if ( this.partitionFiles.containsKey(key) ) 
       {
 	dictionaryFile = (RandomAccessFile)this.partitionFiles.get(key);
