@@ -8,7 +8,7 @@ import java.util.*;
  * Created: Tue Jul 10 09:05:44 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: StringUtils.java,v 1.1 2001/07/25 13:05:01 wrogers Exp $
+ * @version $Id: StringUtils.java,v 1.2 2001/07/25 18:44:23 wrogers Exp $
  */
 
 public final class StringUtils extends Object
@@ -58,8 +58,13 @@ public final class StringUtils extends Object
   }
 
   /**
+   * Write out string elements of arraylist as a brace encapsulated
+   * list separated by spaces; if a token contains spaces then
+   * encapsulate the token with braces.
    *
    * @param list  array list of strings to be joined
+   * @return string joined strings of array list separated by spaces
+   *         encapsulated by braces.
    */
   public static String list(ArrayList list)
   {
@@ -68,7 +73,15 @@ public final class StringUtils extends Object
     sb.append("{");
     while ( it.hasNext() )
       {
-	sb.append(it.next());
+	String token = (String)it.next();
+	if ( token.indexOf(" ") == -1 ) {
+	  sb.append(token);
+	} else {
+	  // if token contains spaces then encapsulate token with braces.
+	  sb.append("{");
+	  sb.append(token);
+	  sb.append("}");
+	}
 	if (it.hasNext()) sb.append(" ");
       }
     sb.append("}");
@@ -76,9 +89,12 @@ public final class StringUtils extends Object
   }
 
   /**
-   *
+   * Write out string elements of arraylist separated by joinstring specified
+   * by user.
    * @param list       array list of strings to be joined
    * @param joinString character to join strings together
+   * @return string containing joined strings of array list separated by
+   *         joinstring.
    */
   public static String join(ArrayList list, String joinString)
   {
