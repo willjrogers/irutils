@@ -8,7 +8,7 @@ import java.io.*;
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IntBinSearchMap.java,v 1.3 2001/08/17 17:20:00 wrogers Exp $
+ * @version $Id: IntBinSearchMap.java,v 1.4 2001/08/29 02:26:05 wrogers Exp $
  */
 
 public class IntBinSearchMap implements BinSearchMap, Serializable {
@@ -71,7 +71,7 @@ public class IntBinSearchMap implements BinSearchMap, Serializable {
   /**
    * get data entry for term 
    * @param term term 
-   * @return int value associated with temr
+   * @return int value associated with term
    */
   public int get(String term)
     throws IOException

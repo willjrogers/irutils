@@ -8,7 +8,7 @@ import java.io.*;
  * Created: Wed Jul 25 09:11:23 2001
  *
  * @author <a href="mailto: "Willie Rogers</a>
- * @version $Id: DataBinSearchMap.java,v 1.1 2001/08/17 17:19:14 wrogers Exp $
+ * @version $Id: DataBinSearchMap.java,v 1.2 2001/08/29 02:26:05 wrogers Exp $
  */
 
 public class DataBinSearchMap implements BinSearchMap, Serializable 
@@ -39,8 +39,8 @@ public class DataBinSearchMap implements BinSearchMap, Serializable
   /**
    * Instantiate a new or existing binary search map with data of a fixed length
    * @param mapFilename filename of map 
-   * @param mode        file mode to use: utils.DataBinSearchMap.WRITE to open map for writing, and
-   *                     utils.DataBinSearchMap.READ to open map for reading.
+   * @param mode        file mode to use: utils.BinSearchMap.WRITE to open map for writing, and
+   *                     utils.BinSearchMap.READ to open map for reading.
    */
   public DataBinSearchMap (String mapFilename, int mode )
     throws FileNotFoundException
