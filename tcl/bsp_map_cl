@@ -12,6 +12,7 @@ set index_root /home/wrogers/devel/exper/test
 set table_root /home/wrogers/devel/exper/tables
 set configfn   $table_root/config
 set termlist "Biophysics|Emergency Medicine|Genetics|Molecular Biology|Urology"
+set termlist ""
 
 proc usage { } {
   global argv0
@@ -156,8 +157,11 @@ if { $listconfig } {
   parray configs
 }
 
-if { [info exists tablename] == 0 } {
-  exit 0
+puts "\[info exists tablename\] => [info exists tablename]"
+if { [info exists tablename] == 0 && $termlist != "" } {
+  puts "missing required argument: tablename not specified!"
+  usage
+  exit 1
 }
 
 puts "configs: [array names configs]"
