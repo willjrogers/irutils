@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.2 2001/07/25 19:36:52 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.3 2001/07/26 19:02:26 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
@@ -126,13 +126,13 @@ public class BSPIndex implements Serializable
 
   /**
    * Generate disk-based word map from existing map in memory
+   * @exception BSPIndexCreateException occurs if index cannot be created.
    */
   public void create()
     throws BSPIndexCreateException, IOException
   {
-    DataOutputStream postingsWriter = null;
+    RunLengthPostingsWriter postingsWriter = null;
     ArrayList dictDataFormat = new ArrayList(1);
-    int nextpost = 0;
     int rowLen = Integer.parseInt((String)indexFormat.get(2));
     ArrayList typeList = new ArrayList(rowLen);
     this.dataLength = new HashMap(5);
@@ -172,11 +172,8 @@ public class BSPIndex implements Serializable
 	break;
       case INVERTED_FILE:
 	dictDataFormat.add(binFormats.get("PTR"));
-	postingsWriter = 
-	  new DataOutputStream 
-	  ( new BufferedOutputStream
-	    (new FileOutputStream
-	     (indexParentDirectoryPath + "/" + this.indexname + "/postings" )));
+	postingsWriter = new RunLengthPostingsWriter 
+	  (indexParentDirectoryPath + "/" + this.indexname );
 	break;
       }
     PrintWriter statfp = new PrintWriter
@@ -212,35 +209,13 @@ public class BSPIndex implements Serializable
 	String key = (String)iter.next();
 	TreeMap tree = (TreeMap)hashlist.get(key);
 	
-	DataOutputStream partitionWriter = 
-	  new DataOutputStream 
-	  ( new BufferedOutputStream
-	    ( new FileOutputStream
-	     ( indexParentDirectoryPath + "/" + this.indexname + "/partition_" + key )));
 	switch (indexOrg)
 	  {
 	  case FILEARRAY:
-	    buildFileArray(partitionWriter, dictDataFormat, tree, key);
-	    this.dataLength.put(key, new Integer(dataLen));
+	    buildFileArray(dictDataFormat, tree, key);
 	    break;
 	  case INVERTED_FILE:
-	    int numrecs = 0;
-	    Iterator keyIter = tree.keySet().iterator();
-	    while (keyIter.hasNext()) {
-	      String termKey = (String)keyIter.next();
-	      String dataRecord = (String)tree.get(termKey);
-	      // write posting
-	      postingsWriter.writeInt(dataRecord.length());
-	      postingsWriter.writeBytes(dataRecord);
-	      // write dictionary entry
-	      partitionWriter.writeBytes(termKey);
-	      partitionWriter.writeInt(nextpost);
-	      nextpost = nextpost + dataRecord.length() + 4;
-	      numrecs++;
-	    }
-	    this.numrecs.put(key, new Integer(numrecs));
-	    // System.out.println("key: " + key );
-	    this.dataLength.put(key, new Integer(4));
+	    buildInvertedFile(dictDataFormat, tree, key, postingsWriter);
 	    break;
 	  }
 	int keylength = ((String)tree.firstKey()).length();
@@ -248,7 +223,6 @@ public class BSPIndex implements Serializable
 			keylength + " " + tree.size());
 	rcfp.println( "bsp_map::partition " + this.indexname + " " +
 		      keylength + " partition_" + key + " " + tree.size());
-	partitionWriter.close();
       }
     
     postingsWriter.close();
@@ -268,43 +242,63 @@ public class BSPIndex implements Serializable
 
   /**
    * Build index in file array organization.
-   * @param writer      dictionary to write key/value data to.
    * @param dataFormat  format of data to be stored with key.
    * @param aTermMap    Map containing key/value pairs to be stored in index.
    * @param partitionId     partition identifier.
    */
-  void buildFileArray(DataOutputStream writer, ArrayList dataFormat, 
-		      Map aTermMap, String partitionId)
+  private void buildFileArray( ArrayList dataFormat, Map aTermMap, String partitionId)
     throws IOException
   {
-    int numrecs = 0;
+    BinSearchMap writer = 
+      new BinSearchMap ( this.indexParentDirectoryPath + "/" +
+			 this.indexname + "/partition_" + partitionId, BinSearchMap.WRITE );
     Iterator keyIter = aTermMap.values().iterator();
     while (keyIter.hasNext()) {
       String key = (String)keyIter.next();
       String dataRecord = (String)aTermMap.get(key);
-      int dataIndex = 0;
       ArrayList dataList = StringUtils.split(dataRecord, "|");
-      writer.writeBytes(key);
       Iterator iter = dataFormat.iterator();
-      while (iter.hasNext()) {
-	String format = (String)iter.next();
-	if (format.compareTo("INT") == 0 ) {
-	  writer.writeInt(Integer.parseInt((String)dataList.get(dataIndex)));
-	} else if (format.compareTo("DBL") == 0 ) {
-	  writer.writeDouble(Double.parseDouble((String)dataList.get(dataIndex)));
-	}
-	dataIndex++;
-      }
-      numrecs++;
+      //writer.writeEntry(key, );
     }
-    this.numrecs.put(partitionId, new Integer(numrecs));
+    this.numrecs.put(partitionId, new Integer(writer.getNumberOfRecords()));
+    this.dataLength.put(partitionId, new Integer(writer.getDataLength()));
+    writer.close();
+  }
+
+  /**
+   * Build index in inverted file organization.
+   * @param dataFormat  format of data to be stored with key.
+   * @param aTermMap    Map containing key/value pairs to be stored in index.
+   * @param partitionId     partition identifier.
+   * @param postingsWriter  postings file writer.
+   */
+  private void buildInvertedFile( ArrayList dataFormat, Map aTermMap, String partitionId, 
+				  RunLengthPostingsWriter postingsWriter)
+    throws IOException
+  {
+    int nextpost = 0;
+    int numrecs = 0;
+    IntBinSearchMap intPartition = 
+      new IntBinSearchMap ( indexParentDirectoryPath + "/" +
+			    this.indexname + "/partition_" + partitionId, IntBinSearchMap.WRITE );
+    Iterator keyIter = aTermMap.keySet().iterator();
+    while (keyIter.hasNext()) {
+      String termKey = (String)keyIter.next();
+      String dataRecord = (String)aTermMap.get(termKey);
+      // write posting
+      nextpost = postingsWriter.writeString(dataRecord);
+      // write dictionary entry
+      intPartition.writeEntry(termKey, nextpost);
+    }
+    this.numrecs.put(partitionId, new Integer(intPartition.getNumberOfRecords()));
+    // System.out.println("key: " + key );
+    this.dataLength.put(partitionId, new Integer(4));
+    intPartition.close();
   }
 
   /**
    * If modification time of table file is later than index then rebuild index
    * using lisp file. See method "create".
-   *
-   * @param config_entry umls style configuration entry. 
    */
   public void update()
     throws IOException, BSPIndexCreateException
@@ -401,6 +395,7 @@ public class BSPIndex implements Serializable
   /**
    * Implementation of toString to override default implementation in
    * java.lang.Object.
+   * @return string representation of index object.
    */
   public String toString()
   {
@@ -412,6 +407,10 @@ public class BSPIndex implements Serializable
     return sb.toString();
   }
 
+  /**
+   * main program 
+   * @param argv argument vector.
+   */
   public static void main(String[] argv)
   {
     
