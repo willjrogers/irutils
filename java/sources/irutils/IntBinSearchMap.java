@@ -8,10 +8,10 @@ import java.io.*;
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IntBinSearchMap.java,v 1.2 2001/07/26 20:13:28 wrogers Exp $
+ * @version $Id: IntBinSearchMap.java,v 1.3 2001/08/17 17:20:00 wrogers Exp $
  */
 
-public class IntBinSearchMap implements Serializable {
+public class IntBinSearchMap implements BinSearchMap, Serializable {
   // organization of one record:
   //  +------------------------+-------------------+
   //  | term                   |      data         |
@@ -21,10 +21,8 @@ public class IntBinSearchMap implements Serializable {
   //
   //  Term Length And Data Length Is The Same For All Records In Map.
 
-  /** open map for reading */
-  public static final int READ = 0;
-  /** open map for writing */
-  public static final int WRITE = 1;
+  /** length of integer in bytes */
+  public static final int DATALENGTH = 4; /* is this right */
   /** data output stream for writing map. */
   private transient DataOutputStream mapWriter;
   /** random access file for reading map. */
@@ -81,7 +79,8 @@ public class IntBinSearchMap implements Serializable {
     if (this.mapRAFile == null ) {
        this.mapRAFile = new RandomAccessFile ( this.filename, "r");
     }
-    return DiskBinarySearch.intBinarySearch(this.mapRAFile, term, term.length(), this.numberOfRecords);
+    return DiskBinarySearch.intBinarySearch(this.mapRAFile, 
+					    term, term.length(), this.numberOfRecords);
   }
 
   /** 
@@ -90,6 +89,14 @@ public class IntBinSearchMap implements Serializable {
   public int getNumberOfRecords()
   {
     return this.numberOfRecords;
+  }
+
+  /**
+   * @return get length of data in each record
+   */
+  public int getDataLength()
+  {
+    return this.DATALENGTH;
   }
 
   /** close resources used by this map. */
