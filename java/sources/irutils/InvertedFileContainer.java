@@ -101,7 +101,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *</p>
  * @author Will Rogers
- * @version $Id: InvertedFileContainer.java,v 1.5 2002/03/13 20:56:16 wrogers Exp $
+ * @version $Id: InvertedFileContainer.java,v 1.6 2002/10/08 19:08:42 wrogers Exp $
  */
 
 public class InvertedFileContainer {
@@ -147,7 +147,7 @@ public class InvertedFileContainer {
     String line = null;
 
     BufferedReader reader = 
-      new BufferedReader(new FileReader( this.tableRoot + "/" + CONFIG_FILENAME ));
+      new BufferedReader(new FileReader( this.tableRoot + File.separator + CONFIG_FILENAME ));
     if ( (line = reader.readLine()) != null ) {
       this.numTables = Integer.parseInt((String)utils.StringUtils.getToken(line, " ", 1));
     } else {
@@ -212,7 +212,7 @@ public class InvertedFileContainer {
     if (line != null) {
       List formatList = utils.StringUtils.split(line, "|");
       
-      String serializedInfo =  indexRoot + "/" + indexname + "/" + 
+      String serializedInfo =  indexRoot + File.separator + indexname + File.separator + 
 	InvertedFile.canonicalSerializedName;
       if ( new File(serializedInfo).exists() ) {
 	// System.out.println(" loading " + serializedInfo);
@@ -225,7 +225,7 @@ public class InvertedFileContainer {
       } else {
 	InvertedFile index = 
 	  new InvertedFile((String)formatList.get(1), 
-			   this.tableRoot + "/" + (String)formatList.get(0),
+			   this.tableRoot + File.separator + (String)formatList.get(0),
 			   this.indexRoot,
 			   formatList);
 	this.openIndexMap.put(indexname, index);
@@ -295,8 +295,7 @@ public class InvertedFileContainer {
     throws FileNotFoundException, IOException
   {
     InvertedFileContainer bspMap = 
-      new InvertedFileContainer("/home/wrogers/devel/exper/utils/java/tables",
-		       "/home/wrogers/devel/exper/utils/java/indices");
+      new InvertedFileContainer("tables", "indices");
     bspMap.printConfig();
   }
 
