@@ -55,7 +55,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.9 2002/12/04 15:44:34 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.10 2002/12/04 15:49:13 wrogers Exp $
  * @see irutils.InvertedFileContainer
  */
 
@@ -494,9 +494,10 @@ public class InvertedFile implements Serializable
   }
 
   /**
-   * Describe <code>setDeferClosing</code> method here.
+   * if true, don't close index file pointer after release().
    *
-   * @param status a <code>boolean</code> value
+   * @param status a <code>boolean</code> value,
+   *    if true, don't close index file pointer after release().
    */
   public void setDeferClosing(boolean status)
   {
@@ -523,7 +524,7 @@ public class InvertedFile implements Serializable
   }
 
   /**
-   * Describe <code>listKeys</code> method here.
+   * List keys of all OPEN partition files.
    *
    * @return a <code>List</code> value
    */
@@ -571,15 +572,6 @@ public class InvertedFile implements Serializable
     sb.append(" keyIndices: ").append(keyIndices).append("\n");
     sb.append(" partitionFiles: ").append(partitionFiles).append("\n");
     return sb.toString();
-  }
-
-  /**
-   * main program 
-   * @param argv argument vector.
-   */
-  public static void main(String[] argv)
-  {
-    
   }
 
 }// InvertedFile
