@@ -75,7 +75,9 @@
     <jar jarfile="${distrib.jar}"
 	 basedir="${utils}"
 	 excludes="indices/*, CVS, **/*~, ${utils.classes}/*,
-	 **/tables/mr*, **/tables/MR*, ${distrib.jar}"
+	 **/tables/mr*, **/tables/MR*, **/tables/recomm*, 
+	 **/tables/*chems,
+	 ${distrib.jar}"
 	 />
   </target>
 
