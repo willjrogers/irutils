@@ -54,12 +54,14 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: InvertedFile.java,v 1.7 2002/10/08 20:01:51 wrogers Exp $
+ * @version $Id: InvertedFile.java,v 1.8 2002/10/09 17:23:17 wrogers Exp $
  * @see irutils.InvertedFileContainer
  */
 
 public class InvertedFile implements Serializable
 {
+  /** serialization version unique identifier for this class. */ 
+  static final long serialVersionUID = -6131431462910547522L;
   /** canonical name of Serialized version of object */
   public static String canonicalSerializedName = "InvertedFileInfo.ser";
   /** list of supportted binary formats */
