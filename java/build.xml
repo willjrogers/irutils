@@ -1,6 +1,7 @@
 <project name="utils" default="main" basedir=".">
 
-  <!-- ==================== Initialization properties ===================== -->
+  <!-- ============= Initialization properties ================= -->
+  <property name="utils" value=".."/>
   <property name="utils.src" value="."/>
 
 
@@ -28,8 +29,10 @@
   <!-- ==================== Administrative targets ======================= -->
 
   <target name="archive" depends="compile, javadoc">
-    <jar jarfile="${utils.src}/irutils.jar"
-	 basedir="${utils.src}"/>
+    <jar jarfile="${utils}/irutils.jar"
+	 basedir="${utils.src}"
+	 excludes="indices/*, CVS, **/*~"
+	 />
   </target>
 
   <target name="clean">

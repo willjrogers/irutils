@@ -25,11 +25,11 @@ If you want to try the sample program (utils.CL):
   
 The source to utils.CL is in <dist dir>/irutils/java/utils/CL.java
 
-* building the irutils.jar file
+* building the irutils.jar file (in parent directory)
 
   $ cd <dist dir>/irutils/java
   $ javac utils/*.java
-  $ jar cvf irutils.jar utils/*.java utils/*.class
+  $ jar cvf ../irutils.jar utils/*.java utils/*.class
 
   or if you have ANT installed:
 
