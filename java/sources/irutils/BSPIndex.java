@@ -4,7 +4,7 @@ import java.util.*;
 import java.io.*;
 
 /**
- * Implementation of Binary Search Parition Index.
+ * Implementation of Binary Search Partition Index.
  * <p>
  * Example of use:
  * <pre>
@@ -27,7 +27,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.5 2001/08/03 18:54:05 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.6 2001/08/17 18:08:20 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
@@ -83,6 +83,9 @@ public class BSPIndex implements Serializable
   /** datalen in dictionary part of each partition */
   HashMap dataLength;
 
+  /** index of key used for this index. */
+  int keyIndex = 0;		// default key index is zero
+
   /** default constructor for serialization purposes only. */
   public BSPIndex()
   {
@@ -104,8 +107,37 @@ public class BSPIndex implements Serializable
     this.indexFormat = format;
   }
 
-  /** load table into in-memory term -> value map. */
+  /** Constructor 
+   * @param indexname      name of index
+   * @param tablefilename   filename containing source table data
+   * @param indexParentDir parent directory of index
+   * @param format         table data format
+   * @param keyIndex       key column index to be used for searching.
+   */
+  public BSPIndex(String indexname, String tablefilename, 
+		  String indexParentDir, ArrayList format, 
+		  int keyIndex)
+  {
+    this.indexname = indexname;
+    this.tablefilename = tablefilename;
+    this.indexParentDirectoryPath = indexParentDir;
+    this.indexFormat = format;
+    this.keyIndex = keyIndex;
+  }
+
+  /** load table into in-memory term -> value map.
+      Column zero is used as key for index. */
   public void load_map()
+     throws FileNotFoundException, IOException
+  {
+    this.load_map(0);
+  }
+
+  /**
+   * load table into in-memory term -> value map.
+   * @param keyIndex index of col to be used as key for index.
+   */
+  public void load_map(int keyIndex)
      throws FileNotFoundException, IOException
   {
     // Load records into buckets based on term length.  Each bucket is
@@ -125,7 +157,7 @@ public class BSPIndex implements Serializable
 	if (line.trim().length() > 0) {
 	  lineList = StringUtils.split(line, "|");
 	  if (lineList.size() > 0) {
-	    key = (String)lineList.get(0);
+	    key = (String)lineList.get(keyIndex);
 	  } else {
 	    System.err.println("lineList size <= 0, line = " + line);
 	  }
@@ -259,6 +291,9 @@ public class BSPIndex implements Serializable
     postingsWriter.close();
     statfp.close();
     rcfp.close();
+    // we've gotten this far, assume we have a valid index.
+    this.valid = true;
+    System.out.println("Index info: \n" + this);
 
     /* serialize info on object to indexname/bspIndexInfo.ser */
     FileOutputStream ostream = 
@@ -268,6 +303,7 @@ public class BSPIndex implements Serializable
     
     p.writeObject(this);
     p.flush();
+    p.close();
     ostream.close();
   }
 
@@ -281,7 +317,7 @@ public class BSPIndex implements Serializable
     throws IOException
   {
     BinSearchMap writer = 
-      new BinSearchMap ( this.indexParentDirectoryPath + "/" +
+      new DataBinSearchMap ( this.indexParentDirectoryPath + "/" +
 			 this.indexname + "/partition_" + partitionId, BinSearchMap.WRITE );
     Iterator keyIter = aTermMap.values().iterator();
     while (keyIter.hasNext()) {
@@ -311,7 +347,7 @@ public class BSPIndex implements Serializable
     int numrecs = 0;
     IntBinSearchMap intPartition = 
       new IntBinSearchMap ( indexParentDirectoryPath + "/" +
-			    this.indexname + "/partition_" + partitionId, IntBinSearchMap.WRITE );
+			    this.indexname + "/partition_" + partitionId, BinSearchMap.WRITE );
     Iterator keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
       String termKey = (String)keyIter.next();
@@ -325,7 +361,6 @@ public class BSPIndex implements Serializable
     // System.out.println("key: " + key );
     this.dataLength.put(partitionId, new Integer(4));
     intPartition.close();
-    this.valid = true;
   }
 
   /**
@@ -342,7 +377,7 @@ public class BSPIndex implements Serializable
     // System.out.println("mapfile.exists(): " + mapfile.exists());
     if (mapfile.exists() == false ||
 	tablefile.lastModified() > mapfile.lastModified())  {
-	this.load_map();
+	this.load_map(this.keyIndex);
 	this.create();
     } else if (mapfile.isFile())  {
 	throw new IOException("file " + indexname + " is not a directory!");
@@ -357,7 +392,7 @@ public class BSPIndex implements Serializable
     throws BSPIndexInvalidException
   {
     if ( this.valid == false ) {
-      throw new BSPIndexInvalidException("Index is not valid. run method update()");
+      throw new BSPIndexInvalidException("Index is not valid. run method update(), "+ this);
     }
     if ( this.partitionFiles == null ) {
       this.partitionFiles = new HashMap(4);
@@ -395,6 +430,8 @@ public class BSPIndex implements Serializable
       case INVERTED_FILE:
 	int address = DiskBinarySearch.intBinarySearch(dictionaryFile, word, word.length(), 
 			    ((Integer)this.numrecs.get(key)).intValue() );
+	if (address == -1)
+	  return null;
 	// System.out.println("address : " + address);
 	if ( this.postingsFile == null ) {
 	  this.postingsFile = new RandomAccessFile ( indexParentDirectoryPath + "/" +
@@ -439,7 +476,11 @@ public class BSPIndex implements Serializable
     sb.append(" indexname: ").append(indexname).append("\n");
     sb.append(" tablefilename: ").append(tablefilename).append("\n");
     sb.append(" indexParentDirectoryPath: ").append(indexParentDirectoryPath).append("\n");
-    sb.append(" partitionFiles:").append(partitionFiles).append("\n");
+    sb.append(" indexOrg: ").append(indexOrg).append("\n");
+    sb.append(" numrecs: ").append(numrecs).append("\n");
+    sb.append(" dataLength: ").append(dataLength).append("\n");
+    sb.append(" keyIndex: ").append(keyIndex).append("\n");
+    sb.append(" partitionFiles: ").append(partitionFiles).append("\n");
     return sb.toString();
   }
 
