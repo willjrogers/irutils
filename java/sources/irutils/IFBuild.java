@@ -6,7 +6,7 @@ import java.util.Iterator;
 /** IFBuild, a sample based command line index builder for the InvertedFile class.
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IFBuild.java,v 1.2 2002/03/19 15:08:37 wrogers Exp $
+ * @version $Id: IFBuild.java,v 1.3 2002/10/08 19:06:45 wrogers Exp $
  */
 
 public class IFBuild {
@@ -42,7 +42,9 @@ public class IFBuild {
       System.out.println("usage: irutils.IFBuild <indexname>");
       System.out.println("properties: ");
       System.out.println("  -Dindex.path=<directory path> : where path indices resides");
+      System.out.println("   (default: " + indexPath + ")");
       System.out.println("  -Dtable.path=<directory path> : where tables reside");
+      System.out.println("   (default: " + tablePath + ")");
       System.exit(0);
     }
 
