@@ -72,7 +72,7 @@ import java.io.*;
  *   // setup index for retrieval.
  *   index.setup();
  *   
- *   BSPTuple result = index.lookup("C00001403");
+ *   BSPTuple result = index.lookup("C0001403");
  *   ArrayList list = (ArrayList)result.getValue();
  *   for (Iterator j = list.iterator(); j.hasNext(); ) {
  *     System.out.println(j.next());
@@ -101,7 +101,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *</p>
  * @author Will Rogers
- * @version $Id: InvertedFileContainer.java,v 1.8 2002/10/09 17:24:49 wrogers Exp $
+ * @version $Id: InvertedFileContainer.java,v 1.9 2005/01/05 20:28:02 wrogers Exp $
  */
 
 public class InvertedFileContainer {
@@ -118,10 +118,10 @@ public class InvertedFileContainer {
   int numTables;
 
   /** map of tables and their configurations */
-  HashMap tableMap = new HashMap(10);
+  HashMap tableMap = new HashMap(3);
   
   /** map of open indices */
-  HashMap openIndexMap = new HashMap(10);
+  HashMap openIndexMap = new HashMap(5);
 
   /** default constructor for serialization purposes. */
   public InvertedFileContainer()
@@ -211,9 +211,10 @@ public class InvertedFileContainer {
     String line = (String)this.tableMap.get(indexname);
     if (line != null) {
       List formatList = utils.StringUtils.split(line, "|");
-      
-      String serializedInfo =  indexRoot + File.separator + indexname + File.separator + 
-	InvertedFile.canonicalSerializedName;
+      StringBuffer strbuf = new StringBuffer();
+      strbuf.append(indexRoot).append(File.separator).append(indexname).append
+	(File.separator).append(InvertedFile.canonicalSerializedName);
+      String serializedInfo =  strbuf.toString();
       if ( new File(serializedInfo).exists() ) {
 	// System.out.println(" loading " + serializedInfo);
 	FileInputStream istream = new FileInputStream(serializedInfo);
