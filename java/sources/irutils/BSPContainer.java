@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *
  * @author Will Rogers
- * @version $Id: BSPContainer.java,v 1.4 2001/08/03 18:18:14 wrogers Exp $
+ * @version $Id: BSPContainer.java,v 1.5 2001/08/17 19:00:04 wrogers Exp $
  */
 
 public class BSPContainer {
@@ -121,7 +121,7 @@ public class BSPContainer {
 	ObjectInputStream p = new ObjectInputStream(istream);
 	BSPIndex index = (BSPIndex)p.readObject();
 	istream.close();
-	// System.out.println("index: " + index);
+	// System.out.println("index:\n" + index);
 	return index;
       } else {
 	return new BSPIndex((String)formatList.get(1), 
