@@ -36,6 +36,9 @@ The source to utils.CL is in <dist dir>/irutils/java/utils/CL.java
   $ cd <dist dir>/irutils/java
   $ ant archive
 
+* TODO 
+
+1. Build Unit tests for critical sections of classes.
 
 Will Rogers
 
