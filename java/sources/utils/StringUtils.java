@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * StringUtils.java
+ * String utilities to treat strings like Tcl lists.
  *
  *
  * Created: Tue Jul 10 09:05:44 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: StringUtils.java,v 1.1 2001/12/20 21:51:36 wrogers Exp $
+ * @version $Id: StringUtils.java,v 1.2 2002/03/15 20:56:39 wrogers Exp $
  */
 
 public final class StringUtils extends Object
@@ -19,7 +19,7 @@ public final class StringUtils extends Object
 
   /**
    * Split string into substrings based on delimitor characters supplied;
-   * resulting substrings are placed in array list in order of appearance.
+   * resulting substrings are placed in an array list in order of appearance.
    *
    * @param textstring string to be split.
    * @param delimitchars delimitor characters.
@@ -48,9 +48,17 @@ public final class StringUtils extends Object
   }
 
   /**
+   * <p>
    * Split string into substrings based on delimitor characters supplied;
    * return substring specified by position.  If there are less tokens than
    * pos then return null.
+   * </p>
+   * <p>
+   * Important Note:  this is meant for one-shot extraction of an element
+   * from a delimited string.  If you want to get more than one element, then
+   * use split() to split string into a list and then use get(i) to
+   * get each element by its index.
+   * </p>
    *
    * @param textstring string to be split.
    * @param delimitchars delimitor characters.  
