@@ -1,6 +1,10 @@
 package utils;
 
-/** sample command line interface for bspIndex */
+/** sample command line interface for bspIndex
+ *
+ * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
+ * @version $Id: CL.java,v 1.5 2001/07/27 14:22:22 wrogers Exp $
+ */
 public class CL {
 
   /**
