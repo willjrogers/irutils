@@ -6,10 +6,14 @@ import java.util.Iterator;
 /** IFBuild, a sample based command line index builder for the InvertedFile class.
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IFBuild.java,v 1.1 2001/12/13 15:25:44 wrogers Exp $
+ * @version $Id: IFBuild.java,v 1.2 2002/03/19 15:08:37 wrogers Exp $
  */
 
 public class IFBuild {
+
+  /** set verbosity via property <code>-Difbuild.verbose=</code><em>true|false</em> */
+  static boolean verbose = 
+    Boolean.getBoolean(System.getProperty("ifbuild.verbose", "false"));
 
   /**
    * main program 
@@ -55,7 +59,9 @@ public class IFBuild {
 	System.err.println("error creating index for " + indexname);
 	System.exit(1);
       }
-    System.out.println("using index: " + index);
+    if (IFBuild.verbose)
+      System.out.println("using index: " + index);
+
     // check to see if index exists, if not then create it. 
     index.update();
 

@@ -6,10 +6,14 @@ import java.util.Iterator;
 /** IFQuery, a sample command line interface for the InvertedFile class.
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IFQuery.java,v 1.5 2001/12/13 15:24:00 wrogers Exp $
+ * @version $Id: IFQuery.java,v 1.6 2002/03/19 15:08:37 wrogers Exp $
  */
 
 public class IFQuery {
+
+  /** set verbosity via property <code>-Difquery.verbose=</code><em>true|false</em> */
+  static boolean verbose = 
+    Boolean.getBoolean(System.getProperty("ifquery.verbose", "false"));
 
   /**
    * main program 
@@ -55,7 +59,8 @@ public class IFQuery {
 	System.err.println("error creating index for " + indexname);
 	System.exit(1);
       }
-    System.out.println("using index: " + index);
+    if (IFQuery.verbose)
+      System.out.println("using index: " + index);
 
     // check to see if index exists, if not then create it. 
     index.update();
