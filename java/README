@@ -1,3 +1,5 @@
+$Id: README,v 1.12 2002/04/08 14:52:03 wrogers Exp $
+
 README - readme about java version of IR Utils
 
 * Partial Manifest
@@ -131,3 +133,7 @@ TBD
 
 --  
 Will Rogers
+
+;;; Local Variables: ***
+;;; mode:outline ***
+;;; End: ***
