@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *
  * @author Will Rogers
- * @version $Id: BSPContainer.java,v 1.3 2001/07/26 19:03:14 wrogers Exp $
+ * @version $Id: BSPContainer.java,v 1.4 2001/08/03 18:18:14 wrogers Exp $
  */
 
 public class BSPContainer {
@@ -26,6 +26,7 @@ public class BSPContainer {
   /** number of tables in database, initialized or not. */
   int numTables;
 
+  /** map of tables and their configurations */
   HashMap tableMap = new HashMap(20);
 
   /** default constructor for serialization purposes. */
@@ -45,6 +46,7 @@ public class BSPContainer {
     this.loadConfig();
   }
 
+  /** Load list of tables and their configurations. */
   public void loadConfig() 
     throws NumberFormatException, FileNotFoundException, IOException
   {
@@ -68,6 +70,15 @@ public class BSPContainer {
 	}
       }
     reader.close();
+  }
+
+ /**
+  * Get map of tables and their corresponding configurations.
+  * @return map containing tables and configurations.
+  */
+  public Map getTableConfigMap()
+  {
+    return this.tableMap;
   }
 
   /**
