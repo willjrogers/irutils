@@ -12,15 +12,21 @@
        =================================================================== 
    -->
 
-  <property name="utils" value=".."/>
-  <property name="utils.src" value="."/>
+  <property name="utils" value="."/>
+  <property name="utils.src"     value="${utils}/sources"/>
+  <property name="utils.classes" value="${utils}/classes"/>
   <property name="infojavadoc.home"   value="/usr/local/share/java/info/irutils"/>
+  <property name="tomcat.home"   value="/usr/local/jakarta"/>
+  <property name="class.jar"     value="irutils.jar"/>
+  <property name="distrib.jar"   value="irutils_dist.jar"/>
 
 
   <!-- ======================== compile ========================= -->
   <target name="compile">  
+    <mkdir dir="${utils.classes}" />
     <javac srcdir="${utils.src}"
            debug="true"
+           destdir="${utils.classes}"
 	   excludes="indices/*, CVS, **/*~,
 	   **/tables/*, README,
 	   doc/*, *.xml, *.xmi, *.pgml, *.argo"
@@ -30,11 +36,11 @@
   <!-- ======================== javadoc ========================= -->
   <target name="javadoc">
   <!-- Add utils internal javadoc -->
-    <mkdir dir="${utils.src}/doc" />
+    <mkdir dir="${utils}/apidoc" />
     <javadoc packagenames="irutils.*, utils.*"
 	     private="yes"
-             sourcepath="."
-             destdir="${utils.src}/doc"
+             sourcepath="${utils.src}"
+             destdir="${utils}/apidoc"
              author="true"
              version="true"
              use="true"
@@ -45,7 +51,7 @@
   </target>
   <target name="infojavadoc" depends="compile">
     <mkdir dir="${infojavadoc.home}"/>
-    <javadoc sourcepath="." packagenames="irutils.*, utils.*"
+    <javadoc sourcepath="${utils}" packagenames="irutils.*, utils.*"
     	     additionalparam="-tocbase irutilspackages"
              docletpath="/usr/local/share/java/TexiDoclet.jar"
              doclet="gnu.texidoclet.Driver"
@@ -54,24 +60,38 @@
 
   <!-- ==================== Administrative targets ======================= -->
 
-  <target name="archive" depends="compile, javadoc">
-    <delete>
-      <fileset dir=".." includes="irutils.jar"/>
-    </delete>
-    <jar jarfile="${utils}/irutils.jar"
-	 basedir="${utils.src}"
-	 excludes="indices/*, CVS, **/*~,
-	 **/tables/mr*, **/tables/MR*"
+  <target name="archive" depends="compile">
+    <jar jarfile="${utils}/${class.jar}"
+	 basedir="${utils.classes}"
+	 includes="utils/*.class, irutils/*.class"
 	 />
   </target>
 
+  <target name="distrib" depends="compile,archive,javadoc">
+    <delete>
+      <fileset dir="${utils}" includes="${distrib.jar}"/>
+      <fileset dir="${utils.classes}" includes="**/*.class"/>
+    </delete>
+    <jar jarfile="${distrib.jar}"
+	 basedir="${utils}"
+	 excludes="indices/*, CVS, **/*~, ${utils.classes}/*,
+	 **/tables/mr*, **/tables/MR*, ${distrib.jar}"
+	 />
+  </target>
+
+  <target name="tomcat" depends="archive">
+    <copy file="${utils}/${class.jar}" todir="${tomcat.home}/lib"/>
+  </target>
+
+
   <target name="clean">
     <delete>
-     <fileset dir="." includes="**/*.class, doc/*"/>
+     <fileset dir="." includes="**/*.class, *.jar, doc/*"/>
+     <fileset dir=".." includes="${distrib.jar}"/>
     </delete>
   </target>
 
-  <target name="all" depends="clean,compile,javadoc,archive"/>
+  <target name="all" depends="clean,distrib"/>
 
   <target name="main" depends="compile"/>
 
