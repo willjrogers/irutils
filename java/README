@@ -1,0 +1,46 @@
+README - readme about java version of IR Utils
+
+* Partial Manifest
+
+build.xml   -  buildfile for Jakarta ANT java build tool.
+              (http://jakarta.apache.org/)
+indices     -  empty index generation directory (used by utils.CL)
+javadoc     -  java documentation for 
+tables      -  sample tables 
+utils       -  java source files 
+
+irutils.jar -  class and source file in jar
+
+* Example Use
+
+Add irtools.jar to your java classpath.
+
+On unix (csh):
+  $ setenv CLASSPATH ${CLASSPATH}:<dist dir>/irutils/irtools.jar
+
+If you want to try the sample program (utils.CL):
+
+  $ cd <dist dir>/irutils
+  $ java -classpath ./irtools.jar utils.CL
+  
+The source to utils.CL is in <dist dir>/irutils/utils/CL.java
+
+* building the irtools.jar file
+
+  $ javac utils/*.java
+  $ jar cvf irtools.jar utils/*.java utils/*.class
+
+  or if you have ANT installed:
+
+  $ ant archive
+
+
+Will Rogers
+
+
+
+
+
+
+
+

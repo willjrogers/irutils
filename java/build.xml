@@ -4,14 +4,12 @@
   <property name="utils.src" value="."/>
 
 
-  <!-- ======================== Copy static files ========================= -->
+  <!-- ======================== compile ========================= -->
   <target name="compile">  
     <javac srcdir="${utils.src}"/>
   </target>
 
   <target name="javadoc">
-
-
   <!-- Add utils internal javadoc -->
     <mkdir dir="${utils.src}/javadoc" />
     <javadoc packagenames="utils.*"
@@ -26,7 +24,13 @@
     />
   </target>
 
-  <!-- ==================== Administrative targets  ======================= -->
+  <!-- ==================== Administrative targets ======================= -->
+
+  <target name="archive" depends="compile">
+    <jar jarfile="${utils.src}/irtools.jar"
+	 basedir="utils"/>
+  </target>
+
   <target name="clean">
     <delete>
      <fileset dir="." includes="**/*.class"/>
