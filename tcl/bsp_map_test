@@ -1,0 +1,49 @@
+#!/bin/sh
+# the next line restarts using tclsh \
+exec tclsh "$0" "$@"
+
+# -*-tcl-*-
+source bsp_map.tcl
+
+bsp_map::set_index_root /home/wrogers/devel/exper/test
+bsp_map::set_table_root /home/wrogers/devel/exper/tables
+
+# create map
+set config "jd_list|jdlist|2|jd|id|TXT|TXT"
+bsp_map::update $config
+
+# read map (change the module/namespace name: bspmap?)
+set mapname [lindex [split $config "|"] 1]
+set termlist "Biophysics|Emergency Medicine|Genetics|Molecular Biology|Urology"
+bsp_map::setup $mapname
+
+set terms [split $termlist "|"]
+
+puts "terms: $terms"
+foreach term $terms {
+  set result [bsp_map::lookup_term $mapname $term]
+  puts "term: $term -> $result"
+}
+
+bsp_map::release $mapname
+
+# try using integer data
+
+set config "jd_list|jdlistint|2|jd|id|TXT|INT"
+bsp_map::update $config
+
+
+# read map (change the module/namespace name: bspmap?)
+set mapname [lindex [split $config "|"] 1]
+set termlist "Biophysics|Emergency Medicine|Genetics|Molecular Biology|Urology"
+bsp_map::setup $mapname
+
+set terms [split $termlist "|"]
+
+puts "terms: $terms"
+foreach term $terms {
+  set result [bsp_map::lookup_term $mapname $term]
+  puts "term: $term -> $result"
+}
+
+bsp_map::release $mapname

@@ -1,0 +1,40 @@
+#!/bin/sh
+# the next line restarts using tclsh \
+exec tclsh "$0" "$@"
+
+puts stderr "ind_cgi: [exec date]" 
+
+source cgiform.tcl
+
+set ws_path "/var/spool/ind_cgi"
+
+if { $env(REQUEST_METHOD) != "POST" } {
+    puts "Content-type: text/html\n"
+    puts "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">"
+    puts "<html>"
+    puts "  <head>"
+    puts "    <title>Invalid Request Method: expected POST </title>"
+    puts "  </head>"
+    puts "  <body>"
+    puts "    <h1>Invalid Request Method: expected POST </h1>"
+    puts "  </body>"
+    puts "</html>"
+    exit 0
+}
+
+set buffer [read stdin $env(CONTENT_LENGTH)]
+
+set type_name [lindex [split $env(CONTENT_TYPE) ";"] 0]
+if {[string compare $type_name "multipart/form-data"] == 0} {
+    puts "Content-type: text/plain\n"
+    puts ""    
+    multipart_form_data $buffer $env(CONTENT_TYPE) foo
+    puts ""    
+    puts $buffer
+    puts ""
+    puts "form data: "
+    parray foo
+}
+
+exit 0
+

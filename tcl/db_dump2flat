@@ -1,0 +1,45 @@
+#!/bin/sh
+# the next line restarts using tclsh \
+exec tclsh "$0" "$@"
+
+proc db_dump_to_table { flatfilename tablefilename } {
+  
+  set flatfp [open $flatfilename "r"]
+  if { [string equal $tablefilename stdout] } {
+    set tablefp $tablefilename
+  } else {
+    set tablefp [open $tablefilename "w"]
+  }
+  # read header
+  while { [gets $flatfp line] >= 0 } {
+    if { [string compare -length 9 $line "HEADER=END"] == 0 } {
+      break
+    }
+  }
+  while { [gets $flatfp line] >= 0 } {
+    set key $line
+    if { [gets $flatfp line] < 0 } {
+      break;
+    }
+    set pt [string last "|\\0a\\00" $line end]
+    set value [string range $line 0 $pt]
+    puts $tablefp $value
+  }
+  close $flatfp
+  close $tablefp
+}
+
+if { $argc < 1 } {
+  puts stderr "$argv0 inputflatfile \[outputfile\]"
+  exit 1
+}
+set flatfilename [lindex $argv 0]
+if { $argc >= 2 } {
+  set tablefilename [lindex $argv 1]
+} else {
+  set tablefilename stdout
+}
+
+db_dump_to_table $flatfilename $tablefilename
+
+exit 0

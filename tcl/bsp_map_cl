@@ -1,0 +1,200 @@
+#!/bin/sh
+# the next line restarts using tclsh \
+exec tclsh "$0" "$@"
+#
+# command line interface to bsp_map 
+#
+lappend auto_path "~/scripts"
+
+# default settings
+set listconfig 0
+set index_root /home/wrogers/devel/exper/test
+set table_root /home/wrogers/devel/exper/tables
+set configfn   $table_root/config
+set termlist "Biophysics|Emergency Medicine|Genetics|Molecular Biology|Urology"
+
+proc usage { } {
+  global argv0
+  global configfn
+  global listconfig
+  global index_root
+  global table_root
+  
+  puts stderr " usage: $argv0 <options>
+
+ options:
+   -config <config_file>    (default: $configfn)
+   -listconfig              list tables in config file
+   -table <tablename>
+   -index_root <directory>  (default: $index_root)
+   -table_root <directory>  (default: $table_root)
+   -termlist <list of terms separated by \"|\">
+"
+}
+
+
+# Procedure: getargs
+# 
+# Parameters:
+#  arglist: Tcl list of arguments
+#
+#  The global variables declared immediately after procedure declaration
+#  a set if specified on command line.
+#
+#  options:
+#    -config <config_file>
+#    -listconfig
+#    -table <tablename>
+#    -index_root <path>
+#    -table_root <path>
+#    -termlist <list of terms separated by "|">
+#
+proc getargs { arglist } {
+  global configfn
+  global listconfig
+  global index_root
+  global table_root
+  global tablename
+  global termlist
+
+  while { [llength $arglist] > 0 } {
+    # puts "arglist: $arglist"
+    set arg [lindex $arglist 0]
+    if { [string compare -length 1 $arg "-"] == 0 } {
+      switch -exact -- $arg {
+	"-config" {
+	  if { [llength $arglist] <= 0 } {
+	    usage
+	    exit 1
+	  }
+	  set configfn [lindex $arglist 1]
+	  set arglist [lrange $arglist 2 end]
+	}	
+	"-listconfig"  {
+	  set listconfig 1
+	  set arglist [lrange $arglist 1 end]
+	}
+	"-index_root" {
+	  if { [llength $arglist] <= 0 } {
+	    usage
+	    exit 1
+	  }
+	  set index_root [lindex $arglist 1]
+	  set arglist [lrange $arglist 2 end]
+	}
+	"-table_root" {
+	  if { [llength $arglist] <= 0 } {
+	    usage
+	    exit 1
+	  }
+	  set table_root [lindex $arglist 1]
+	  set arglist [lrange $arglist 2 end]
+	}
+	"-table" {
+	  if { [llength $arglist] <= 0 } {
+	    usage
+	    exit 1
+	  }
+	  set tablename [lindex $arglist 1]
+	  set arglist [lrange $arglist 2 end]
+	}
+	"-termlist" {
+	  if { [llength $arglist] <= 0 } {
+	    usage
+	    exit 1
+	  }
+	  set termlist [lindex $arglist 1]
+	  set arglist [lrange $arglist 2 end]
+	}
+	"-dump" {
+	  puts "not implemented"
+	}
+      }
+    }
+  }
+}
+
+# Procedure: load_config 
+#  Load table configurations
+#  params: 
+#    configfn: filename of file contain configurations of tables.
+#  result:
+#  configurations are stored in associative array "configs".
+#
+proc load_config { configfn } {
+  global configs
+  global num_tables
+
+  set configfp [open $configfn "r"]
+  
+  if { [gets $configfp line] >= 0 } {
+    set num_tables [lindex [split $line] 1]
+  }
+  
+  while { [gets $configfp line] >= 0 } {
+    if { ! [string equal [string index $line 0] "\#"] } {
+      set configs([lindex [split $line "|"] 1]) $line
+    }
+  }
+  close $configfp
+  return $num_tables
+}
+
+# puts "argc: $argc, argv: $argv"
+
+if { [llength $argv] <= 0 } {
+  usage
+  exit 1
+} else {
+  getargs $argv
+}
+set configfn   $table_root/config
+load_config $configfn
+
+if { $listconfig } {
+  puts "number of tables = $num_tables"
+  parray configs
+}
+
+if { [info exists tablename] == 0 } {
+  exit 0
+}
+
+puts "configs: [array names configs]"
+if { [lsearch -exact [array names configs] $tablename] == -1 } {
+  puts "configuration: $tablename is not available"
+  exit
+}
+
+set config $configs($tablename)
+puts "config: $config"
+
+bsp_map::set_index_root $index_root
+bsp_map::set_table_root $table_root
+
+# create map
+bsp_map::update $config
+
+# read map (change the module/namespace name: bspmap?)
+set mapname [lindex [split $config "|"] 1]
+bsp_map::setup $mapname
+
+
+# try it out
+set terms [split $termlist "|"]
+
+puts "terms: $terms"
+foreach term $terms {
+  set result [bsp_map::lookup_term $mapname $term]
+  puts "term: $term -> $result"
+}
+
+# release resources
+bsp_map::release $mapname
+
+exit 0
+
+# Tell emacs that this is really a perl script
+#Local Variables:
+#Mode: tcl
+#End:

@@ -1,0 +1,1589 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 24 24 588 768
+%%Title: Enscript Output
+%%For: Willie Rogers
+%%Creator: GNU enscript 1.6.1
+%%CreationDate: Thu Jul 19 15:55:52 2001
+%%Orientation: Landscape
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6 1
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6 1
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Courier
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier /F-gs-font MF
+/F-gs-font 7 7 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-simple 1.6 1
+
+/do_header {	% print default simple header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+
+    HF setfont
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      5 0 moveto fname show
+      45 0 rmoveto fmodstr show
+      45 0 rmoveto pagenumstr show
+    } ifelse
+
+  grestore
+} def
+%%EndResource
+/d_page_w 744 def
+/d_page_h 564 def
+/d_header_x 0 def
+/d_header_y 549 def
+/d_header_w 744 def
+/d_header_h 15 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 744 def
+/d_footer_h 0 def
+/d_output_w 744 def
+/d_output_h 549 def
+/cols 2 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+90 rotate
+24 -588 translate
+/pagenum 1 def
+/fname (bsp_map.tcl) def
+/fdir () def
+/ftail (bsp_map.tcl) def
+% User defined strings:
+/fmodstr (Tue Jul 10 10:50:33 2001) def
+/pagenumstr (1) def
+/user_header_p false def
+%%EndPageSetup
+do_header
+5 539 M
+(# bsp_map : binary search partitioned map) s
+5 531 M
+(#) s
+5 523 M
+(#) s
+5 515 M
+(# add new logic:   if typelist of form: TXT|INT|...|INT  then use array) s
+5 507 M
+(#                  else use inverted file.) s
+5 499 M
+(#) s
+5 483 M
+(# binary search partitions) s
+5 475 M
+(# ) s
+5 467 M
+(# * setting directory where indices reside) s
+5 459 M
+(#) s
+5 451 M
+(#  bsp_map::set_root directory \(is there a better name for this\)) s
+5 443 M
+(#  defaults to current directory   ) s
+5 435 M
+(#  NOTE: should be a full path in most cases.) s
+5 427 M
+(#) s
+5 419 M
+(# e.g.:) s
+5 411 M
+(#  bsp_map::set_root /home/wrogers/exper) s
+5 403 M
+(#) s
+5 395 M
+(# * index creation and updating) s
+5 387 M
+(#  ) s
+5 379 M
+(#  bsp_map::create_lisp lispfile mapname) s
+5 371 M
+(#  bsp_map::update_lisp lispfile mapname) s
+5 363 M
+(#) s
+5 355 M
+(#  bsp_map::create config) s
+5 347 M
+(#  bsp_map::update config) s
+5 339 M
+(#) s
+5 331 M
+(# e.g.:) s
+5 323 M
+(#  bsp_map::create_lisp /lisp/word-signal-lw.9901-12.l word-signal-lw.9901-12) s
+5 315 M
+(#  bsp_map::update_lisp /lisp/word-signal-lw.9901-12.l word-signal-lw.9901-12) s
+5 307 M
+(#) s
+5 299 M
+(#  bsp_map::create wordidf_lw.txt|wordidf_lw|2|word|normwc|TXT|TXT) s
+5 291 M
+(#  bsp_map::update wordidf_lw.txt|wordidf_lw|2|word|normwc|TXT|TXT) s
+5 283 M
+(#) s
+5 275 M
+(# * indexing use initialization and term lookup ) s
+5 267 M
+(# ) s
+5 259 M
+(#  bsp_map::setup mapname) s
+5 251 M
+(#  bsp_map::lookup_term mapname term) s
+5 243 M
+(# ) s
+5 235 M
+(# e.g.:) s
+5 227 M
+(#  bsp_map::setup word-signal-lw.9901-1) s
+5 219 M
+(#  bsp_map::lookup_term word-signal-lw.9901-12 WESTERNBLOTTING) s
+5 211 M
+(#) s
+5 203 M
+(# File organization:) s
+5 195 M
+(#    FILEARRAY: directory containing:) s
+5 187 M
+(#       mapinforc.tcl                  -- setup file containing map ) s
+5 179 M
+(#                                         parameters including size of) s
+5 171 M
+(#                                         partitions.) s
+5 163 M
+(#       partition.stats                -- a sort of human readable file) s
+5 155 M
+(#                                         partition sizes and term-lengths) s
+5 147 M
+(#       partition_<mapname><termlen>   -- a partition of all terms of) s
+5 139 M
+(#                                         term length <termlen> and ) s
+5 131 M
+(#                                         associated values.) s
+5 123 M
+(#    INVERTED FILE: directory containing:) s
+5 115 M
+(#       mapinforc.tcl                  -- setup file containing map ) s
+5 107 M
+(#                                         parameters including size of) s
+5 99 M
+(#                                         partitions.) s
+5 91 M
+(#       partition.stats                -- a sort of human readable file) s
+5 83 M
+(#                                         partition sizes and term-lengths) s
+5 75 M
+(#       partition_<mapname><termlen>   -- a partition of all terms of) s
+5 67 M
+(#                                         term length <termlen> and ) s
+5 59 M
+(#                                         pointers to associated values in) s
+5 51 M
+(#                                         postings file.) s
+5 43 M
+(#       postings                       -- postings file containing associated) s
+5 35 M
+(#                                         values.) s
+5 27 M
+(#       ) s
+5 3 M
+(namespace eval bsp_map {) s
+377 539 M
+(  variable index_root) s
+377 531 M
+(  variable table_root) s
+377 523 M
+(  variable lisp_table_root) s
+377 515 M
+(  variable partd) s
+377 507 M
+(  variable partition) s
+377 499 M
+(  variable binformat) s
+377 491 M
+(  variable hashlist) s
+377 483 M
+(  variable mapformat) s
+377 475 M
+(  variable index_org) s
+377 467 M
+(  variable postingsd) s
+377 459 M
+(  variable dataformat) s
+377 451 M
+(  variable datalen) s
+377 443 M
+(  ) s
+377 435 M
+(  set binformat\(INT\) "d1") s
+377 427 M
+(  set binformat\(TXT\) "a") s
+377 419 M
+(  set binformat\(PTR\) "i1") s
+377 403 M
+(  # set index_root to current directory) s
+377 395 M
+(  set index_root [pwd]) s
+377 379 M
+(  # set table_root to current directory) s
+377 371 M
+(  set table_root [pwd]) s
+377 363 M
+(  ) s
+377 355 M
+(  # Procedure: load_map_from_lisp) s
+377 347 M
+(  # Params) s
+377 339 M
+(  #   filename  lisp file containg normalized terms) s
+377 331 M
+(  #   mapname   directory to place partitons and the name of partition map.) s
+377 323 M
+(  # NOTE: not a true lisp parser.) s
+377 315 M
+(  proc load_map_from_lisp { filename mapname } {) s
+377 307 M
+(    variable hashlist) s
+377 299 M
+(    variable mapformat) s
+377 291 M
+(    variable wordnum) s
+377 283 M
+(    variable keylen) s
+377 275 M
+(    variable lisp_table_root) s
+377 267 M
+(    ) s
+377 259 M
+(    # format is in "filename|mapname|2|word|normwc|TXT|INT" it is expressed as a tcl l) s
+377 251 M
+(ist for speed) s
+377 243 M
+(    # to output a separated list use:  `join <list> "|"`) s
+377 235 M
+(    set mapformat\($mapname\) [list $filename $mapname 2 word normwc TXT INT]) s
+377 227 M
+(    set wordnum\($mapname\) 0) s
+377 211 M
+(    set fp [open $lisp_table_root/$filename "r"]) s
+377 203 M
+(    while {[gets $fp line] >= 0} {) s
+377 195 M
+(      set list [split $line]) s
+377 187 M
+(      set key [string tolower [string trim [lindex $list 1] "\\""]]) s
+377 179 M
+(      set value [string trimright [lindex $list 2] "\)"]) s
+377 171 M
+(      set wordlen [string length $key]) s
+377 163 M
+(      if { $wordlen > 0 } {) s
+377 155 M
+(        if { [info exists ${mapname}${wordlen}] == 0 } {) s
+377 147 M
+(          variable ${mapname}${wordlen}) s
+377 139 M
+(          set keylen\(${mapname}${wordlen}\) $wordlen) s
+377 131 M
+(        }) s
+377 123 M
+(        set ${mapname}${wordlen}\($key\) [list $key $value]) s
+377 115 M
+(      }) s
+377 107 M
+(      incr wordnum\($mapname\)) s
+377 99 M
+(    }) s
+377 91 M
+(    close $fp) s
+377 83 M
+(    ) s
+377 75 M
+(    puts "$wordnum\($mapname\) words hashed.") s
+377 67 M
+(    set hashlist [info vars ${mapname}*]) s
+377 59 M
+(    puts "[llength $hashlist] hash partitions created") s
+377 43 M
+(    foreach hash $hashlist {) s
+377 35 M
+(      puts "$hash: length: [llength [array names $hash]]") s
+377 27 M
+(    }) s
+377 19 M
+(  }) s
+377 3 M
+(  proc load_map_from_db_dump { filename config_entry } {) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+90 rotate
+24 -588 translate
+/pagenum 2 def
+/fname (bsp_map.tcl) def
+/fdir () def
+/ftail (bsp_map.tcl) def
+% User defined strings:
+/fmodstr (Tue Jul 10 10:50:33 2001) def
+/pagenumstr (2) def
+/user_header_p false def
+%%EndPageSetup
+do_header
+5 539 M
+(    variable hashlist) s
+5 531 M
+(    variable mapformat) s
+5 523 M
+(    variable wordnum) s
+5 515 M
+(    variable keylen) s
+5 507 M
+(    variable table_root) s
+5 491 M
+(    set config_list [split $config_entry "|"]) s
+5 483 M
+(    set filename [lindex $config_list 0]) s
+5 475 M
+(    set mapname [lindex $config_list 1]) s
+5 459 M
+(    set mapformat\($mapname\) $config_list) s
+5 451 M
+(    set wordnum\($mapname\) 0) s
+5 443 M
+(  }) s
+5 427 M
+(  # Procedure: load_table) s
+5 419 M
+(  #  Load table referred to by read entry of the form:) s
+5 411 M
+(  #   input_file|tablename|num_fields|fieldname1|...|N|fieldtype1|...|N|) s
+5 403 M
+(  #  Params:) s
+5 395 M
+(  #     config_entry -- a configuration entry of form shown above.) s
+5 387 M
+(  # ) s
+5 379 M
+(  proc load_map { config_entry } {) s
+5 371 M
+(    variable hashlist) s
+5 363 M
+(    variable mapformat) s
+5 355 M
+(    variable wordnum) s
+5 347 M
+(    variable keylen) s
+5 339 M
+(    variable table_root) s
+5 323 M
+(    set config_list [split $config_entry "|"]) s
+5 315 M
+(    set filename [lindex $config_list 0]) s
+5 307 M
+(    set mapname [lindex $config_list 1]) s
+5 291 M
+(    set mapformat\($mapname\) $config_list) s
+5 283 M
+(    set wordnum\($mapname\) 0) s
+5 267 M
+(    puts "loading from file $table_root/$filename") s
+5 259 M
+(    set fp [open $table_root/$filename "r"]) s
+5 251 M
+(    while {[gets $fp line] >= 0} {) s
+5 243 M
+(      set row [split $line "|"]) s
+5 235 M
+(      set key [lindex $row 0]) s
+5 227 M
+(      set wordlen [string length $key]) s
+5 219 M
+(      if { $wordlen > 0 } {) s
+5 211 M
+(        if { [info exists ${mapname}${wordlen}] == 0 } {) s
+5 203 M
+(          variable ${mapname}${wordlen}) s
+5 195 M
+(          set keylen\(${mapname}${wordlen}\) $wordlen) s
+5 187 M
+(        }) s
+5 179 M
+(        set ${mapname}${wordlen}\($key\) $row) s
+5 171 M
+(      }) s
+5 163 M
+(      incr wordnum\($mapname\)) s
+5 155 M
+(    }) s
+5 147 M
+(    close $fp) s
+5 139 M
+(    set hashlist [info vars ${mapname}*]) s
+5 131 M
+(    foreach hash $hashlist {) s
+5 123 M
+(      puts "$hash: length: [llength [array names $hash]]") s
+5 115 M
+(      parray $hash) s
+5 107 M
+(    }) s
+5 99 M
+(  }) s
+5 91 M
+(  ) s
+5 83 M
+(  ) s
+5 75 M
+(  # Procedure: bsp_map::create) s
+5 67 M
+(  #  Generate word map from existing map in memory) s
+5 59 M
+(  # Params) s
+5 51 M
+(  #   mapname   directory to place partitons and the name of partition map.) s
+5 43 M
+(  #   debug \(optional\) set to 1 if you want debuging) s
+5 35 M
+(  #) s
+5 27 M
+(  proc create { mapname { debug 0 } } {) s
+5 19 M
+(    variable index_root) s
+5 11 M
+(    variable binformat) s
+5 3 M
+(    variable hashlist) s
+377 539 M
+(    variable mapformat) s
+377 531 M
+(    variable wordnum) s
+377 523 M
+(    variable keylen) s
+377 515 M
+(    ) s
+377 507 M
+(    set rowlen [lindex $mapformat\($mapname\) 2]) s
+377 499 M
+(    # namelist[] = elements[3..\(3 + rowlen - 1\)]) s
+377 491 M
+(    set namelist [lrange $mapformat\($mapname\) 3 [expr 2 + $rowlen]]) s
+377 483 M
+(    # typelist[] = elements[\(3 + rowlen\)..\(3 + \(rowlen * 2\) - 1\)]) s
+377 475 M
+(    set typelist [lrange $mapformat\($mapname\) [expr 3 + $rowlen] [expr 2 + $rowlen + $) s
+377 467 M
+(rowlen]]) s
+377 459 M
+(                  ) s
+377 451 M
+(    set datalen 0) s
+377 443 M
+(    set index_org FILEARRAY) s
+377 435 M
+(    set postingformatlist {}) s
+377 427 M
+(    for {set i 1} {$i < $rowlen} {incr i} {) s
+377 419 M
+(      set fieldtype [lindex $typelist $i]) s
+377 411 M
+(      set wformat $binformat\($fieldtype\)) s
+377 403 M
+(      lappend dataformatlist $wformat) s
+377 395 M
+(      if { [string equal $fieldtype "TXT"] } {) s
+377 387 M
+(        set index_org INVERTEDFILE) s
+377 379 M
+(      } else {) s
+377 371 M
+(        incr datalen 8) s
+377 363 M
+(      }) s
+377 355 M
+(    }) s
+377 339 M
+(    puts "creating index in $mapname") s
+377 331 M
+(    file mkdir $index_root/$mapname) s
+377 315 M
+(    # write partitions in human readable format) s
+377 307 M
+(    if { $debug == 1 } {) s
+377 299 M
+(      puts "writing partitions in human readable format...") s
+377 291 M
+(      foreach hash $hashlist {) s
+377 283 M
+(        variable $hash) s
+377 275 M
+(        set partfp [open $index_root/$mapname/$hash "w"]) s
+377 267 M
+(        foreach term [lsort -dictionary [array names $hash]] {) s
+377 259 M
+(          puts $partfp "$term [set ${hash}\($term\)]") s
+377 251 M
+(        }) s
+377 243 M
+(        close $partfp) s
+377 235 M
+(      }) s
+377 227 M
+(    }) s
+377 211 M
+(    # if inverted file than open postings.) s
+377 203 M
+(    switch $index_org {) s
+377 195 M
+(      INVERTEDFILE {) s
+377 187 M
+(        set postingsname $index_root/$mapname/postings) s
+377 179 M
+(        puts "opening postings file: $postingsname") s
+377 171 M
+(        set postingsfp [open $postingsname "w"]) s
+377 163 M
+(        fconfigure $postingsfp -translation binary -encoding binary) s
+377 155 M
+(        set nextpost 0) s
+377 147 M
+(        set dictdatafmt $binformat\(PTR\)) s
+377 139 M
+(      } ) s
+377 131 M
+(      FILEARRAY {) s
+377 123 M
+(        set dictdatafmt $dataformatlist) s
+377 115 M
+(      }) s
+377 107 M
+(    }) s
+377 99 M
+(    puts "generating partitions...") s
+377 91 M
+(    ) s
+377 83 M
+(    # write partitions with corresponding statistics ) s
+377 75 M
+(    set statfp [open "$index_root/$mapname/partition.stats" "w"]) s
+377 67 M
+(    puts $statfp "\\# $mapname/partition.log -- bsp_map.tcl status file") s
+377 59 M
+(    puts $statfp "\\# total number of terms: $wordnum\($mapname\)") s
+377 51 M
+(    puts $statfp "\\#") s
+377 43 M
+(    puts $statfp "\\# table format: ") s
+377 35 M
+(    puts $statfp "\\#  partition_filename termlen nterms") s
+377 27 M
+(    ) s
+377 19 M
+(    set rcfp [open "$index_root/$mapname/mapinforc.tcl" "w"]) s
+377 11 M
+(    puts $rcfp "\\# Tcl rc file for bsp_map.") s
+377 3 M
+(    puts $rcfp "\\#") s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+90 rotate
+24 -588 translate
+/pagenum 3 def
+/fname (bsp_map.tcl) def
+/fdir () def
+/ftail (bsp_map.tcl) def
+% User defined strings:
+/fmodstr (Tue Jul 10 10:50:33 2001) def
+/pagenumstr (3) def
+/user_header_p false def
+%%EndPageSetup
+do_header
+5 539 M
+(    puts $rcfp "\\# record format:") s
+5 531 M
+(    puts $rcfp "\\#   [join $mapformat\($mapname\) "|"]") s
+5 523 M
+(    puts $rcfp "bsp_map::mapformat $mapname [list $mapformat\($mapname\)]") s
+5 515 M
+(    puts $rcfp "bsp_map::index_org $mapname $index_org") s
+5 507 M
+(    puts $rcfp "bsp_map::dictdataformat $mapname $dictdatafmt $datalen") s
+5 499 M
+(    ) s
+5 491 M
+(    puts $rcfp "\\# quick load partition map for Tcl") s
+5 483 M
+(    puts $rcfp "\\# format: ") s
+5 475 M
+(    puts $rcfp "\\#  bsp_map::partition <mapname> <term length> <partitionfilename> <nu) s
+5 467 M
+(m of records>") s
+5 459 M
+(    ) s
+5 451 M
+(    foreach hash $hashlist {) s
+5 443 M
+(      variable $hash) s
+5 435 M
+(      # given hash table of terms of length n, write in binary format.) s
+5 427 M
+(      ) s
+5 419 M
+(      # generate format string for "puts") s
+5 411 M
+(      set fieldtype [lindex $typelist 0]) s
+5 403 M
+(      set wformat $binformat\($fieldtype\)) s
+5 395 M
+(      set formatlist [list ${wformat}$keylen\($hash\) ]) s
+5 387 M
+(      set formatstr [join [concat $formatlist $dictdatafmt] ""]) s
+5 379 M
+(      puts "binary format string for partition $hash: $formatstr") s
+5 371 M
+(      set partfp [open "$index_root/$mapname/partition_$hash" "w"]) s
+5 363 M
+(      fconfigure $partfp -translation binary -encoding binary) s
+5 355 M
+(      switch $index_org {) s
+5 347 M
+(        FILEARRAY {) s
+5 339 M
+(          foreach term [lsort -dictionary [array names $hash]] {) s
+5 331 M
+(            # puts "term: $term") s
+5 323 M
+(            set len [string length $term]) s
+5 315 M
+(            set datarow [set ${hash}\($term\)]) s
+5 307 M
+(            set script [concat [list binary format $formatstr] $datarow]) s
+5 299 M
+(            # puts "script $script") s
+5 291 M
+(            puts -nonewline $partfp [eval $script]) s
+5 283 M
+(          }) s
+5 275 M
+(        }) s
+5 267 M
+(        INVERTEDFILE {) s
+5 259 M
+(          foreach term [lsort -dictionary [array names $hash]] {) s
+5 251 M
+(            # puts "term: $term") s
+5 243 M
+(            set len [string length $term]) s
+5 235 M
+(            set datarow [join [set ${hash}\($term\)] "|"]) s
+5 227 M
+(            set datalen [string bytelength $datarow]) s
+5 219 M
+(            puts -nonewline $postingsfp [binary format "ia$datalen" $datalen $datarow]) s
+5 211 M
+(            set script [concat [list binary format $formatstr] [list $term] $nextpost]) s
+5 203 M
+(            # puts "script: $script") s
+5 195 M
+(            puts -nonewline $partfp [eval $script]) s
+5 187 M
+(            incr nextpost [expr $datalen + 4]) s
+5 179 M
+(          }) s
+5 171 M
+(        }) s
+5 163 M
+(      }) s
+5 155 M
+(      close $partfp) s
+5 147 M
+(      puts $statfp "partition_$hash $keylen\($hash\) [llength [array names $hash]]") s
+5 139 M
+(      puts $rcfp "bsp_map::partition $mapname $keylen\($hash\) partition_$hash [llength ) s
+5 131 M
+([array names $hash]]") s
+5 123 M
+(    } ) s
+5 115 M
+(    if { [string equal $index_org INVERTEDFILE] } {) s
+5 107 M
+(      close $postingsfp) s
+5 99 M
+(    }) s
+5 91 M
+(    close $statfp) s
+5 83 M
+(    close $rcfp) s
+5 75 M
+(    ) s
+5 67 M
+(    puts "done") s
+5 59 M
+(  }) s
+5 51 M
+(  ) s
+5 43 M
+(  #-----------------------------------------------------------------) s
+5 35 M
+(  # code to read word maps created with bsp_map::create) s
+5 27 M
+(  #-----------------------------------------------------------------) s
+5 19 M
+(  ) s
+5 11 M
+(  # Procedure: bsp_map::lookup_term) s
+5 3 M
+(  #) s
+377 539 M
+(  # Given a word map named "mapname", lookup up "term" based on term) s
+377 531 M
+(  # length and ordinal value using binary search partitions.) s
+377 523 M
+(  # ) s
+377 515 M
+(  proc lookup_term { mapname term } {) s
+377 507 M
+(    variable partd) s
+377 499 M
+(    variable partition) s
+377 491 M
+(    variable index_root) s
+377 483 M
+(    variable index_org) s
+377 475 M
+(    variable mapformat) s
+377 467 M
+(    variable postingsd) s
+377 459 M
+(    variable datalen) s
+377 451 M
+(    ) s
+377 443 M
+(    set len [string length $term]) s
+377 435 M
+(    if {[info exists partition\($mapname,$len\)] != 0 } {) s
+377 427 M
+(      if {[info exists partd\($mapname,$len\)] == 0 } {) s
+377 419 M
+(        if [file exists $index_root/$mapname/[lindex $partition\($mapname,$len\) 0]] {) s
+377 411 M
+(          set partd\($mapname,$len\) [open "$index_root/$mapname/[lindex $partition\($map) s
+377 403 M
+(name,$len\) 0]" "r"]) s
+377 395 M
+(          fconfigure $partd\($mapname,$len\) -translation binary -encoding binary) s
+377 387 M
+(        } else {) s
+377 379 M
+(          return {}) s
+377 371 M
+(        }) s
+377 363 M
+(      } ) s
+377 355 M
+(      switch $index_org\($mapname\) {) s
+377 347 M
+(        FILEARRAY {) s
+377 339 M
+(          set result [binsearch $partd\($mapname,$len\) $term $len [lindex $partition\($m) s
+377 331 M
+(apname,$len\) 1] $datalen\($mapname\)]) s
+377 323 M
+(          set datalist [list [lindex $result 0]]) s
+377 315 M
+(          foreach bindouble [lrange $result 1 end] {) s
+377 307 M
+(            binary scan $bindouble "d1" num) s
+377 299 M
+(            lappend datalist $num) s
+377 291 M
+(          }) s
+377 283 M
+(          return [join $datalist "|"]) s
+377 275 M
+(        }) s
+377 267 M
+(        INVERTEDFILE {) s
+377 259 M
+(          set entry [binsearch $partd\($mapname,$len\) $term $len [lindex $partition\($ma) s
+377 251 M
+(pname,$len\) 1] 4]) s
+377 243 M
+(          if { $entry == {} } {) s
+377 235 M
+(            return {}) s
+377 227 M
+(          }) s
+377 219 M
+(          binary scan [lindex $entry 1] "i1" offset) s
+377 211 M
+(          # puts "term: [lindex $entry 0], offset: $offset") s
+377 203 M
+(          if {[info exists postingsd\($mapname\)] == 0 } {) s
+377 195 M
+(            if [file exists $index_root/$mapname/postings] {) s
+377 187 M
+(              set postingsd\($mapname\) [open "$index_root/$mapname/postings" "r"]) s
+377 179 M
+(              fconfigure $postingsd\($mapname\) -translation binary -encoding binary) s
+377 171 M
+(            } else {) s
+377 163 M
+(              puts stderr "postings file is missing!!") s
+377 155 M
+(              return {}) s
+377 147 M
+(            }) s
+377 139 M
+(          }) s
+377 131 M
+(          seek $postingsd\($mapname\) $offset start) s
+377 123 M
+(          binary scan [read $postingsd\($mapname\) 4] "i1" postingslen) s
+377 115 M
+(          binary scan [read $postingsd\($mapname\) $postingslen] "a$postingslen" data) s
+377 107 M
+(          return $data) s
+377 99 M
+(        }) s
+377 91 M
+(      } ) s
+377 83 M
+(    }) s
+377 75 M
+(    return {}) s
+377 67 M
+(  }) s
+377 51 M
+(  # Procedure: binsearch) s
+377 43 M
+(  #  Disk based binary search implementation) s
+377 35 M
+(  # params:) s
+377 27 M
+(  #   bsfp:       file pointer for binary search table) s
+377 19 M
+(  #   word:       search word) s
+377 11 M
+(  #   wordlen:    wordlength) s
+377 3 M
+(  #   numrecs:    number of records in table) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+90 rotate
+24 -588 translate
+/pagenum 4 def
+/fname (bsp_map.tcl) def
+/fdir () def
+/ftail (bsp_map.tcl) def
+% User defined strings:
+/fmodstr (Tue Jul 10 10:50:33 2001) def
+/pagenumstr (4) def
+/user_header_p false def
+%%EndPageSetup
+do_header
+5 539 M
+(  #   datalen:    length of associated data) s
+5 531 M
+(  # returns:) s
+5 523 M
+(  #   Two element Tcl list containing word and binary data associated with it) s
+5 515 M
+(  #   or empty list if term not found.) s
+5 507 M
+(  proc binsearch { bsfp word wordlen numrecs datalen } {) s
+5 499 M
+(    # d1 or i1 if double then bytelen is 8 else int of bytelen 4.) s
+5 491 M
+(    set low 0) s
+5 483 M
+(    set high $numrecs) s
+5 475 M
+(    ) s
+5 467 M
+(    while { $low < $high } {) s
+5 459 M
+(      set mid [expr $low + \($high- $low\) / 2]) s
+5 451 M
+(      ) s
+5 443 M
+(      seek $bsfp [expr $mid * \($wordlen+$datalen\)] start ) s
+5 435 M
+(      set tstword [read $bsfp $wordlen]) s
+5 427 M
+(      set cond [string compare $word $tstword]) s
+5 419 M
+(      if {$cond < 0} {) s
+5 411 M
+(        set high $mid) s
+5 403 M
+(      } elseif { $cond > 0 } {) s
+5 395 M
+(        set low [expr $mid + 1]) s
+5 387 M
+(      } else {) s
+5 379 M
+(        set data [read $bsfp $datalen]) s
+5 371 M
+(        return [list $word $data]) s
+5 363 M
+(      }) s
+5 355 M
+(    }) s
+5 347 M
+(    return {}) s
+5 339 M
+(  }) s
+5 323 M
+(  # Procedure: bsp_map::index_org) s
+5 315 M
+(  # set indexing organization of map "mapname", usually "FILEARRAY" or) s
+5 307 M
+(  #  "INVERTEDFILE") s
+5 299 M
+(  proc index_org { mapname organization } {) s
+5 291 M
+(    variable index_org) s
+5 283 M
+(    set index_org\($mapname\) $organization) s
+5 275 M
+(  }) s
+5 259 M
+(  # Procedure: dictdataformat) s
+5 251 M
+(  # Binary format and data length of associated value data for map) s
+5 243 M
+(  # "mapname") s
+5 235 M
+(  proc dictdataformat { mapname binformat length } {) s
+5 227 M
+(    variable dataformat) s
+5 219 M
+(    variable datalen) s
+5 211 M
+(    set dataformat\($mapname\) $binformat) s
+5 203 M
+(    set datalen\($mapname\) $length) s
+5 195 M
+(  }) s
+5 179 M
+(  # Procedure: bsp_map::mapformat) s
+5 171 M
+(  # table format for table "mapname" as a Tcl list.) s
+5 163 M
+(  proc mapformat { mapname formatlist } {) s
+5 155 M
+(    variable mapformat ) s
+5 147 M
+(    set mapformat\($mapname\) $formatlist) s
+5 139 M
+(  }) s
+5 123 M
+(  # Procedure: bsp_map::partition ) s
+5 115 M
+(  # Set term length, partition filename, and number of records for a) s
+5 107 M
+(  # partition in the index.) s
+5 99 M
+(  proc partition { mapname term_length partitionfilename numofrecords } {) s
+5 91 M
+(    variable partition) s
+5 83 M
+(    set partition\($mapname,$term_length\) [list $partitionfilename $numofrecords]) s
+5 75 M
+(  }) s
+5 59 M
+(  # Procedure: bsp_map::setup) s
+5 51 M
+(  # Load setup file for map "mapname") s
+5 43 M
+(  proc setup { mapname } {) s
+5 35 M
+(    variable index_root) s
+5 27 M
+(    source $index_root/$mapname/mapinforc.tcl) s
+5 19 M
+(  }) s
+5 3 M
+(  # Procedure: bsp_map::release) s
+377 539 M
+(  #  Release file pointer resources used by index "mapname") s
+377 531 M
+(  #) s
+377 523 M
+(  proc release { mapname } {) s
+377 515 M
+(    variable partd) s
+377 499 M
+(    foreach fdesc [array names partd] {) s
+377 491 M
+(      set list [split $fdesc ","]) s
+377 483 M
+(      if [string equal [lindex $list 0] $mapname] {) s
+377 475 M
+(        close $partd\($fdesc\)) s
+377 467 M
+(        unset partd\($fdesc\)) s
+377 459 M
+(      }) s
+377 451 M
+(    }) s
+377 443 M
+(  }) s
+377 435 M
+(  ) s
+377 427 M
+(  # Procedure: bsp_map::set_root) s
+377 419 M
+(  #  Change root directory for indices) s
+377 411 M
+(  proc set_index_root { index_root } {) s
+377 403 M
+(    variable index_root) s
+377 395 M
+(    ) s
+377 387 M
+(    set index_root $index_root) s
+377 379 M
+(  }) s
+377 363 M
+(  # Procedure: bsp_map::set_index_root) s
+377 355 M
+(  #  Change root directory for indices) s
+377 347 M
+(  proc set_index_root { root } {) s
+377 339 M
+(    variable index_root) s
+377 331 M
+(    ) s
+377 323 M
+(    set index_root $root) s
+377 315 M
+(  }) s
+377 307 M
+(  # Procedure: bsp_map::set_table_root) s
+377 299 M
+(  #  Change root directory for tables) s
+377 291 M
+(  proc set_table_root { root } {) s
+377 283 M
+(    variable table_root) s
+377 275 M
+(    ) s
+377 267 M
+(    set table_root $root) s
+377 259 M
+(  }) s
+377 243 M
+(  #  Change root directory for lisp_tables) s
+377 235 M
+(  proc set_lisp_table_root { root } {) s
+377 227 M
+(    variable lisp_table_root) s
+377 219 M
+(    ) s
+377 211 M
+(    set lisp_table_root $root) s
+377 203 M
+(  }) s
+377 187 M
+(  # procedure: bsp_map::list_partition ) s
+377 179 M
+(  # List key/value pairs in a partition for map "mapname" using) s
+377 171 M
+(  # key \(term\) length "keylen".) s
+377 163 M
+(  proc list_partition { mapname keylen } {) s
+377 155 M
+(    variable partition) s
+377 147 M
+(    variable index_root) s
+377 139 M
+(    variable index_org) s
+377 123 M
+(    set fp [open "$index_root/[lindex $partition\($mapname,$keylen\) 0]" "r"]) s
+377 115 M
+(    fconfigure $fp -translation binary -encoding binary) s
+377 107 M
+(    for {set i 0} { $i < [lindex $partition\($mapname,$keylen\) 1] } { incr i } {) s
+377 99 M
+(      seek $fp [expr $i * \($keylen + 4\)]) s
+377 91 M
+(      binary scan [read $fp [expr $keylen + 4]] a10i1 term offset) s
+377 83 M
+(      puts "term: $term, offset: $offset") s
+377 75 M
+(    }) s
+377 67 M
+(    close $fp) s
+377 59 M
+(  }) s
+377 43 M
+(  # Procedure: bsp_map::update) s
+377 35 M
+(  # ) s
+377 27 M
+(  # if modification time of table file is later than index then rebuild index) s
+377 19 M
+(  # using lisp file. See procedure "create".) s
+377 11 M
+(  proc update { config_entry } {) s
+377 3 M
+(    variable index_root) s
+_R
+S
+%%Page: (5) 5
+%%BeginPageSetup
+_S
+90 rotate
+24 -588 translate
+/pagenum 5 def
+/fname (bsp_map.tcl) def
+/fdir () def
+/ftail (bsp_map.tcl) def
+% User defined strings:
+/fmodstr (Tue Jul 10 10:50:33 2001) def
+/pagenumstr (5) def
+/user_header_p false def
+%%EndPageSetup
+do_header
+5 539 M
+(    variable table_root) s
+5 523 M
+(    set config_list [split $config_entry "|"]) s
+5 515 M
+(    set filename [lindex $config_list 0]) s
+5 507 M
+(    set mapname [lindex $config_list 1]) s
+5 491 M
+(    set mapfile_exists [file exists $index_root/$mapname]) s
+5 483 M
+(    if { $mapfile_exists && [file isdirectory $index_root/$mapname] == 0 } {) s
+5 475 M
+(      puts stderr "file $mapname is not a directory") s
+5 467 M
+(      return ) s
+5 459 M
+(    }) s
+5 451 M
+(    if { $mapfile_exists == 0 || ) s
+5 443 M
+(         [file mtime $table_root/$filename] > [file mtime $index_root/$mapname] } {) s
+5 435 M
+(      load_map $config_entry) s
+5 427 M
+(      create $mapname) s
+5 419 M
+(    }) s
+5 411 M
+(  }) s
+5 395 M
+(  # Procedure: bsp_map::update_lisp) s
+5 387 M
+(  # ) s
+5 379 M
+(  # if modification time of table file is later than index then rebuild index) s
+5 371 M
+(  # using lisp file. See procedure "create".) s
+5 363 M
+(  proc update_lisp { filename mapname } {) s
+5 355 M
+(    variable index_root) s
+5 347 M
+(    variable lisp_table_root) s
+5 331 M
+(    set mapfile_exists [file exists $index_root/$mapname]) s
+5 323 M
+(    if { $mapfile_exists && [file isdirectory $index_root/$mapname] == 0 } {) s
+5 315 M
+(      puts stderr "file $mapname is not a directory") s
+5 307 M
+(      return ) s
+5 299 M
+(    }) s
+5 291 M
+(    if { $mapfile_exists == 0 || ) s
+5 283 M
+(         [file mtime $lisp_table_root/$filename] > [file mtime $index_root/$mapname] }) s
+5 275 M
+( {) s
+5 267 M
+(      load_map_from_lisp $filename $mapname) s
+5 259 M
+(      create $mapname) s
+5 251 M
+(    }) s
+5 243 M
+(  }) s
+5 227 M
+(}) s
+5 219 M
+(# namespace bs_map ) s
+_R
+S
+%%Trailer
+%%Pages: 5
+%%DocumentNeededResources: font Courier-Bold Courier 
+%%EOF
