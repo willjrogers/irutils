@@ -1,13 +1,28 @@
 <project name="utils" default="main" basedir=".">
 
   <!-- ============= Initialization properties ================= -->
+  <!-- Give user a chance to override without editing this file
+       (and without typing -D each time it compiles it) -->
+  <property file=".ant.properties" />
+  <property file="${user.home}/.ant.properties" />
+
+  <!--
+       ===================================================================
+         Set the properties related to the source tree
+       =================================================================== 
+   -->
+
   <property name="utils" value=".."/>
   <property name="utils.src" value="."/>
 
 
   <!-- ======================== compile ========================= -->
   <target name="compile">  
-    <javac srcdir="${utils.src}"/>
+    <javac srcdir="${utils.src}"
+	   excludes="indices/*, CVS, **/*~,
+	   **/tables/*, README,
+	   doc/*, *.xml, *.xmi, *.pgml, *.argo"
+	   />
   </target>
 
   <!-- ======================== javadoc ========================= -->
@@ -30,6 +45,9 @@
   <!-- ==================== Administrative targets ======================= -->
 
   <target name="archive" depends="compile, javadoc">
+    <delete>
+      <fileset dir=".." includes="irutils.jar"/>
+    </delete>
     <jar jarfile="${utils}/irutils.jar"
 	 basedir="${utils.src}"
 	 excludes="indices/*, CVS, **/*~,
@@ -39,7 +57,7 @@
 
   <target name="clean">
     <delete>
-     <fileset dir="." includes="**/*.class"/>
+     <fileset dir="." includes="**/*.class, doc/*"/>
     </delete>
   </target>
 
