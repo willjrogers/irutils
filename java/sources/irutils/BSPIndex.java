@@ -10,7 +10,7 @@ import java.io.*;
  * Created: Fri Jul  6 15:37:53 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: BSPIndex.java,v 1.1 2001/07/25 13:05:01 wrogers Exp $
+ * @version $Id: BSPIndex.java,v 1.2 2001/07/25 19:36:52 wrogers Exp $
  */
 
 public class BSPIndex implements Serializable
@@ -101,7 +101,7 @@ public class BSPIndex implements Serializable
       {
 	TreeMap bucket;
 	i++;
-	lineList = utils.StringUtils.split(line, "|");
+	lineList = StringUtils.split(line, "|");
 	key = (String)lineList.get(0);
 	String keyLength = new Integer (key.length()).toString();
 	bucket = (TreeMap)this.hashlist.get(this.indexname+keyLength);
@@ -142,8 +142,8 @@ public class BSPIndex implements Serializable
 	typeList.add(j, indexFormat.get(i));
 	// System.out.println("type: " + indexFormat.get(i));
       }
-    // System.out.println("indexFormat: " + utils.StringUtils.list(indexFormat));
-    // System.out.println("typeList: " + utils.StringUtils.list(typeList));
+    // System.out.println("indexFormat: " + StringUtils.list(indexFormat));
+    // System.out.println("typeList: " + StringUtils.list(typeList));
     int dataLen = 0;
     this.indexOrg = FILEARRAY;
 
@@ -194,9 +194,9 @@ public class BSPIndex implements Serializable
     rcfp.println( "# Tcl rc file for bsp_map." );
     rcfp.println( "#" );
     rcfp.println( "# record format:" );
-    rcfp.println( "#   " + utils.StringUtils.join(indexFormat, "|") );
+    rcfp.println( "#   " + StringUtils.join(indexFormat, "|") );
     rcfp.println( "bsp_map::mapformat " + this.indexname + " " +
-		  utils.StringUtils.list(indexFormat));
+		  StringUtils.list(indexFormat));
     rcfp.println( "bsp_map::index_org " + this.indexname + " " + indexOrgTypeString[indexOrg] );
     rcfp.println( "bsp_map::dictdataformat " + this.indexname + " " +
 		  StringUtils.join(dictDataFormat, " ") + " " + dataLen );
@@ -283,7 +283,7 @@ public class BSPIndex implements Serializable
       String key = (String)keyIter.next();
       String dataRecord = (String)aTermMap.get(key);
       int dataIndex = 0;
-      ArrayList dataList = utils.StringUtils.split(dataRecord, "|");
+      ArrayList dataList = StringUtils.split(dataRecord, "|");
       writer.writeBytes(key);
       Iterator iter = dataFormat.iterator();
       while (iter.hasNext()) {
@@ -324,90 +324,6 @@ public class BSPIndex implements Serializable
   } // BSPIndex.update
 
 
-
-  /**
-   *  Disk based binary search implementation
-   *
-   * @param bsfp       file pointer for binary search table
-   * @param word       search word
-   * @param wordlen    wordlength
-   * @param numrecs    number of records in table
-   * @param datalen    length of associated data
-
-   * @return byte array containing binary data
-   *          associated with search word or null if term not found.
-   */
-  byte[] binsearch(RandomAccessFile bsfp, String word, int wordlen, int numrecs, int datalen)
-    throws IOException
-  {
-    // d1 or i1 if double then bytelen is 8 else int of bytelen 4.
-    int low = 0;
-    int high = numrecs;
-    int cond;
-    int mid;
-    byte[] wordbuf = new byte[wordlen];
-    String tstword;
-    byte[] data = new byte[datalen];
-
-    while ( low < high )
-      {
-	mid = low + (high- low) / 2;
-	bsfp.seek(mid * (wordlen+datalen));
-	bsfp.read(wordbuf);
-	tstword = new String(wordbuf);
-	cond = word.compareTo(tstword);
-	if (cond < 0) {
-	  high = mid;
-	} else if (cond > 0) {
-	  low = mid + 1;
-	} else {
-	  bsfp.read(data);
-	  return data;
-	}
-      }
-    return null;
-  }
-
-
-  /**
-   *  Disk based binary search implementation
-   *
-   * @param bsfp       file pointer for binary search table
-   * @param word       search word
-   * @param wordlen    wordlength
-   * @param numrecs    number of records in table
-   * @return int containing address of posting.
-   */
-  int intBinsearch(RandomAccessFile bsfp, String word, int wordlen, int numrecs)
-    throws IOException
-  {
-    // d1 or i1 if double then bytelen is 8 else int of bytelen 4.
-    int datalen = 4;
-    int low = 0;
-    int high = numrecs;
-    int cond;
-    int mid;
-    byte[] wordbuf = new byte[wordlen];
-    String tstword;
-
-    while ( low < high )
-      {
-	mid = low + (high- low) / 2;
-	bsfp.seek(mid * (wordlen+datalen));
-	bsfp.read(wordbuf);
-	tstword = new String(wordbuf);
-	cond = word.compareTo(tstword);
-	if (cond < 0) {
-	  high = mid;
-	} else if (cond > 0) {
-	  low = mid + 1;
-	} else {
-	  return bsfp.readInt();
-	}
-      }
-    return -1;
-  }
-
   /**
    * setup unserialized index.
    */
@@ -447,7 +363,7 @@ public class BSPIndex implements Serializable
       case FILEARRAY:
 	break;
       case INVERTED_FILE:
-	int address = intBinsearch(dictionaryFile, word, word.length(), 
+	int address = DiskBinarySearch.intBinarySearch(dictionaryFile, word, word.length(), 
 			    ((Integer)this.numrecs.get(key)).intValue() );
 	// System.out.println("address : " + address);
 	if ( this.postingsFile == null ) {
