@@ -12,9 +12,10 @@
        =================================================================== 
    -->
 
-  <property name="utils" value="."/>
-  <property name="utils.src"     value="${utils}/sources"/>
-  <property name="utils.classes" value="${utils}/classes"/>
+  <property name="project" value="."/>
+  <property name="project.lib"     value="${project}/lib"/>
+  <property name="project.src"     value="${project}/sources"/>
+  <property name="project.classes" value="${project}/classes"/>
   <property name="infojavadoc.home"   value="/usr/local/share/java/info/irutils"/>
   <property name="tomcat.home"   value="/usr/local/jakarta"/>
   <property name="class.jar"     value="irutils.jar"/>
@@ -23,10 +24,10 @@
 
   <!-- ======================== compile ========================= -->
   <target name="compile">  
-    <mkdir dir="${utils.classes}" />
-    <javac srcdir="${utils.src}"
+    <mkdir dir="${project.classes}" />
+    <javac srcdir="${project.src}"
            debug="true"
-           destdir="${utils.classes}"
+           destdir="${project.classes}"
 	   excludes="indices/*, CVS, **/*~,
 	   **/tables/*, README,
 	   doc/*, *.xml, *.xmi, *.pgml, *.argo"
@@ -35,12 +36,12 @@
 
   <!-- ======================== javadoc ========================= -->
   <target name="javadoc">
-  <!-- Add utils internal javadoc -->
-    <mkdir dir="${utils}/apidoc" />
+  <!-- Add project internal javadoc -->
+    <mkdir dir="${project}/apidoc" />
     <javadoc packagenames="irutils.*, utils.*"
 	     private="yes"
-             sourcepath="${utils.src}"
-             destdir="${utils}/apidoc"
+             sourcepath="${project.src}"
+             destdir="${project}/apidoc"
              author="true"
              version="true"
              use="true"
@@ -51,7 +52,7 @@
   </target>
   <target name="infojavadoc" depends="compile">
     <mkdir dir="${infojavadoc.home}"/>
-    <javadoc sourcepath="${utils}" packagenames="irutils.*, utils.*"
+    <javadoc sourcepath="${project}" packagenames="irutils.*, utils.*"
     	     additionalparam="-tocbase irutilspackages"
              docletpath="/usr/local/share/java/TexiDoclet.jar"
              doclet="gnu.texidoclet.Driver"
@@ -60,21 +61,28 @@
 
   <!-- ==================== Administrative targets ======================= -->
 
-  <target name="archive" depends="compile">
-    <jar jarfile="${utils}/${class.jar}"
-	 basedir="${utils.classes}"
-	 includes="utils/*.class, irutils/*.class"
+  <target name="jar" depends="compile">
+    <mkdir dir="${project.lib}"/>
+    <jar jarfile="${project.lib}/${class.jar}"
+	 basedir="${project.classes}"
 	 />
   </target>
 
+  <target name="archive" depends="compile">
+    <jar jarfile="${java.top}/{distrib.jar}"
+	 basedir="${project.top}"
+	 />
+  </target>
+
+
   <target name="distrib" depends="compile,archive,javadoc">
     <delete>
-      <fileset dir="${utils}" includes="${distrib.jar}"/>
-      <fileset dir="${utils.classes}" includes="**/*.class"/>
+      <fileset dir="${project}" includes="${distrib.jar}"/>
+      <fileset dir="${project.classes}" includes="**/*.class"/>
     </delete>
     <jar jarfile="${distrib.jar}"
-	 basedir="${utils}"
-	 excludes="indices/*, CVS, **/*~, ${utils.classes}/*,
+	 basedir="${project}"
+	 excludes="indices/*, CVS, **/*~, ${project.classes}/*,
 	 **/tables/mr*, **/tables/MR*, **/tables/recomm*, 
 	 **/tables/*chems,
 	 ${distrib.jar}"
@@ -82,7 +90,7 @@
   </target>
 
   <target name="tomcat" depends="archive">
-    <copy file="${utils}/${class.jar}" todir="${tomcat.home}/lib"/>
+    <copy file="${project}/${class.jar}" todir="${tomcat.home}/lib"/>
   </target>
 
 
