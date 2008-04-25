@@ -19,7 +19,7 @@ import java.io.*;
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: DictionaryBinSearchMap.java,v 1.4 2001/09/20 15:02:37 wrogers Exp $
+ * @version $Id: DictionaryBinSearchMap.java,v 1.5 2008/04/25 15:02:56 wrogers Exp $
  */
 
 public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
@@ -59,8 +59,8 @@ public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
   /**
    * Write an entry into map
    * @param term Term. 
-   * @param numberOfPostings Number of postings assoicated with term.
-   * @param address Address of postings assoicated with term.
+   * @param numOfPostings Number of postings assoicated with term.
+   * @param data data associated with term.
    */
   public void writeEntry(String term, int numOfPostings, int data)
     throws IOException
