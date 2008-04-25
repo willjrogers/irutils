@@ -4,13 +4,14 @@ import java.util.*;
 import java.io.*;
 
 /**
- * Implementation of AbstractList for lists of "IR" document postings.
+ * Implementation of an Unmodifiable AbstractList for lists of "IR"
+ * document postings.
  *
  *
  * Created: Fri Aug 31 17:22:28 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: PostingsList.java,v 1.1 2001/09/20 15:03:23 wrogers Exp $
+ * @version $Id: PostingsList.java,v 1.2 2008/04/25 15:07:49 wrogers Exp $
  */
 
 public class PostingsList extends AbstractList implements List {
@@ -29,7 +30,7 @@ public class PostingsList extends AbstractList implements List {
 
   /**
    * Constructor.
-   * @param postingFile random access file object for postings file 
+   * @param postingsFile random access file object for postings file 
    * @param postingsAddress offset in file to beginning of postings list
    * @param postingsCount number of postings in list
    */
@@ -60,10 +61,15 @@ public class PostingsList extends AbstractList implements List {
   {
     return this.count;
   }
+  /** not supported */
   public void     add(int index, Object element) {  }
+  /** not supported */
   public boolean  add(Object o)  { return false; }
+  /** not supported */
   public boolean  addAll(int index, Collection c) { return false; }
+  /** not supported */
   public void     clear() {}
+  /** not supported */
   public boolean  equals(Object o) { return false; }
   /** 
    * get posting at index. 
@@ -226,7 +232,7 @@ public class PostingsList extends AbstractList implements List {
 	  this.file.read(databuf); 
 	  return new String(databuf); 
 	} catch ( IOException exception ) {
-	  System.out.println("exception: " + exception);
+	  System.out.println("PostingsList.next(): exception: " + exception);
 	  return null;
 	}
       }
