@@ -101,7 +101,7 @@ import java.io.*;
  * Created: Mon Jul  9 21:57:05 2001
  *</p>
  * @author Will Rogers
- * @version $Id: InvertedFileContainer.java,v 1.9 2005/01/05 20:28:02 wrogers Exp $
+ * @version $Id: InvertedFileContainer.java,v 1.10 2008/04/25 15:06:16 wrogers Exp $
  */
 
 public class InvertedFileContainer {
@@ -203,7 +203,7 @@ public class InvertedFileContainer {
            ClassNotFoundException, OptionalDataException
   {
     /** index open? if so then use it. */
-    InvertedFile invertedFile = (InvertedFile)openIndexMap.get(indexname);
+    InvertedFile invertedFile = (InvertedFile)this.openIndexMap.get(indexname);
     if (invertedFile != null)
       return invertedFile;
 
