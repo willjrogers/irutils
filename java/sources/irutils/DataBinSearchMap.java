@@ -14,12 +14,12 @@ import java.io.*;
  * </pre>
  *
  *  Term Length And Data Length Is The Same For All Records In Map.
- *  </p>
- *
+ * </p>
+ * <br/>
  * Created: Wed Jul 25 09:11:23 2001
  *
  * @author <a href="mailto: "Willie Rogers</a>
- * @version $Id: DataBinSearchMap.java,v 1.4 2001/09/20 15:03:23 wrogers Exp $
+ * @version $Id: DataBinSearchMap.java,v 1.5 2008/04/25 15:01:53 wrogers Exp $
  */
 
 public class DataBinSearchMap implements BinSearchMap, Serializable 
@@ -35,8 +35,10 @@ public class DataBinSearchMap implements BinSearchMap, Serializable
   private int termLength = 0;
   /** data length of data associated with terms for each record in map */
   private int dataLength = 0;
+
+  public static final String canonicalSerializedName = "DataBinSearchMap.ser";
   /** filename of map */
-  String filename;
+  transient String filename;
 
   /**
    * Instantiate a new or existing binary search map with data of a fixed length
@@ -57,6 +59,40 @@ public class DataBinSearchMap implements BinSearchMap, Serializable
     this.filename = mapFilename;    
   }
 
+  public static DataBinSearchMap getInstance(String filename)
+    throws FileNotFoundException, IOException, ClassNotFoundException
+  {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(filename).append("_").append(canonicalSerializedName);
+    String serializedInfo =  strbuf.toString();
+    if ( new File(serializedInfo).exists() ) {
+      // System.out.println(" loading " + serializedInfo);
+      FileInputStream istream = new FileInputStream(serializedInfo);
+      ObjectInputStream p = new ObjectInputStream(istream);
+      DataBinSearchMap index = (DataBinSearchMap)p.readObject();
+      istream.close();
+      index.mapRAFile = new RandomAccessFile ( filename, "r");
+      index.filename = filename;
+      return index;
+    } else {
+      System.err.println("  " + serializedInfo);
+    }
+    return null;
+  }
+
+  public void serializeMapInfo()
+    throws FileNotFoundException, IOException
+  {
+    /* serialize info on object to indexDirectoryPath/<Canonical Serialized Name> */
+    FileOutputStream ostream = 
+      new FileOutputStream(this.filename + "_" + canonicalSerializedName);
+    ObjectOutputStream p = new ObjectOutputStream(ostream);
+    p.writeObject(this);
+    p.flush();
+    p.close();
+    ostream.close();
+  }
+
   /**
    * Write an entry into map.
    * @param term term 
@@ -74,6 +110,23 @@ public class DataBinSearchMap implements BinSearchMap, Serializable
   }
 
   /**
+   * Write an entry into map.
+   * @param term term 
+   * @param data data to be assoicated with term
+   */
+  public void writeIntArrayEntry(String term, int[] data)
+    throws IOException
+  {
+    // write dictionary entry
+    this.mapWriter.writeBytes(term);
+    for (int i = 0; i<data.length; i++)
+      this.mapWriter.writeInt(data[i]);
+    this.numberOfRecords++;
+    this.termLength = term.length();
+    this.dataLength = data.length;
+  }
+
+  /**
    * get data entry for term 
    * @param term term 
    * @return byte array containing value associated with term
@@ -85,6 +138,28 @@ public class DataBinSearchMap implements BinSearchMap, Serializable
        this.mapRAFile = new RandomAccessFile ( this.filename, "r");
     }
     return DiskBinarySearch.binarySearch(this.mapRAFile, term, term.length(), this.numberOfRecords, this.dataLength);
+  }
+
+  /**
+   * get data entry for term 
+   * @param term term 
+   * @return byte array containing value associated with term
+   */
+  public int[] getIntArray(String term)
+    throws IOException
+  {
+    if (this.mapRAFile == null ) {
+       this.mapRAFile = new RandomAccessFile ( this.filename, "r");
+    }
+    return DiskBinarySearch.intArrayBinarySearch(this.mapRAFile, term, term.length(), this.numberOfRecords, this.dataLength);
+  }
+
+  /**
+   * get length of term in each record
+   */
+  public int getTermLength()
+  {
+    return this.termLength;
   }
 
   /**
