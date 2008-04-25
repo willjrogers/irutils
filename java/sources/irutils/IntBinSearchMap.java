@@ -2,7 +2,7 @@ package irutils;
 import java.io.*;
 
 /**
- * Integer Binaray Search Map
+ * Integer Binary Array Search Map
  *<p>
  * organization of one record:
  * <pre>
@@ -18,7 +18,7 @@ import java.io.*;
  * Created: Wed Jul 25 09:09:18 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: IntBinSearchMap.java,v 1.6 2001/09/20 15:03:23 wrogers Exp $
+ * @version $Id: IntBinSearchMap.java,v 1.7 2008/04/25 15:04:53 wrogers Exp $
  */
 
 public class IntBinSearchMap implements BinSearchMap, Serializable {
