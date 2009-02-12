@@ -2,6 +2,8 @@ package irutils;
 
 import java.util.*;
 import java.io.*;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 
 /**
  * Implementation of Binary Search Partition Inverted File.
@@ -66,7 +68,7 @@ public class InvertedFile implements Serializable
   /** canonical name of Serialized version of object */
   public static String canonicalSerializedName = "InvertedFileInfo.ser";
   /** list of supportted binary formats */
-  static HashMap binFormats = new HashMap(4);
+  static Map binFormats = new HashMap(4);
   /** do this once at class instantiation */
   static
    {
@@ -83,6 +85,9 @@ public class InvertedFile implements Serializable
 
   /** postings file */
   transient RandomAccessFile postingsFile;
+
+  /** mapped version of postings file */
+  transient MappedByteBuffer postingsByteBuffer;
 
   /** if true, don't close index file pointer after release(). */
   transient boolean deferClosing = false;
@@ -113,6 +118,10 @@ public class InvertedFile implements Serializable
 
   /** list of key indices (Integer)  used for this index. (default is [0]) */
   List keyIndices = null;		// if null, key index is zero
+
+  /** flag to use Memory Mapped version */
+  private static boolean useMappedFile = true;
+  //Boolean.getBoolean(System.getProperty("ifread.mapped","true"));
 
   /** default constructor for serialization purposes only. */
   public InvertedFile()
@@ -158,6 +167,7 @@ public class InvertedFile implements Serializable
     List lineList;
     int i = 0;
     // System.out.println("loading map " + this.indexname );
+    TemporaryPostingsPool pool = new TemporaryPostingsPool(this.indexname + "_tposts", "rw");
     BufferedReader reader = 
       new BufferedReader(new FileReader( this.tablefilename ));
     while ( (line = reader.readLine()) != null )
@@ -188,20 +198,24 @@ public class InvertedFile implements Serializable
 	if (bucket == null ) {
 	  bucket = new TreeMap();
 	  this.hashlist.put(this.indexname+keyLength, bucket);
-	  List postings = new ArrayList();
-	  postings.add(line);
-	  bucket.put(key, postings);
+	  
+	  /*List postings = new ArrayList();
+	    postings.add(line);*/
+	  bucket.put(key, new Integer(pool.add(line, -1)));
 	} else {
 	if ( bucket.containsKey(key) )
 	  {
-	    List postings = (List)bucket.get(key);
-	    postings.add(line);
+	    /*	    List postings = (List)bucket.get(key);
+		    postings.add(line);*/
+	    int link = ((Integer)bucket.get(key)).intValue();
+	    bucket.put(key, new Integer(pool.add(line, link)));
 	  }
 	else
 	  {
-	    List postings = new ArrayList();
+	    /*List postings = new ArrayList();
 	    postings.add(line);
-	    bucket.put(key, postings);
+	    bucket.put(key, postings);*/
+	    bucket.put(key, new Integer(pool.add(line, -1)));
 	  }
 	}
 	wordnum++;
@@ -216,6 +230,7 @@ public class InvertedFile implements Serializable
       Map bucket = (Map)iter.next();
       // System.out.println("bucket, size: " + bucket.size());
     }
+    pool.close();
   }
 
   /**
@@ -232,20 +247,29 @@ public class InvertedFile implements Serializable
     List typeList = new ArrayList(rowLen);
     this.dataLength = new HashMap(5);
     this.numrecs = new HashMap(5);
-    for (int i = 3 + rowLen, j = 0; i < 4 + rowLen + rowLen; i++, j++)
-      {
-	typeList.add(j, indexFormat.get(i));
-	// System.out.println("type: " + indexFormat.get(i));
-      }
+    try {
+      for (int i = 3 + rowLen, j = 0; i < 4 + rowLen + rowLen; i++, j++)
+        {
+          typeList.add(j, indexFormat.get(i));
+          // System.out.println("type: " + indexFormat.get(i));
+        }
+    } catch (Exception exception) {
+      exception.printStackTrace(System.err);
+      throw new BSPIndexCreateException
+        ("configuration file specified data length of " + 
+         this.dataLength + 
+         ", but was unable to acess type field, please check configuration file ");
+    }
     // System.out.println("indexFormat: " + StringUtils.list(indexFormat));
     // System.out.println("typeList: " + StringUtils.list(typeList));
     int dataLen = 0;
     List dataFormatList = new ArrayList(10);
     for (int i = 1; i < rowLen; i++ )
       {
-	String fieldtype = (String)typeList.get(i);
-	dataFormatList.add(binFormats.get(fieldtype));
+        String fieldtype = (String)typeList.get(i);
+        dataFormatList.add(binFormats.get(fieldtype));
       }
+    
     // create index
 
     File indexDirectory = new File(this.indexParentDirectoryPath + File.separator + this.indexname);
@@ -253,7 +277,9 @@ public class InvertedFile implements Serializable
       {
 	if (indexDirectory.mkdir() == false)
 	  {
-	    throw new BSPIndexCreateException("unable to create index directory");
+	    throw new BSPIndexCreateException
+              ("unable to create index directory: " + this.indexParentDirectoryPath + 
+               File.separator + this.indexname);
 	  }
       }
     dictDataFormat.add(binFormats.get("PTR"));
@@ -321,7 +347,7 @@ public class InvertedFile implements Serializable
     p.flush();
     p.close();
     ostream.close();
-  }
+    }
 
   /**
    * Build index in inverted file organization.
@@ -338,6 +364,7 @@ public class InvertedFile implements Serializable
   {
     int nextpost = 0;
     int numrecs = 0;
+    TemporaryPostingsPool pool = new TemporaryPostingsPool(this.indexname + "_tposts", "r");
     DictionaryBinSearchMap intPartition = 
       new DictionaryBinSearchMap ( indexParentDirectoryPath + File.separator +
 				   this.indexname + File.separator + "partition_" + partitionId, 
@@ -345,12 +372,15 @@ public class InvertedFile implements Serializable
     Iterator keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
       String termKey = (String)keyIter.next();
-      List postings = (List)aTermMap.get(termKey);
+      /* List postings = (List)aTermMap.get(termKey);*/
+      int link = ((Integer)aTermMap.get(termKey)).intValue();
+      List postings = pool.getv2(link);
+      System.out.println("postings size: " + postings.size());
       Iterator postingIter = postings.iterator();
-      
       if (postingIter.hasNext()) 
 	{
 	  String dataRecord = (String)postingIter.next();
+	  System.out.println("dataRecord: " + dataRecord);
 	  // write posting
 	  nextpost = postingsWriter.writeString(dataRecord);
 	  while (postingIter.hasNext()) 
@@ -367,6 +397,7 @@ public class InvertedFile implements Serializable
     // System.out.println("key: " + key );
     this.dataLength.put(partitionId, new Integer(4));
     intPartition.close();
+    pool.close();
   }
 
   /**
@@ -438,30 +469,57 @@ public class InvertedFile implements Serializable
   public BSPTuple lookup(String word, boolean loadAllData)
     throws FileNotFoundException, IOException
   {
-    RandomAccessFile dictionaryFile;
+    RandomAccessFile dictionaryRAFFile;
+    MappedByteBuffer dictionaryByteBuffer;
+    File dictionaryFile;
+    DictionaryEntry entry;
     String keyLength = new Integer (word.length()).toString();
     String key = this.indexname + keyLength;
     List postings;
     // System.out.println("this.partitionFiles: " + this.partitionFiles );
-    if ( this.partitionFiles.containsKey(key) ) 
-      {
-	dictionaryFile = (RandomAccessFile)this.partitionFiles.get(key);
-      }
-    else 
-      {
-	try {
-	  dictionaryFile = 
-	    new RandomAccessFile ( indexParentDirectoryPath + File.separator +
-				   indexname + File.separator + "partition_" + key, "r" );
-	  this.partitionFiles.put(key, dictionaryFile);
-	} catch (FileNotFoundException exception) {
-	  return new BSPTuple(word, new ArrayList(0)); // partition not found, return an empty list
+    if (useMappedFile) {
+      if ( this.partitionFiles.containsKey(key) ) 
+	{
+	  dictionaryByteBuffer = (MappedByteBuffer)this.partitionFiles.get(key);
 	}
+      else 
+	{
+	  FileChannel dictionaryFileChannel = 
+	    (new FileInputStream(new File ( indexParentDirectoryPath + File.separator +
+					    indexname + File.separator +
+					    "partition_" + key))).getChannel();
+	  int sz = (int)dictionaryFileChannel.size();
+	  dictionaryByteBuffer = 
+	    dictionaryFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+	  this.partitionFiles.put(key, dictionaryByteBuffer);
+	  dictionaryFileChannel.close();
       } 
-
-    DictionaryEntry entry = 
-      DiskBinarySearch.dictionaryBinarySearch(dictionaryFile, word, word.length(), 
-					      ((Integer)this.numrecs.get(key)).intValue() );
+      // System.out.println("mapping file");
+      entry =
+	MappedFileBinarySearch.dictionaryBinarySearch(dictionaryByteBuffer, word, word.length(), 
+						((Integer)this.numrecs.get(key)).intValue() );
+    } else {
+      //System.out.println("opening file for random access");
+      try {
+	if ( this.partitionFiles.containsKey(key) ) 
+	  {
+	    dictionaryRAFFile = (RandomAccessFile)this.partitionFiles.get(key);
+	  }
+	else 
+	  {
+	    dictionaryRAFFile = 
+	      new RandomAccessFile ( indexParentDirectoryPath + File.separator +
+				     indexname + File.separator + "partition_" + key, "r" );
+	    
+	    this.partitionFiles.put(key, dictionaryRAFFile);
+	  } 
+	entry = 
+	  DiskBinarySearch.dictionaryBinarySearch(dictionaryRAFFile, word, word.length(), 
+						  ((Integer)this.numrecs.get(key)).intValue() );
+      } catch (FileNotFoundException exception) {
+	return new BSPTuple(word, new ArrayList(0)); // partition not found, return an empty list
+      }
+    }
     if (entry == null) {
       return new BSPTuple(word, new ArrayList(0)); // entry not found, return an empty list
     }
@@ -469,27 +527,55 @@ public class InvertedFile implements Serializable
     int address = entry.getAddress();
     // System.out.println("postings count : " + count);
     // System.out.println("address : " + address);
-    if ( this.postingsFile == null ) {
-	  this.postingsFile = 
-	    new RandomAccessFile ( indexParentDirectoryPath + File.separator +
-				   indexname + File.separator + "postings", "r" );
-    }
-    if (loadAllData)
-      {
-	postings = new ArrayList(count);
-	postingsFile.seek(address);
-	for (int i = 0; i < count; i++)
-	  {
-	    int postingsLen = postingsFile.readInt();
-	    // System.out.println("postingsLen : " + postingsLen);
-	    byte[] databuf = new byte[postingsLen];
-	    postingsFile.read(databuf);
-	    postings.add(new String(databuf));
-	  }
-      } else {
+    
+    if (useMappedFile) {
+      if ( this.postingsByteBuffer == null ) {
+	FileChannel postingsFileChannel = 
+	  (new FileInputStream( new File ( indexParentDirectoryPath + 
+					   File.separator + indexname +
+					   File.separator + "postings"))).getChannel();
+	int sz = (int)postingsFileChannel.size();
+	this.postingsByteBuffer =
+	  postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+	postingsFileChannel.close();
+      }      
+      if (loadAllData)
+	{
+	  postings = new ArrayList(count);
+	  this.postingsByteBuffer.position(address);
+	  for (int i = 0; i < count; i++)
+	    {
+	      int postingsLen = this.postingsByteBuffer.getInt();
+	      byte[] databuf = new byte[postingsLen];
+	      this.postingsByteBuffer.get(databuf);
+	      postings.add(new String(databuf));
+	    }
+	} else {
+	postings = new MappedPostingsList(this.postingsByteBuffer, address, count);
+      }
+    } else {
+      if ( this.postingsFile == null ) {
+	this.postingsFile = 
+	  new RandomAccessFile ( indexParentDirectoryPath + File.separator +
+				 indexname + File.separator + "postings", "r" );
+      }
+      if (loadAllData)
+	{
+	  postings = new ArrayList(count);
+	  postingsFile.seek(address);
+	  for (int i = 0; i < count; i++)
+	    {
+	      int postingsLen = postingsFile.readInt();
+	      // System.out.println("postingsLen : " + postingsLen);
+	      byte[] databuf = new byte[postingsLen];
+	      postingsFile.read(databuf);
+	      postings.add(new String(databuf));
+	    }
+	} else {
 	// System.out.println("postingsFile: " + postingsFile);
 	postings = new PostingsList(postingsFile, address, count);
       }
+    }
     return new BSPTuple(word, postings );
   }
 
@@ -514,12 +600,22 @@ public class InvertedFile implements Serializable
     Iterator partIter = this.partitionFiles.keySet().iterator();
     while (partIter.hasNext()) {
       String key = (String)partIter.next();
-      ((RandomAccessFile)this.partitionFiles.get(key)).close();
+      if (! useMappedFile) {
+	RandomAccessFile raFile = (RandomAccessFile)this.partitionFiles.get(key);
+	raFile.close();
+	if (this.postingsFile != null && deferClosing == false)  {
+	  this.postingsFile.close();
+	  this.postingsFile = null;
+	}
+      } 
+      // else {
+	// MappedByteBuffer dictionaryByteBuffer = (MappedByteBuffer)this.partitionFiles.get(key);
+	// dictionaryByteBuffer.finalize();
+	// if (this.postingsByteBuffer != null && deferClosing == false)  {
+	//	  this.postingsByteBuffer = null;
+	//}
+      //}
       this.partitionFiles.remove(key);
-    }
-    if (this.postingsFile != null && deferClosing == false)  {
-      this.postingsFile.close();
-      this.postingsFile = null;
     }
   }
 

@@ -1,5 +1,7 @@
 package irutils;
 import java.io.*;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 
 /**
  * Dictionary Binary Search Map.
@@ -30,28 +32,46 @@ public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
   private transient DataOutputStream mapWriter;
   /** random access file for reading map. */
   private transient RandomAccessFile mapRAFile;
+  /** FileChannel for reading map. */
+  private transient FileChannel mapFileChannel;
+  /** Memory Mapped File Buffer for reading map. */
+  private transient MappedByteBuffer mapByteBuffer;
   /** number of records in this map. */
   int numberOfRecords = 0;
   /** term length of all terms in this map. */
   private int termLength = 0;
   /** filename of map */
   String filename;
+  /** flag to use Memory Mapped version */
+  private boolean useMappedFile = 
+    Boolean.getBoolean(System.getProperty("ifread.mapped","true"));
 
   /**
    * Instantiate a new or existing binary search map with single integers for data.
    * @param mapFilename filename of map
-   * @param mode        file mode to use: utils.DictionaryBinSearchMap.WRITE to open map for writing, and
-   *                    utils.DictionaryBinSearchMap.READ to open map for reading.
+   * @param mode        file mode to use:
+   *                    utils.DictionaryBinSearchMap.WRITE to open map
+   *                    for writing, and
+   *                    utils.DictionaryBinSearchMap.READ to open map
+   *                    for reading. 
    */
   public DictionaryBinSearchMap ( String mapFilename, int mode )
-    throws FileNotFoundException
+    throws FileNotFoundException, IOException
   {
     if ( mode == WRITE ) {
       this.mapWriter = 
 	new DataOutputStream ( new BufferedOutputStream
 			       ( new FileOutputStream ( mapFilename )));
     } else {
-      this.mapRAFile = new RandomAccessFile ( mapFilename, "r");
+      if (this.useMappedFile) {
+	this.mapFileChannel = 
+	  (new FileInputStream(new File( mapFilename ))).getChannel();
+	int sz = (int)this.mapFileChannel.size();
+	this.mapByteBuffer = 
+	  this.mapFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+      } else {
+	this.mapRAFile = new RandomAccessFile ( mapFilename, "r");
+      }
     }
     this.filename = mapFilename;
   }
@@ -81,11 +101,27 @@ public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
   public DictionaryEntry get(String term)
     throws IOException
   {
-    if (this.mapRAFile == null ) {
-       this.mapRAFile = new RandomAccessFile ( this.filename, "r");
+    if (this.useMappedFile) {
+      if (this.mapFileChannel == null) {
+	this.mapFileChannel = 
+	  (new FileInputStream(new File(this.filename))).getChannel();
+      }
+      if (this.mapByteBuffer == null) {
+	int sz = (int)this.mapFileChannel.size();
+	this.mapByteBuffer = 
+	  this.mapFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+      }
+      return MappedFileBinarySearch.dictionaryBinarySearch
+	(this.mapByteBuffer, 
+	 term, term.length(), this.numberOfRecords);
+    } else {
+      if (this.mapRAFile == null ) {
+	this.mapRAFile = new RandomAccessFile ( this.filename, "r");
+      }
+      return DiskBinarySearch.dictionaryBinarySearch
+	(this.mapRAFile, 
+	 term, term.length(), this.numberOfRecords);
     }
-    return DiskBinarySearch.dictionaryBinarySearch(this.mapRAFile, 
-					    term, term.length(), this.numberOfRecords);
   }
 
   /** 
@@ -108,11 +144,17 @@ public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
   public void close()
     throws IOException
   {
-    if (this.mapRAFile != null ) {
-      this.mapRAFile.close();
-    }
-    if (this.mapWriter != null ) {
-      this.mapWriter.close();
+    if (this.useMappedFile) {
+      if ( this.mapFileChannel != null ) {
+	this.mapFileChannel.close();
+      }
+    } else {
+      if (this.mapRAFile != null ) {
+	this.mapRAFile.close();
+      }
+      if (this.mapWriter != null ) {
+	this.mapWriter.close();
+      }
     }
   }
 

@@ -8,7 +8,7 @@ import java.io.*;
  * Created: Wed Jul 25 11:15:59 2001
  *
  * @author <a href="mailto:wrogers@nlm.nih.gov">Willie Rogers</a>
- * @version $Id: DiskBinarySearch.java,v 1.3 2001/09/07 13:32:20 wrogers Exp $
+ * @version $Id: DiskBinarySearch.java,v 1.3 2006/09/20 21:06:19 wrogers Exp $
  */
 
 public final class DiskBinarySearch extends Object
@@ -38,21 +38,24 @@ public final class DiskBinarySearch extends Object
     String tstword;
     byte[] data = new byte[datalen];
 
-    while ( low < high )
+    synchronized(bsfp) 
       {
-	mid = low + (high- low) / 2;
-	bsfp.seek(mid * (wordlen+datalen));
-	bsfp.read(wordbuf);
-	tstword = new String(wordbuf);
-	cond = word.compareTo(tstword);
-	if (cond < 0) {
-	  high = mid;
-	} else if (cond > 0) {
-	  low = mid + 1;
-	} else {
-	  bsfp.read(data);
-	  return data;
-	}
+        while ( low < high )
+          {
+            mid = low + (high- low) / 2;
+            bsfp.seek(mid * (wordlen+datalen));
+            bsfp.read(wordbuf);
+            tstword = new String(wordbuf);
+            cond = word.compareTo(tstword);
+            if (cond < 0) {
+              high = mid;
+            } else if (cond > 0) {
+              low = mid + 1;
+            } else {
+              bsfp.read(data);
+              return data;
+            }
+          }
       }
     return null;
   }
@@ -78,20 +81,23 @@ public final class DiskBinarySearch extends Object
     byte[] wordbuf = new byte[wordlen];
     String tstword;
 
-    while ( low < high )
+    synchronized(bsfp) 
       {
-	mid = low + (high- low) / 2;
-	bsfp.seek(mid * (wordlen+datalen));
-	bsfp.read(wordbuf);
-	tstword = new String(wordbuf);
-	cond = word.compareTo(tstword);
-	if (cond < 0) {
-	  high = mid;
-	} else if (cond > 0) {
-	  low = mid + 1;
-	} else {
-	  return bsfp.readInt();
-	}
+	while ( low < high )
+	  {
+	    mid = low + (high- low) / 2;
+	    bsfp.seek(mid * (wordlen+datalen));
+	    bsfp.read(wordbuf);
+	    tstword = new String(wordbuf);
+	    cond = word.compareTo(tstword);
+	    if (cond < 0) {
+	      high = mid;
+	    } else if (cond > 0) {
+	      low = mid + 1;
+	    } else {
+	      return bsfp.readInt();
+	    }
+	  }
       }
     return -1;
   }
@@ -138,4 +144,106 @@ public final class DiskBinarySearch extends Object
       }
     return null;
   }
+
+  /**
+   *  Disk based binary search implementation
+   *
+   * @param bsfp       file pointer for binary search table
+   * @param word       search word
+   * @param wordlen    wordlength
+   * @param numrecs    number of records in table
+   * @param datalen    length of associated data
+
+   * @return integer array containing binary data
+   *          associated with search word or null if term not found.
+   */
+  public static int[] intArrayBinarySearch(RandomAccessFile bsfp, String word, int wordlen, int numrecs, int datalen)
+    throws IOException
+  {
+    // d1 or i1 if double then bytelen is 8 else int of bytelen 4.
+    int low = 0;
+    int high = numrecs;
+    int cond;
+    int mid;
+    byte[] wordbuf = new byte[wordlen];
+    String tstword;
+    int[] data = new int[datalen];
+
+    synchronized(bsfp) 
+      {
+        while ( low < high )
+          {
+            mid = low + (high- low) / 2;
+            bsfp.seek(mid * (wordlen+(datalen*4)));
+            bsfp.read(wordbuf);
+            tstword = new String(wordbuf);
+            cond = word.compareTo(tstword);
+            if (cond < 0) {
+              high = mid;
+            } else if (cond > 0) {
+              low = mid + 1;
+            } else {
+              for (int i = 0; i < datalen; i++) {
+                data[i] = bsfp.readInt();
+              }
+              return data;
+            }
+          }
+      }
+    return null;
+  }
+
+
+  /**
+   *  Disk based binary search implementation
+   *
+   * @param bsfp       file pointer for binary search table
+   * @param word       search word
+   * @param wordlen    wordlength
+   * @param numrecs    number of records in table
+   * @param datalen    length of associated data
+
+   * @return integer array containing binary data
+   *          associated with search word or null if term not found.
+   */
+  public static int[] intArrayBinarySearch(RandomAccessFile bsfp, String word, int wordlen, int numrecs, int datalen, int[] data)
+    throws IOException
+  {
+
+    // d1 or i1 if double then bytelen is 8 else int of bytelen 4.
+    int low = 0;
+    int high = numrecs;
+    int cond;
+    int mid;
+    byte[] wordbuf = new byte[wordlen];
+    String tstword;
+
+    if (data.length >= datalen) {
+      synchronized(bsfp) 
+        {
+          while ( low < high )
+            {
+              mid = low + (high- low) / 2;
+              bsfp.seek(mid * (wordlen+(datalen*4)));
+              bsfp.read(wordbuf);
+              tstword = new String(wordbuf);
+              cond = word.compareTo(tstword);
+              if (cond < 0) {
+                high = mid;
+              } else if (cond > 0) {
+                low = mid + 1;
+              } else {
+                for (int i = 0; i < datalen; i++) {
+                  data[i] = bsfp.readInt();
+                }
+                return data;
+              }
+            }
+        }
+    } else {
+      System.out.println("Integer data array too small not modifying array and returning null!");
+    }
+    return null;
+  }
+
 } // DiskBinarySearch
