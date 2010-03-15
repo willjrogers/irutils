@@ -27,7 +27,7 @@ public class BSPContainer {
   int numTables;
 
   /** map of tables and their configurations */
-  HashMap tableMap = new HashMap(20);
+  Map<String,String> tableMap = new HashMap<String,String>(20);
 
   /** default constructor for serialization purposes. */
   public BSPContainer()
@@ -111,7 +111,7 @@ public class BSPContainer {
 
     String line = (String)this.tableMap.get(indexname);
     if (line != null) {
-      List formatList = utils.StringUtils.split(line, "|");
+      List<String> formatList = utils.StringUtils.split(line, "|");
       
       String serializedInfo =  indexRoot + "/" + indexname + "/" + 
 	"bspIndexInfo.ser";

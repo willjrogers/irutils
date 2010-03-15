@@ -18,7 +18,7 @@ import java.io.*;
  * <br/>
  * Created: Wed Jul 25 09:11:23 2001
  *
- * @author <a href="mailto: "Willie Rogers</a>
+ * @author <a href="mailto:wjrogers@mail.nih.gov">Willie Rogers</a>
  * @version $Id: DataBinSearchMap.java,v 1.5 2008/04/25 15:01:53 wrogers Exp $
  */
 

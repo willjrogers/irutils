@@ -38,7 +38,7 @@ public class BSPIndex implements Serializable
   static final int INVERTED_FILE = 1;
   static String indexOrgTypeString[] = new String[] { "FILEARRAY", "INVERTEDFILE" };
   /** list of supportted binary formats */
-  static HashMap binFormats = new HashMap(4);
+  static Map<String,String> binFormats = new HashMap<String,String>(4);
   /** do this once at class instantiation */
   static
    {
@@ -48,10 +48,10 @@ public class BSPIndex implements Serializable
    }
 
   /** hashlist of hash or tree maps for generating new indices. */
-  transient HashMap hashlist= new HashMap(5);
+  transient Map<String,Map<String,String>> hashlist = new HashMap<String,Map<String,String>>(5);
 
   /** hashmap of open partition files. */
-  transient HashMap partitionFiles = new HashMap(5);
+  transient Map<String, RandomAccessFile> partitionFiles = new HashMap<String, RandomAccessFile>(5);
 
   /** postings file */
   transient RandomAccessFile postingsFile;
@@ -69,7 +69,7 @@ public class BSPIndex implements Serializable
   String indexParentDirectoryPath;
 
   /** format for data */
-  List indexFormat;
+  List<String> indexFormat;
   
   /** number of words in index */
   int wordnum;
@@ -78,10 +78,10 @@ public class BSPIndex implements Serializable
   int indexOrg;
 
   /** number of records in each partition */
-  HashMap numrecs;
+  Map<String,Integer> numrecs;
 
   /** datalen in dictionary part of each partition */
-  HashMap dataLength;
+  Map<String,Integer> dataLength;
 
   /** index of key used for this index. */
   int keyIndex = 0;		// default key index is zero
@@ -99,7 +99,7 @@ public class BSPIndex implements Serializable
    * @param format         table data format
    */
   public BSPIndex(String indexname, String tablefilename, 
-		  String indexParentDir, List format)
+		  String indexParentDir, List<String> format)
   {
     this.indexname = indexname;
     this.tablefilename = tablefilename;
@@ -115,7 +115,7 @@ public class BSPIndex implements Serializable
    * @param keyIndex       key column index to be used for searching.
    */
   public BSPIndex(String indexname, String tablefilename, 
-		  String indexParentDir, ArrayList format, 
+		  String indexParentDir, List<String> format, 
 		  int keyIndex)
   {
     this.indexname = indexname;
@@ -145,14 +145,14 @@ public class BSPIndex implements Serializable
     // first element (key) of the record.
     String line;
     String key = null;
-    List lineList;
+    List<String> lineList;
     int i = 0;
     // System.out.println("loading map " + this.indexname );
     BufferedReader reader = 
       new BufferedReader(new FileReader( this.tablefilename ));
     while ( (line = reader.readLine()) != null )
       {
-	Map bucket;
+	Map<String,String> bucket;
 	i++;
 	if (line.trim().length() > 0) {
 	  lineList = utils.StringUtils.split(line, "|");
@@ -163,9 +163,9 @@ public class BSPIndex implements Serializable
 	  }
 	}
 	String keyLength = new Integer (key.length()).toString();
-	bucket = (Map)this.hashlist.get(this.indexname+keyLength);
+	bucket = this.hashlist.get(this.indexname+keyLength);
 	if (bucket == null ) {
-	  bucket = new TreeMap();
+	  bucket = new TreeMap<String,String>();
 	  this.hashlist.put(this.indexname+keyLength, bucket);
 	} 
 	bucket.put(key, line);
@@ -176,10 +176,11 @@ public class BSPIndex implements Serializable
     reader.close();
     // System.out.println("# of input lines: " + i );
     // System.out.println("# of buckets: " + hashlist.size());
-    Iterator iter = hashlist.values().iterator();
-    while (iter.hasNext()) {
-      Map bucket = (Map)iter.next();
-      // System.out.println("bucket, size: " + bucket.size());
+    for (Map<String,String> bucket : hashlist.values() ) {
+      // Iterator iter = hashlist.values().iterator();
+      // while (iter.hasNext()) {
+      // Map<String,String> bucket = iter.next();
+      System.out.println("bucket, size: " + bucket.size());
     }
   }
 
@@ -191,14 +192,14 @@ public class BSPIndex implements Serializable
     throws BSPIndexCreateException, IOException
   {
     RunLengthPostingsWriter postingsWriter = null;
-    ArrayList dictDataFormat = new ArrayList(1);
-    int rowLen = Integer.parseInt((String)indexFormat.get(2));
-    ArrayList typeList = new ArrayList(rowLen);
-    this.dataLength = new HashMap(5);
-    this.numrecs = new HashMap(5);
+    List<String> dictDataFormat = new ArrayList<String>(1);
+    int rowLen = Integer.parseInt(this.indexFormat.get(2));
+    List<String> typeList = new ArrayList<String>(rowLen);
+    this.dataLength = new HashMap<String,Integer>(5);
+    this.numrecs = new HashMap<String,Integer>(5);
     for (int i = 3 + rowLen, j = 0; i < 3 + rowLen + rowLen; i++, j++)
       {
-	typeList.add(j, indexFormat.get(i));
+	typeList.add(j, this.indexFormat.get(i));
 	// System.out.println("type: " + indexFormat.get(i));
       }
     // System.out.println("indexFormat: " + StringUtils.list(indexFormat));
@@ -206,7 +207,7 @@ public class BSPIndex implements Serializable
     int dataLen = 0;
     this.indexOrg = FILEARRAY;
 
-    ArrayList dataFormatList = new ArrayList(10);
+    List<String> dataFormatList = new ArrayList<String>(10);
     for (int i = 1; i < rowLen; i++ )
       {
 	String fieldtype = (String)typeList.get(i);
@@ -339,7 +340,7 @@ public class BSPIndex implements Serializable
    * @param partitionId     partition identifier.
    * @param postingsWriter  postings file writer.
    */
-  private void buildInvertedFile( ArrayList dataFormat, Map aTermMap, String partitionId, 
+  private void buildInvertedFile( List dataFormat, Map aTermMap, String partitionId, 
 				  RunLengthPostingsWriter postingsWriter)
     throws IOException
   {
@@ -396,7 +397,7 @@ public class BSPIndex implements Serializable
       throw new BSPIndexInvalidException("Index is not valid. run method update(), "+ this);
     }
     if ( this.partitionFiles == null ) {
-      this.partitionFiles = new HashMap(4);
+      this.partitionFiles = new HashMap<String,RandomAccessFile>(4);
     }
   }
 

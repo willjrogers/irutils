@@ -18,7 +18,7 @@ public final class MappedFileBinarySearch extends Object
   /**
    *  MappedFile based binary search implementation
    *
-   * @param bsfp       file pointer for binary search table
+   * @param byteBuf    in memory byte buffer
    * @param word       search word
    * @param wordlen    wordlength
    * @param numrecs    number of records in table

@@ -68,7 +68,7 @@ public class InvertedFile implements Serializable
   /** canonical name of Serialized version of object */
   public static String canonicalSerializedName = "InvertedFileInfo.ser";
   /** list of supportted binary formats */
-  static Map binFormats = new HashMap(4);
+  static Map<String,String> binFormats = new HashMap<String,String>(4);
   /** do this once at class instantiation */
   static
    {
@@ -78,10 +78,10 @@ public class InvertedFile implements Serializable
    }
 
   /** hashlist of hash or tree maps for generating new indices. */
-  transient Map hashlist = new HashMap(350, 0.96f);
+  transient Map<String,Map<String,Integer>> hashlist = new HashMap<String,Map<String,Integer>>(350, 0.96f);
 
   /** hashmap of open partition files. */
-  transient Map partitionFiles = new HashMap(5);
+  transient Map<String,Object> partitionFiles = new HashMap<String,Object>(5);
 
   /** postings file */
   transient RandomAccessFile postingsFile;
@@ -105,19 +105,19 @@ public class InvertedFile implements Serializable
   transient String indexParentDirectoryPath;
 
   /** format for data */
-  List indexFormat;
+  List<String> indexFormat;
   
   /** number of words in index */
   int wordnum;
 
   /** number of records in each partition */
-  Map numrecs;
+  Map<String,Integer> numrecs;
 
   /** datalen in dictionary part of each partition */
-  Map dataLength;
+  Map<String,Integer> dataLength;
 
   /** list of key indices (Integer)  used for this index. (default is [0]) */
-  List keyIndices = null;		// if null, key index is zero
+  List<Integer> keyIndices = null;		// if null, key index is zero
 
   /** flag to use Memory Mapped version */
   private static boolean useMappedFile = true;
@@ -136,7 +136,7 @@ public class InvertedFile implements Serializable
    * @param format         table data format
    */
   public InvertedFile(String indexname, String tablefilename, 
-		  String indexParentDir, List format)
+		  String indexParentDir, List<String> format)
   {
     this.indexname = indexname;
     this.tablefilename = tablefilename;
@@ -144,7 +144,7 @@ public class InvertedFile implements Serializable
     this.indexFormat = format;
     List keyList = utils.StringUtils.split((String)format.get(3), ",");
     // convert key indices to Integer.
-    this.keyIndices = new ArrayList();
+    this.keyIndices = new ArrayList<Integer>();
     for (int i = 0; i < keyList.size(); i++) {
       keyIndices.add(new Integer((String)keyList.get(i)));
     }
@@ -164,7 +164,7 @@ public class InvertedFile implements Serializable
     // first element (key) of the record.
     String line;
     String key = null;
-    List lineList;
+    List<String> lineList;
     int i = 0;
     // System.out.println("loading map " + this.indexname );
     TemporaryPostingsPool pool = new TemporaryPostingsPool(this.indexname + "_tposts", "rw");
@@ -172,7 +172,7 @@ public class InvertedFile implements Serializable
       new BufferedReader(new FileReader( this.tablefilename ));
     while ( (line = reader.readLine()) != null )
       {
-	Map bucket;
+	Map<String,Integer> bucket;
 	i++;
 	if (line.trim().length() > 0) {
 	  lineList = utils.StringUtils.split(line, "|");
@@ -194,9 +194,9 @@ public class InvertedFile implements Serializable
 	  }
 	}
 	String keyLength = new Integer (key.length()).toString();
-	bucket = (Map)this.hashlist.get(this.indexname+keyLength);
+	bucket = this.hashlist.get(this.indexname+keyLength);
 	if (bucket == null ) {
-	  bucket = new TreeMap();
+	  bucket = new TreeMap<String,Integer>();
 	  this.hashlist.put(this.indexname+keyLength, bucket);
 	  
 	  /*List postings = new ArrayList();
@@ -242,15 +242,16 @@ public class InvertedFile implements Serializable
     throws BSPIndexCreateException, IOException
   {
     RunLengthPostingsWriter postingsWriter = null;
-    List dictDataFormat = new ArrayList(1);
+    List<String> dictDataFormat = new ArrayList<String>(1);
     int rowLen = Integer.parseInt((String)indexFormat.get(2));
-    List typeList = new ArrayList(rowLen);
-    this.dataLength = new HashMap(5);
-    this.numrecs = new HashMap(5);
+    List<String> typeList = new ArrayList<String>(rowLen);
+
+    this.dataLength = new HashMap<String,Integer>(5);
+    this.numrecs = new HashMap<String,Integer>(5);
     try {
       for (int i = 3 + rowLen, j = 0; i < 4 + rowLen + rowLen; i++, j++)
         {
-          typeList.add(j, indexFormat.get(i));
+          typeList.add(j, this.indexFormat.get(i));
           // System.out.println("type: " + indexFormat.get(i));
         }
     } catch (Exception exception) {
@@ -263,7 +264,7 @@ public class InvertedFile implements Serializable
     // System.out.println("indexFormat: " + StringUtils.list(indexFormat));
     // System.out.println("typeList: " + StringUtils.list(typeList));
     int dataLen = 0;
-    List dataFormatList = new ArrayList(10);
+    List<String> dataFormatList = new ArrayList<String>(10);
     for (int i = 1; i < rowLen; i++ )
       {
         String fieldtype = (String)typeList.get(i);
@@ -363,7 +364,6 @@ public class InvertedFile implements Serializable
     throws IOException
   {
     int nextpost = 0;
-    int numrecs = 0;
     TemporaryPostingsPool pool = new TemporaryPostingsPool(this.indexname + "_tposts", "r");
     DictionaryBinSearchMap intPartition = 
       new DictionaryBinSearchMap ( indexParentDirectoryPath + File.separator +
@@ -418,7 +418,7 @@ public class InvertedFile implements Serializable
 	tablefile.lastModified() > mapfile.lastModified())  {
       if (this.hashlist == null) 
 	{
-	  this.hashlist = new HashMap(5);
+	  this.hashlist = new HashMap<String,Map<String,Integer>>(5);
 	}
       this.load_map();
       this.create();
@@ -439,7 +439,7 @@ public class InvertedFile implements Serializable
       throw new BSPIndexInvalidException("Index is not valid. run method update(), " + this);
     }
     if ( this.partitionFiles == null ) {
-      this.partitionFiles = new HashMap(4);
+      this.partitionFiles = new HashMap<String,Object>(4);
     }
   }
 
@@ -475,7 +475,7 @@ public class InvertedFile implements Serializable
     DictionaryEntry entry;
     String keyLength = new Integer (word.length()).toString();
     String key = this.indexname + keyLength;
-    List postings;
+    List<String> postings;
     // System.out.println("this.partitionFiles: " + this.partitionFiles );
     if (useMappedFile) {
       if ( this.partitionFiles.containsKey(key) ) 
@@ -541,7 +541,7 @@ public class InvertedFile implements Serializable
       }      
       if (loadAllData)
 	{
-	  postings = new ArrayList(count);
+	  postings = new ArrayList<String>(count);
 	  this.postingsByteBuffer.position(address);
 	  for (int i = 0; i < count; i++)
 	    {
@@ -561,7 +561,7 @@ public class InvertedFile implements Serializable
       }
       if (loadAllData)
 	{
-	  postings = new ArrayList(count);
+	  postings = new ArrayList<String>(count);
 	  postingsFile.seek(address);
 	  for (int i = 0; i < count; i++)
 	    {

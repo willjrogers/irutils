@@ -26,10 +26,10 @@ public final class StringUtils extends Object
    * @return List containing substrings or empty list if no strings
    *         were split.
    */
-  public static List split(String textstring, String delimitchars)
+  public static List<String> split(String textstring, String delimitchars)
   {
     StringTokenizer st = new StringTokenizer(textstring, delimitchars, true);
-    List list = new ArrayList((st.countTokens() + 1)/ 2);
+    List<String> list = new ArrayList<String>((st.countTokens() + 1)/ 2);
     String previousToken = "";
     while (st.hasMoreTokens()) 
       {
@@ -102,7 +102,7 @@ public final class StringUtils extends Object
    * @return string joined strings of array list separated by spaces
    *         encapsulated by braces.
    */
-  public static String list(List list)
+  public static String list(List<String> list)
   {
     StringBuffer sb = new StringBuffer();
     Iterator it = list.iterator();
@@ -133,13 +133,14 @@ public final class StringUtils extends Object
    * @return string containing joined strings of array list separated by
    *         joinstring.
    */
-  public static String join(List list, String joinString)
+  public static String join(List<String> list, String joinString)
   {
     StringBuffer sb = new StringBuffer();
     Iterator it = list.iterator();
     while ( it.hasNext() )
       {
 	sb.append(it.next());
+      
 	if (it.hasNext()) sb.append(joinString);
       }
     return sb.toString();
@@ -152,7 +153,7 @@ public final class StringUtils extends Object
       String separator = args[0];
       for (int i = 1; i < args.length; i++)
 	{
-	  List keyIndices = split(args[i], separator);
+	  List<String> keyIndices = split(args[i], separator);
 	  if (debug) {
 	    System.out.println("string : " + args[i] + 
 			       ", separator: " + separator +

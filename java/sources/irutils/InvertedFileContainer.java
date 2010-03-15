@@ -118,10 +118,10 @@ public class InvertedFileContainer {
   int numTables;
 
   /** map of tables and their configurations */
-  HashMap tableMap = new HashMap(3);
+  Map<String,String> tableMap = new HashMap<String,String>(3);
   
   /** map of open indices */
-  HashMap openIndexMap = new HashMap(5);
+  Map<String,InvertedFile> openIndexMap = new HashMap<String,InvertedFile>(5);
 
   /** default constructor for serialization purposes. */
   public InvertedFileContainer()
@@ -210,7 +210,7 @@ public class InvertedFileContainer {
     /** otherwise instantiate index */
     String line = (String)this.tableMap.get(indexname);
     if (line != null) {
-      List formatList = utils.StringUtils.split(line, "|");
+      List<String> formatList = utils.StringUtils.split(line, "|");
       StringBuffer strbuf = new StringBuffer();
       strbuf.append(indexRoot).append(File.separator).append(indexname).append
 	(File.separator).append(InvertedFile.canonicalSerializedName);
