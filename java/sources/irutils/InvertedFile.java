@@ -120,13 +120,14 @@ public class InvertedFile implements Serializable
   List<Integer> keyIndices = null;		// if null, key index is zero
 
   /** flag to use Memory Mapped version */
-  private static boolean useMappedFile = true;
+  private static boolean useMappedFile = false;
   //Boolean.getBoolean(System.getProperty("ifread.mapped","true"));
 
   /** default constructor for serialization purposes only. */
   public InvertedFile()
   {
     // System.out.println("InvertedFile: instantiation");
+      useMappedFile = Boolean.getBoolean(System.getProperty("ifread.mapped","false"));
   }
 
   /** Constructor 
@@ -493,11 +494,11 @@ public class InvertedFile implements Serializable
 	    dictionaryFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
 	  this.partitionFiles.put(key, dictionaryByteBuffer);
 	  dictionaryFileChannel.close();
-      } 
+	} 
       // System.out.println("mapping file");
       entry =
 	MappedFileBinarySearch.dictionaryBinarySearch(dictionaryByteBuffer, word, word.length(), 
-						((Integer)this.numrecs.get(key)).intValue() );
+						      ((Integer)this.numrecs.get(key)).intValue() );
     } else {
       //System.out.println("opening file for random access");
       try {
@@ -535,10 +536,16 @@ public class InvertedFile implements Serializable
 					   File.separator + indexname +
 					   File.separator + "postings"))).getChannel();
 	int sz = (int)postingsFileChannel.size();
-	this.postingsByteBuffer =
-	  postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
-	postingsFileChannel.close();
-      }      
+    System.out.println("mapping buffer of size: " + sz);
+	try {
+	  this.postingsByteBuffer =
+	    postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+	} catch (IOException exception) {
+	  System.err.println("Exception mapping postings buffer of size: " + sz );
+	  throw exception;
+	}
+	// postingsFileChannel.close();
+      }
       if (loadAllData)
 	{
 	  postings = new ArrayList<String>(count);
