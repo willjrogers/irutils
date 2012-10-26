@@ -98,11 +98,11 @@ then use the command:
 ** Dictionary
 
 *** Organization of one dictionary record:
-	  +------------------------+--------------------+-------------------+
-	  | term                   | number of postings |address of postings|
-	  +------------------------+--------------------+-------------------+
-	  |<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
-	  |<-------------------------- record length ---------------------->|
+	+------------------------+--------------------+-------------------+
+	| term                   | number of postings |address of postings|
+	+------------------------+--------------------+-------------------+
+	|<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
+	|<-------------------------- record length ---------------------->|
 
 Term Length, # of postings And addr are the same for all records in a partition.
 
