@@ -1,0 +1,114 @@
+README - readme about IR Utils for different platforms
+
+* Platforms
+
+Java and Tcl are the most mature implementations.  The beginings of C
+and Python versions are there as well.
+
+
+* Building an Index 
+
+** Using irutils.IFBuild
+
+To build the index word_signal in /Users/will/Library/jdindex  from the
+table word_signal.txt in /Users/will/Library/jdtables
+
+If the table word_signal.txt is of the form:
+
+addision|3.145623
+adrenal|2.39843	
+...
+
+
+Then create an ifconfig file in /Users/will/Library/jdtables of the
+form:
+
+NUM_TABLES: 1
+#
+word_signal.txt|word_signal|2|0|word|weight|TXT|INT
+
+
+The format of |ifconfig| is:
+
+  input_file|tablename|num_fields|key fields|fieldname1|...|N|fieldtype1|...|N|
+
+Field Types are:
+
+     TXT  -- data you wish to be accessed as text (or floats)
+     INT  -- data you wish to be accessed as integers
+
+Key Fields: a comma separated list of columns to be used as key,
+             currently must be type TXT
+
+Annotated example of a config entry:
+^<<
+       +-------------------------------------------- input file
+       |	     +------------------------------ tablename
+       |	     |      +----------------------- number of fields
+       |	     |      | +--------------------- key fields
+       |	     |      | |  +------------------ field name         
+       |	     |      | |  |     +------------ field name
+       |	     |      | |  |     |     +------ field type
+       |	     |      | |  |     |     |   +-- field type
+       |	     |      | |  |     |     |   |
+word_signal.txt|word_signal|2|0|word|weight|TXT|INT
+^>>
+
+then use the command:
+
+ $ java -Dindex.path=/Users/will/Library/jdindex \
+       -Dtable.path=/Users/will/Library/jdtables irutils.IFBuild word_signal
+
+
+** IFBuild usage
+
+ usage: irutils.IFBuild <indexname>
+ properties: 
+   -Dindex.path=<directory path> : where path indices resides
+   -Dtable.path=<directory path> : where tables reside
+
+
+
+* building the irutils.jar file (in parent directory)
+
+  $ cd <dist dir>/irutils/java
+  $ javac -d classes source/*/*.java
+  # cd classes
+  $ jar cvf ../irutils.jar irutils/*.class utils/*.class
+
+  or if you have ANT installed:
+
+  $ cd <dist dir>/irutils/java
+  $ ant archive
+
+* building distibution using ant
+
+  $ cd <dist dir>/irutils/java
+  $ ant distrib
+      or
+  $ ant all
+
+* TODO 
+
+1. Build Unit tests for critical sections of classes.
+
+
+* Appendix 1 - Inverted File Organization
+
+** Dictionary
+
+*** Organization of one dictionary record:
+  +------------------------+--------------------+-------------------+
+  | term                   | number of postings |address of postings|
+  +------------------------+--------------------+-------------------+
+  |<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
+  |<-------------------------- record length ---------------------->|
+
+  Term Length, # of postings And addr are the same for all records in a partition.
+
+** Organization of Postings file
+
+TBD
+
+--  
+Will Rogers
