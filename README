@@ -72,7 +72,7 @@ then use the command:
 
 	$ cd <dist dir>/irutils/java
 	$ javac -d classes source/*/*.java
-	# cd classes
+	$ cd classes
 	$ jar cvf ../irutils.jar irutils/*.class utils/*.class
 
   or if you have ANT installed:
@@ -98,11 +98,13 @@ then use the command:
 ** Dictionary
 
 *** Organization of one dictionary record:
+
 	+------------------------+--------------------+-------------------+
 	| term                   | number of postings |address of postings|
 	+------------------------+--------------------+-------------------+
 	|<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
 	|<-------------------------- record length ---------------------->|
+
 
 Term Length, # of postings And addr are the same for all records in a partition.
 
