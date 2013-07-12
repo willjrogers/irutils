@@ -1,6 +1,7 @@
-$Id: README,v 1.14 2002/04/17 17:11:50 wrogers Exp $
+README, Fri Jul 12 10:29:23 2013, edit by Will Rogers
 
-README - readme about java version of IR Utils
+README - Readme about Java version of IR Utils
+Willie Rogers
 
 * Partial Manifest
 
@@ -23,7 +24,7 @@ On unix (csh):
 If you want to try the sample program (irutils.CL):
 
   $ cd <dist dir>/irutils/java
-  $ java -classpath ./irutils.jar irutils.CL
+  $ java -classpath ./lib/irutils.jar irutils.CL
   
 The source to irutils.CL is in <dist dir>/irutils/java/irutils/CL.java
 
@@ -44,6 +45,7 @@ adrenal|2.39843
 
 Then create an ifconfig file in /Users/will/Library/jdtables of the
 form:
+
 NUM_TABLES: 1
 #
 word_signal.txt|word_signal|2|0|word|weight|TXT|INT
@@ -76,37 +78,40 @@ word_signal.txt|word_signal|2|0|word|weight|TXT|INT
 
 then use the command:
 
- $ java -Dindex.path=/Users/will/Library/jdindex \
-        -Dtable.path=/Users/will/Library/jdtables irutils.IFBuild word_signal
+	$ java -Dindex.path=/Users/will/Library/jdindex \
+	       -Dtable.path=/Users/will/Library/jdtables irutils.IFBuild word_signal
 
 
 ** IFBuild usage
 
- usage: irutils.IFBuild <indexname>
- properties: 
-   -Dindex.path=<directory path> : where path indices resides
-   -Dtable.path=<directory path> : where tables reside
+	 usage: irutils.IFBuild <indexname>
+	 properties: 
+	   -Dindex.path=<directory path> : where path indices resides
+	   -Dtable.path=<directory path> : where tables reside
 
+** IFQuery usage
 
+	java -Dindex.path=./jdindex -Dtable.path=./jdtables \
+	       -classpath ./classes  irutils.IFQuery word_signal heart
 
 * building the irutils.jar file (in parent directory)
 
-  $ cd <dist dir>/irutils/java
-  $ javac -d classes source/*/*.java
-  # cd classes
-  $ jar cvf ../irutils.jar irutils/*.class utils/*.class
+	$ cd <dist dir>/irutils/java
+	$ javac -d classes source/*/*.java
+	# cd classes
+	$ jar cvf ../irutils.jar irutils/*.class utils/*.class
 
   or if you have ANT installed:
 
-  $ cd <dist dir>/irutils/java
-  $ ant archive
+	$ cd <dist dir>/irutils/java
+	$ ant archive
 
 * building distibution using ant
 
-  $ cd <dist dir>/irutils/java
-  $ ant distrib
+	$ cd <dist dir>/irutils/java
+	$ ant distrib
       or
-  $ ant all
+	$ ant all
 
 * TODO 
 
@@ -118,13 +123,16 @@ then use the command:
 ** Dictionary
 
 *** Organization of one dictionary record:
-  +------------------------+--------------------+-------------------+
-  | term                   | number of postings |address of postings|
-  +------------------------+--------------------+-------------------+
-  |<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
-  |<-------------------------- record length ---------------------->|
+	+------------------------+--------------------+-------------------+
+	| term                   | number of postings |address of postings|
+	+------------------------+--------------------+-------------------+
+	|<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
+	|<-------------------------- record length ---------------------->|
 
-  Term Length, # of postings And addr are the same for all records in a partition.
+  Term Length, number of bytes representing number of postings and
+  number of bytes containing posting address are the same for all
+  records in a partition.  Term length of elements of each partition
+  is specified by the partition name.
 
 ** Organization of Postings file
 
