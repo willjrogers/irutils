@@ -119,15 +119,23 @@ public class InvertedFile implements Serializable
   /** list of key indices (Integer)  used for this index. (default is [0]) */
   List<Integer> keyIndices = null;		// if null, key index is zero
 
+  /** display informational messages */
+  boolean verbose = 
+    Boolean.parseBoolean(System.getProperty("ifbuild.verbose","false"));
+
   /** flag to use Memory Mapped version */
-  private static boolean useMappedFile = false;
-  //Boolean.getBoolean(System.getProperty("ifread.mapped","true"));
+  private boolean useMappedFile = 
+    Boolean.parseBoolean(System.getProperty("ifread.mapped","false"));
+
+  boolean invfLowerCaseKeys = 
+    Boolean.parseBoolean(System.getProperty("ifbuild.lowercase.keys","false"));
 
   /** default constructor for serialization purposes only. */
   public InvertedFile()
   {
-    // System.out.println("InvertedFile: instantiation");
-      useMappedFile = Boolean.getBoolean(System.getProperty("ifread.mapped","false"));
+    if (this.verbose) {
+      System.out.println("InvertedFile: instantiation");
+    }
   }
 
   /** Constructor 
@@ -167,8 +175,11 @@ public class InvertedFile implements Serializable
     String key = null;
     List<String> lineList;
     int i = 0;
-    // System.out.println("loading map " + this.indexname );
-    TemporaryPostingsPool pool = new TemporaryPostingsPool(this.indexname + "_tposts", "rw");
+    if (this.verbose) {
+       System.out.println("loading map " + this.indexname );
+    }
+    TemporaryPostingsPool pool =
+      new TemporaryPostingsPool(this.indexname + "_tposts", "rw");
     BufferedReader reader = 
       new BufferedReader(new FileReader( this.tablefilename ));
     while ( (line = reader.readLine()) != null )
@@ -181,12 +192,20 @@ public class InvertedFile implements Serializable
 	    if (this.keyIndices == null || 
 		(this.keyIndices.size() == 1 && 
 		 ((Integer)this.keyIndices.get(0)).intValue() == 0)) {
-	      key = (String)lineList.get(0);
+	      if (invfLowerCaseKeys) {
+		key = lineList.get(0).toLowerCase();
+	      } else {
+		key = (String)lineList.get(0);
+	      }
 	    } else {
 	      StringBuffer strBuf = new StringBuffer();
 	      for (int j = 0; j < keyIndices.size(); j++) {
 		int col = ((Integer)keyIndices.get(j)).intValue();
-		strBuf.append((String)lineList.get(col));
+		if (invfLowerCaseKeys) {
+		  strBuf.append(lineList.get(col).toLowerCase());
+		} else {
+		  strBuf.append(lineList.get(col));
+		}
 	      }
 	      key = strBuf.toString();
 	    }
@@ -220,16 +239,22 @@ public class InvertedFile implements Serializable
 	  }
 	}
 	wordnum++;
-	// System.out.println("bucket.put(key: " + key + ", value), " + 
-	// "keylength: " + keyLength + ", bucket size: " + bucket.size());
+	if (this.verbose) {
+	  System.out.println("bucket.put(key: " + key + ", value), " + 
+			     "keylength: " + keyLength + ", bucket size: " + bucket.size());
+	}
       }
     reader.close();
-    // System.out.println("# of input lines: " + i );
-    // System.out.println("# of buckets: " + hashlist.size());
+    if (this.verbose) {
+      System.out.println("# of input lines: " + i );
+      System.out.println("# of buckets: " + hashlist.size());
+    }
     Iterator iter = hashlist.values().iterator();
     while (iter.hasNext()) {
       Map bucket = (Map)iter.next();
-      // System.out.println("bucket, size: " + bucket.size());
+      if (this.verbose) {
+	System.out.println("bucket, size: " + bucket.size());
+      }
     }
     pool.close();
   }
@@ -253,17 +278,21 @@ public class InvertedFile implements Serializable
       for (int i = 3 + rowLen, j = 0; i < 4 + rowLen + rowLen; i++, j++)
         {
           typeList.add(j, this.indexFormat.get(i));
-          // System.out.println("type: " + indexFormat.get(i));
+	  if (this.verbose) {
+	    System.out.println("type: " + indexFormat.get(i));
+	  }
         }
     } catch (Exception exception) {
       exception.printStackTrace(System.err);
       throw new BSPIndexCreateException
         ("configuration file specified data length of " + 
          this.dataLength + 
-         ", but was unable to acess type field, please check configuration file ");
+         ", but was unable to access type field, please check configuration file ");
     }
-    // System.out.println("indexFormat: " + StringUtils.list(indexFormat));
-    // System.out.println("typeList: " + StringUtils.list(typeList));
+    if (this.verbose) {
+      System.out.println("indexFormat: " + utils.StringUtils.list(indexFormat));
+      System.out.println("typeList: " + utils.StringUtils.list(typeList));
+    }
     int dataLen = 0;
     List<String> dataFormatList = new ArrayList<String>(10);
     for (int i = 1; i < rowLen; i++ )
@@ -337,8 +366,9 @@ public class InvertedFile implements Serializable
     rcfp.close();
     // we've gotten this far, assume we have a valid index.
     this.valid = true;
-    // System.out.println("Index info: \n" + this);
-
+    if (this.verbose) {
+      System.out.println("Index info: \n" + this);
+    }
     /* serialize info on object to indexname/<Canonical Serialized Name> */
     FileOutputStream ostream = 
       new FileOutputStream(this.indexParentDirectoryPath + File.separator + this.indexname +
@@ -373,15 +403,22 @@ public class InvertedFile implements Serializable
     Iterator keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
       String termKey = (String)keyIter.next();
+      if (this.verbose) {
+	System.out.println("termKey: " + termKey );
+      }
       /* List postings = (List)aTermMap.get(termKey);*/
       int link = ((Integer)aTermMap.get(termKey)).intValue();
       List postings = pool.getv2(link);
-      System.out.println("postings size: " + postings.size());
+      if (this.verbose) {
+	System.out.println("postings size: " + postings.size());
+      }
       Iterator postingIter = postings.iterator();
       if (postingIter.hasNext()) 
 	{
 	  String dataRecord = (String)postingIter.next();
-	  System.out.println("dataRecord: " + dataRecord);
+	  if (this.verbose) {
+	    System.out.println("dataRecord: " + dataRecord);
+	  }
 	  // write posting
 	  nextpost = postingsWriter.writeString(dataRecord);
 	  while (postingIter.hasNext()) 
@@ -394,9 +431,12 @@ public class InvertedFile implements Serializable
       // write dictionary entry
       intPartition.writeEntry(termKey, postings.size(), nextpost);
     }
-    this.numrecs.put(partitionId, new Integer(intPartition.getNumberOfRecords()));
-    // System.out.println("key: " + key );
-    this.dataLength.put(partitionId, new Integer(4));
+    synchronized (this.numrecs) {
+      this.numrecs.put(partitionId, new Integer(intPartition.getNumberOfRecords()));
+    }
+    synchronized (this.dataLength) {
+      this.dataLength.put(partitionId, new Integer(4));
+    }
     intPartition.close();
     pool.close();
   }
@@ -411,10 +451,14 @@ public class InvertedFile implements Serializable
     throws IOException, BSPIndexCreateException
   {
     String indexDir = this.indexParentDirectoryPath + File.separator + this.indexname;
-    // System.out.println("updating index: " + this.indexname );
+    if (this.verbose) {
+      System.out.println("updating index: " + this.indexname );
+    }
     File tablefile = new File(this.tablefilename);
     File mapfile = new File(indexDir);
-    // System.out.println("mapfile.exists(): " + mapfile.exists());
+    if (this.verbose) {
+      System.out.println("mapfile.exists(): " + mapfile.exists());
+    }
     if (mapfile.exists() == false ||
 	tablefile.lastModified() > mapfile.lastModified())  {
       if (this.hashlist == null) 
@@ -477,7 +521,9 @@ public class InvertedFile implements Serializable
     String keyLength = new Integer (word.length()).toString();
     String key = this.indexname + keyLength;
     List<String> postings;
-    // System.out.println("this.partitionFiles: " + this.partitionFiles );
+    if (this.verbose) {
+      System.out.println("this.partitionFiles: " + this.partitionFiles );
+    }
     if (useMappedFile) {
       if ( this.partitionFiles.containsKey(key) ) 
 	{
@@ -495,12 +541,16 @@ public class InvertedFile implements Serializable
 	  this.partitionFiles.put(key, dictionaryByteBuffer);
 	  dictionaryFileChannel.close();
 	} 
-      // System.out.println("mapping file");
+      if (this.verbose) {
+	System.out.println("mapping file");
+      }
       entry =
 	MappedFileBinarySearch.dictionaryBinarySearch(dictionaryByteBuffer, word, word.length(), 
 						      ((Integer)this.numrecs.get(key)).intValue() );
     } else {
-      //System.out.println("opening file for random access");
+      if (this.verbose) {
+	System.out.println("opening file for random access");
+      }
       try {
 	if ( this.partitionFiles.containsKey(key) ) 
 	  {
@@ -526,9 +576,10 @@ public class InvertedFile implements Serializable
     }
     int count = entry.getNumberOfPostings();
     int address = entry.getAddress();
-    // System.out.println("postings count : " + count);
-    // System.out.println("address : " + address);
-    
+    if (this.verbose) {
+      System.out.println("postings count : " + count);
+      System.out.println("address : " + address);
+    }
     if (useMappedFile) {
       if ( this.postingsByteBuffer == null ) {
 	FileChannel postingsFileChannel = 
@@ -536,7 +587,9 @@ public class InvertedFile implements Serializable
 					   File.separator + indexname +
 					   File.separator + "postings"))).getChannel();
 	int sz = (int)postingsFileChannel.size();
-    System.out.println("mapping buffer of size: " + sz);
+	if (this.verbose) {
+	  System.out.println("mapping buffer of size: " + sz);
+	}
 	try {
 	  this.postingsByteBuffer =
 	    postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
@@ -573,13 +626,17 @@ public class InvertedFile implements Serializable
 	  for (int i = 0; i < count; i++)
 	    {
 	      int postingsLen = postingsFile.readInt();
-	      // System.out.println("postingsLen : " + postingsLen);
+	      	if (this.verbose) {
+		   System.out.println("postingsLen : " + postingsLen);
+		}
 	      byte[] databuf = new byte[postingsLen];
 	      postingsFile.read(databuf);
 	      postings.add(new String(databuf));
 	    }
 	} else {
-	// System.out.println("postingsFile: " + postingsFile);
+	if (this.verbose) {
+	  System.out.println("postingsFile: " + postingsFile);
+	}
 	postings = new PostingsList(postingsFile, address, count);
       }
     }
