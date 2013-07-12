@@ -29,8 +29,6 @@ public class IFQuery {
     java.io.IOException, BSPIndexCreateException, BSPIndexInvalidException, 
     ClassNotFoundException
   {
-
-    String words[] = { };	// empty array
     String indexPath = 
       System.getProperty("index.path", 
 			 "/home/wrogers/devel/exper/irutils/java/indices");
@@ -68,18 +66,16 @@ public class IFQuery {
     // setup index for retrieval.
     index.setup();
 
-    words = new String[args.length - 1];
+    StringBuffer wordsb = new StringBuffer();
     for (int i = 1; i < args.length; i++) {
-      words[i-1] = args[i];
+      wordsb.append(args[i]).append(" ");
     }
 
-    for (int i = 0; i < words.length; i++) {
-      // lookup each term in index.
-      BSPTuple result = index.lookup(words[i]);
-      List list = (List)result.getValue();
-      for (Iterator j = list.iterator(); j.hasNext(); ) {
-	System.out.println(j.next());
-      }
+    // lookup term in index.
+    BSPTuple result = index.lookup(wordsb.toString().trim());
+    List list = (List)result.getValue();
+    for (Iterator j = list.iterator(); j.hasNext(); ) {
+      System.out.println(j.next());
     }
     index.release();
   }
