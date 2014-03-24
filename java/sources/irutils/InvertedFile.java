@@ -120,8 +120,8 @@ public class InvertedFile implements Serializable
   List<Integer> keyIndices = null;		// if null, key index is zero
 
   /** display informational messages */
-  boolean verbose = 
-    Boolean.parseBoolean(System.getProperty("ifbuild.verbose","false"));
+  private boolean verbose =
+    Boolean.getBoolean(System.getProperty("ifbuild.verbose","false"));
 
   /** flag to use Memory Mapped version */
   private boolean useMappedFile = 
@@ -134,6 +134,7 @@ public class InvertedFile implements Serializable
   public InvertedFile()
   {
     if (this.verbose) {
+      System.out.println("verbose mode is " + this.verbose);
       System.out.println("InvertedFile: instantiation");
     }
   }
@@ -505,25 +506,32 @@ public class InvertedFile implements Serializable
   /**
    * Look up word in index, return corresponding key and value pair if
    * found, null if otherwise.
-   * @param word word to lookup in index.
+   * @param targetWord word to lookup in index.
    * @param loadAllData if true then load all the data.
    * @return tuple containing key/value pair, null if key not found.
    * @exception FileNotFoundException if an error occurs
    * @exception IOException if an error occurs
    */
-  public BSPTuple lookup(String word, boolean loadAllData)
+  public BSPTuple lookup(String targetWord, boolean loadAllData)
     throws FileNotFoundException, IOException
   {
     RandomAccessFile dictionaryRAFFile;
     MappedByteBuffer dictionaryByteBuffer;
     File dictionaryFile;
     DictionaryEntry entry;
+    String word;
+    if (this.invfLowerCaseKeys) {
+      word = targetWord.toLowerCase();
+    } else {
+      word = targetWord;
+    }
     String keyLength = new Integer (word.length()).toString();
     String key = this.indexname + keyLength;
     List<String> postings;
-    if (this.verbose) {
-      System.out.println("this.partitionFiles: " + this.partitionFiles );
-    }
+    // if (this.verbose) {
+    //   System.out.println("lookup(): verbose mode is " + this.verbose);
+    //   System.out.println("lookup(): this.partitionFiles: " + this.partitionFiles );
+    // }
     if (useMappedFile) {
       if ( this.partitionFiles.containsKey(key) ) 
 	{
@@ -548,9 +556,9 @@ public class InvertedFile implements Serializable
 	MappedFileBinarySearch.dictionaryBinarySearch(dictionaryByteBuffer, word, word.length(), 
 						      ((Integer)this.numrecs.get(key)).intValue() );
     } else {
-      if (this.verbose) {
-	System.out.println("opening file for random access");
-      }
+      // if (this.verbose) {
+      // 	System.out.println("lookup(): opening file for random access");
+      // }
       try {
 	if ( this.partitionFiles.containsKey(key) ) 
 	  {
@@ -576,10 +584,10 @@ public class InvertedFile implements Serializable
     }
     int count = entry.getNumberOfPostings();
     int address = entry.getAddress();
-    if (this.verbose) {
-      System.out.println("postings count : " + count);
-      System.out.println("address : " + address);
-    }
+    // if (this.verbose) {
+    //   System.out.println("lookup(): postings count : " + count);
+    //   System.out.println("lookup(): address : " + address);
+    // }
     if (useMappedFile) {
       if ( this.postingsByteBuffer == null ) {
 	FileChannel postingsFileChannel = 
@@ -588,7 +596,7 @@ public class InvertedFile implements Serializable
 					   File.separator + "postings"))).getChannel();
 	int sz = (int)postingsFileChannel.size();
 	if (this.verbose) {
-	  System.out.println("mapping buffer of size: " + sz);
+	  System.out.println("lookup(): mapping buffer of size: " + sz);
 	}
 	try {
 	  this.postingsByteBuffer =
@@ -626,16 +634,16 @@ public class InvertedFile implements Serializable
 	  for (int i = 0; i < count; i++)
 	    {
 	      int postingsLen = postingsFile.readInt();
-	      	if (this.verbose) {
-		   System.out.println("postingsLen : " + postingsLen);
-		}
+	      // if (this.verbose) {
+	      // 	System.out.println("lookup(): postingsLen : " + postingsLen);
+	      // }
 	      byte[] databuf = new byte[postingsLen];
 	      postingsFile.read(databuf);
 	      postings.add(new String(databuf));
 	    }
 	} else {
 	if (this.verbose) {
-	  System.out.println("postingsFile: " + postingsFile);
+	  System.out.println("lookup(): postingsFile: " + postingsFile);
 	}
 	postings = new PostingsList(postingsFile, address, count);
       }
@@ -714,6 +722,18 @@ public class InvertedFile implements Serializable
       throw new java.lang.RuntimeException(exception.getMessage());
     }
     super.finalize();
+  }
+
+  public String getIndexName() {
+    return this.indexname;
+  }
+
+  public void setUseMappedFile(boolean state) {
+    this.useMappedFile = state;
+  }
+
+  public void setInvfLowerCaseKeys(boolean state) {
+    this.invfLowerCaseKeys = state;
   }
 
   /**
