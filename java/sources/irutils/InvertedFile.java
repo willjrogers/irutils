@@ -78,7 +78,8 @@ public class InvertedFile implements Serializable
    }
 
   /** hashlist of hash or tree maps for generating new indices. */
-  transient Map<String,Map<String,Integer>> hashlist = new HashMap<String,Map<String,Integer>>(350, 0.96f);
+  // transient Map<String,Map<String,Integer>> hashlist = new HashMap<String,Map<String,Integer>>(350, 0.96f);
+  transient Map<String,Map<String,Integer>> hashlist = new TreeMap<String,Map<String,Integer>>();
 
   /** hashmap of open partition files. */
   transient Map<String,Object> partitionFiles = new HashMap<String,Object>(5);
