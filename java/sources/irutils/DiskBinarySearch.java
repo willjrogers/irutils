@@ -241,6 +241,7 @@ public final class DiskBinarySearch extends Object
             }
         }
     } else {
+      System.err.println("Integer data array too small not modifying array and returning null!");
       System.out.println("Integer data array too small not modifying array and returning null!");
     }
     return null;
