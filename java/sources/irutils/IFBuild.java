@@ -58,7 +58,9 @@ public class IFBuild {
     InvertedFile index = container.get(indexname);
     if (index == null)
       {
-	System.err.println("error creating index for " + indexname);
+	System.err.println("error creating index for " + indexname + ".");
+	System.err.println("missing entry in config file: ifconfig for " + 
+			   indexname + ".");
 	System.exit(1);
       }
     if (IFBuild.verbose)
