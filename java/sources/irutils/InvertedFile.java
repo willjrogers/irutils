@@ -583,8 +583,8 @@ public class InvertedFile implements Serializable
     if (entry == null) {
       return new BSPTuple(word, new ArrayList(0)); // entry not found, return an empty list
     }
-    int count = entry.getNumberOfPostings();
-    int address = entry.getAddress();
+    long count = entry.getNumberOfPostings();
+    long address = entry.getAddress();
     // if (this.verbose) {
     //   System.out.println("lookup(): postings count : " + count);
     //   System.out.println("lookup(): address : " + address);
@@ -610,8 +610,8 @@ public class InvertedFile implements Serializable
       }
       if (loadAllData)
 	{
-	  postings = new ArrayList<String>(count);
-	  this.postingsByteBuffer.position(address);
+	  postings = new ArrayList<String>((int)count);
+	  this.postingsByteBuffer.position((int)address);
 	  for (int i = 0; i < count; i++)
 	    {
 	      int postingsLen = this.postingsByteBuffer.getInt();
@@ -620,7 +620,7 @@ public class InvertedFile implements Serializable
 	      postings.add(new String(databuf));
 	    }
 	} else {
-	postings = new MappedPostingsList(this.postingsByteBuffer, address, count);
+	postings = new MappedPostingsList(this.postingsByteBuffer, (int)address, (int)count);
       }
     } else {
       if ( this.postingsFile == null ) {
@@ -630,7 +630,7 @@ public class InvertedFile implements Serializable
       }
       if (loadAllData)
 	{
-	  postings = new ArrayList<String>(count);
+	  postings = new ArrayList<String>((int)count);
 	  postingsFile.seek(address);
 	  for (int i = 0; i < count; i++)
 	    {
@@ -646,7 +646,7 @@ public class InvertedFile implements Serializable
 	if (this.verbose) {
 	  System.out.println("lookup(): postingsFile: " + postingsFile);
 	}
-	postings = new PostingsList(postingsFile, address, count);
+	postings = new PostingsList(postingsFile, address, (int)count);
       }
     }
     return new BSPTuple(word, postings );

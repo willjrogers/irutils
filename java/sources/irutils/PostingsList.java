@@ -17,12 +17,12 @@ import java.io.*;
 public class PostingsList extends AbstractList implements List {
 
   /** offset in file to beginning of postings list */
-  private int address;
+  private long address;
   /** number of postings in list */
   private int count;
   /** absolute offset (addresses) in postings file of postings in this
    * list. */
-  private int[] offsets;
+  private long[] offsets;
   /** byte lengths of of postings in this list */
   private int[] lengths;
   /** random access file object for postings file */
@@ -34,16 +34,16 @@ public class PostingsList extends AbstractList implements List {
    * @param postingsAddress offset in file to beginning of postings list
    * @param postingsCount number of postings in list
    */
-  public PostingsList (RandomAccessFile postingsFile, int postingsAddress, int postingsCount)
+  public PostingsList (RandomAccessFile postingsFile, long postingsAddress, int postingsCount)
     throws IOException
   {
     this.address = postingsAddress;
     this.count = postingsCount;
     this.file = postingsFile;
     // System.out.println("this.file: " + this.file);
-    this.offsets = new int[postingsCount];
+    this.offsets = new long[postingsCount];
     this.lengths = new int[postingsCount];
-    postingsFile.seek(this.address); int offset = this.address;
+    postingsFile.seek(this.address); long offset = this.address;
     for (int i = 0; i < count; i++)
       {
 	this.offsets[i] = offset;
@@ -164,19 +164,19 @@ public class PostingsList extends AbstractList implements List {
   private class PostingsListIterator implements Iterator, ListIterator
     {
       /** offset in file to beginning of postings list */
-      int address;
+      long address;
       /** number of postings in list */
       int count;
       /** current index in postings */
       int index = 0;
       /** absolute offset (addresses) in postings file of postings in this
        * list. */
-      int[] offsets;
+      long[] offsets;
       /** random access file object for postings file */
       RandomAccessFile file;
 
       public PostingsListIterator(RandomAccessFile file, 
-				  int address, int count, int offsets[])
+				  long address, int count, long offsets[])
 	throws IOException
       {
 	this.count = count;
@@ -186,7 +186,7 @@ public class PostingsList extends AbstractList implements List {
 	file.seek(address);
       }
       public PostingsListIterator(RandomAccessFile file, 
-				  int address, int count, int offsets[],
+				  long address, int count, long offsets[],
 				  int index)
 	throws IOException
       {

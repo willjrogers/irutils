@@ -62,10 +62,15 @@ public class MappedPostingsList extends AbstractList implements List {
   {
     return this.count;
   }
+    @Override
   public void     add(int index, Object element) {  }
+    @Override
   public boolean  add(Object o)  { return false; }
+    @Override
   public boolean  addAll(int index, Collection c) { return false; }
+    @Override
   public void     clear() {}
+    @Override
   public boolean  equals(Object o) { return false; }
   /** 
    * get posting at index. 
@@ -84,13 +89,16 @@ public class MappedPostingsList extends AbstractList implements List {
       return null;
     }
   } 
+    @Override
   public int      hashCode() { return 0; }
+    @Override
   public int      indexOf(Object o) { return 0;}
 
   /** 
    * get an iterator over the current posting list.
    * @return iterator over postings list.
    */
+    @Override
   public Iterator iterator()
   { 
     try {
@@ -100,12 +108,14 @@ public class MappedPostingsList extends AbstractList implements List {
       return null; 
     } 
   }
+    @Override
   public int      lastIndexOf(Object o) { return 0;  }
 
   /** 
    * get an list iterator over the current posting list.
    * @return list iterator over postings.
    */
+    @Override
   public ListIterator    listIterator() 
   {
     try {
@@ -122,6 +132,7 @@ public class MappedPostingsList extends AbstractList implements List {
    * @param index index to start iterating at.
    * @return list iterator over postings.
    */
+    @Override
   public ListIterator    listIterator(int index) { 
     try {
       return new MappedPostingsListIterator(this.buffer, 
@@ -133,19 +144,23 @@ public class MappedPostingsList extends AbstractList implements List {
       return null; 
     } 
   }
+    @Override
   public Object	 remove(int index) {
     // not implemented
     return get(index); 
   }
+    @Override
   protected void removeRange(int fromIndex, int toIndex) 
   {
     // not implemented
   }
+    @Override
   public Object	  set(int index, Object element) 
   {
     // not implemented
     return null;
   }
+    @Override
   public List	   subList(int fromIndex, int toIndex) 
   { 
     try {
