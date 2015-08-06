@@ -13,25 +13,29 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
+
+import java.nio.MappedByteBuffer;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import irutils.MultiKeyIndex.Record;
+
 
 /**
  * 
  */
 
-public class MultiKeyIndexLookup {
+public class MappedMultiKeyIndexLookup {
 
-  MultiKeyIndex index;
+  MappedMultiKeyIndex index;
 
-  public MultiKeyIndexLookup(String indexDirectoryName)
-    throws FileNotFoundException
+  public MappedMultiKeyIndexLookup(String indexDirectoryName)
+    throws FileNotFoundException, IOException
   {
-    this.index = new MultiKeyIndex(indexDirectoryName);
+    this.index = new MappedMultiKeyIndex(indexDirectoryName);
   }
 
-  public MultiKeyIndexLookup(MultiKeyIndex index) {
+  public MappedMultiKeyIndexLookup(MappedMultiKeyIndex index) {
     this.index = index;
   }
 
@@ -42,23 +46,20 @@ public class MultiKeyIndexLookup {
     String termLengthString = Integer.toString(term.length());
     String columnString = Integer.toString(column);
 
-    RandomAccessFile termDictionaryRaf = this.index.openTermDictionaryFile(columnString, termLengthString);
-    RandomAccessFile extentsRaf = this.index.openExtentsFile(columnString, termLengthString);
-    RandomAccessFile postingsRaf = this.index.getPostingsFile();
+    MappedByteBuffer termDictionaryRaf = this.index.openTermDictionaryFile(columnString, termLengthString);
+    MappedByteBuffer extentsRaf = this.index.openExtentsFile(columnString, termLengthString);
+    MappedByteBuffer postingsRaf = this.index.getPostingsFile();
     Map<String,String> statsMap = this.index.readStatsFile(columnString, termLengthString);
 
     int datalength = Integer.parseInt(statsMap.get("datalength"));
     int recordnum = Integer.parseInt(statsMap.get("recordnum"));
     
     DictionaryEntry entry = 
-      MultiKeyIndex.dictionaryBinarySearch(termDictionaryRaf, term.toLowerCase(), 
+      MappedMultiKeyIndex.dictionaryBinarySearch(termDictionaryRaf, term.toLowerCase(), 
 					   term.length(), datalength, recordnum );
     if (entry != null) {
-      MultiKeyIndex.readPostings(extentsRaf, postingsRaf, resultList, entry);
-    }
-    termDictionaryRaf.close();
-    extentsRaf.close();
-    postingsRaf.close();
+      MappedMultiKeyIndex.readPostings(extentsRaf, postingsRaf, resultList, entry);
+    } 
     return resultList;
   }
 
@@ -91,8 +92,8 @@ public class MultiKeyIndexLookup {
 	System.out.println("indexname: " + indexName);
 	System.out.println("column: " + column);
 	System.out.println("term: " + term);
-	MultiKeyIndex index = new MultiKeyIndex(workingDir, indexName);
-	MultiKeyIndexLookup instance = new MultiKeyIndexLookup(index);
+	MappedMultiKeyIndex index = new MappedMultiKeyIndex(workingDir, indexName);
+	MappedMultiKeyIndexLookup instance = new MappedMultiKeyIndexLookup(index);
 	List<String> resultList = instance.lookup( term, Integer.parseInt(column));
 	for (String result: resultList) {
 	  System.out.println(result);

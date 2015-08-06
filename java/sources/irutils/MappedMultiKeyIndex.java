@@ -9,12 +9,17 @@ import java.util.Map.Entry;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
+
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -22,44 +27,56 @@ import java.security.NoSuchAlgorithmException;
  * 
  */
 
-public class MultiKeyIndex {
+public class MappedMultiKeyIndex {
 
   String indexname;
   String indexDirectoryName;
-  RandomAccessFile postingsRaf;
+  MappedByteBuffer postingsByteBuffer;
   /** random access file name cache as Map, filename -> random access file. */
-  Map<String,RandomAccessFile> rafCache = new HashMap<String,RandomAccessFile>(); 
+  Map<String,MappedByteBuffer> byteBufCache = new HashMap<String,MappedByteBuffer>(); 
   /** map of stats maps for each partition, partitionName -> StatsMap */
   Map<String,Map<String,String>> MapOfStatMaps = new HashMap<String,Map<String,String>>();
 
-  public MultiKeyIndex(String indexDirectoryName)
-    throws FileNotFoundException
+  public MappedMultiKeyIndex(String indexDirectoryName)
+    throws FileNotFoundException, IOException
   {
     this.indexDirectoryName = indexDirectoryName;
     String[] fields = indexDirectoryName.split("/");
     this.indexname = fields[fields.length - 1];
-    this.postingsRaf = 
-      new RandomAccessFile(indexDirectoryName + "/postings", "r");
+
+    FileChannel postingsFileChannel = 
+	(new FileInputStream(new File (indexDirectoryName + "/postings"))).getChannel();
+      int sz = (int)postingsFileChannel.size();
+      this.postingsByteBuffer = 
+	postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
   }
 
-  public MultiKeyIndex(String workingDirectoryName, String indexname)
-    throws FileNotFoundException
+  public MappedMultiKeyIndex(String workingDirectoryName, String indexname)
+    throws FileNotFoundException, IOException
   {
     this.indexDirectoryName = workingDirectoryName +  "/indices/" + indexname ;
     this.indexname = indexname;
-    this.postingsRaf = 
-      new RandomAccessFile(this.indexDirectoryName + "/postings", "r");
+
+    FileChannel postingsFileChannel = 
+	(new FileInputStream(new File (indexDirectoryName + "/postings"))).getChannel();
+      int sz = (int)postingsFileChannel.size();
+      this.postingsByteBuffer = 
+	postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
   }
 
-  public RandomAccessFile openRandomAccessFile(String filename) 
-    throws FileNotFoundException
+  public MappedByteBuffer openMappedByteBuffer(String filename) 
+    throws FileNotFoundException, IOException
   {
-    if (rafCache.containsKey(filename)) {
-      return rafCache.get(filename);
+    if (byteBufCache.containsKey(filename)) {
+      return byteBufCache.get(filename);
     } else {
-      RandomAccessFile raf = new RandomAccessFile(filename, "r");
-      rafCache.put(filename, raf);
-      return raf;
+      FileChannel fileChannel = 
+	(new FileInputStream(new File (filename))).getChannel();
+      int sz = (int)fileChannel.size();
+      MappedByteBuffer byteBuffer = 
+	fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+      byteBufCache.put(filename, byteBuffer);
+      return byteBuffer;
     }
   }
 
@@ -89,24 +106,24 @@ public class MultiKeyIndex {
   }
 
 
-  public RandomAccessFile openTermDictionaryFile(String columnString, String termLengthString)
+  public MappedByteBuffer openTermDictionaryFile(String columnString, String termLengthString)
     throws IOException
   {
-    return openRandomAccessFile(partitionPath
+    return openMappedByteBuffer(partitionPath
 				(this.indexDirectoryName,
 				 columnString, termLengthString, "-term-dictionary"));
   }
 
-  public RandomAccessFile openExtentsFile(String columnString, String termLengthString)
+  public MappedByteBuffer openExtentsFile(String columnString, String termLengthString)
     throws IOException
   {
-    return openRandomAccessFile(partitionPath
+    return openMappedByteBuffer(partitionPath
 				(this.indexDirectoryName,
 				 columnString, termLengthString, "-postings-offsets"));
   }
 
-  public RandomAccessFile getPostingsFile() {
-    return this.postingsRaf;
+  public MappedByteBuffer getPostingsFile() {
+    return this.postingsByteBuffer;
   }
  
   public Map<String,String> readStatsFile(String columnString, String termLengthString)
@@ -124,9 +141,9 @@ public class MultiKeyIndex {
     String termLengthString = Integer.toString(term.length());
     String columnString = Integer.toString(column);
 
-    RandomAccessFile termDictionaryRaf = this.openTermDictionaryFile(columnString, termLengthString);
-    RandomAccessFile extentsRaf = this.openExtentsFile(columnString, termLengthString);
-    RandomAccessFile postingsRaf = this.getPostingsFile();
+    MappedByteBuffer termDictionaryRaf = this.openTermDictionaryFile(columnString, termLengthString);
+    MappedByteBuffer extentsRaf = this.openExtentsFile(columnString, termLengthString);
+    MappedByteBuffer postingsRaf = this.getPostingsFile();
     Map<String,String> statsMap = this.readStatsFile(columnString, termLengthString);
 
     int datalength = Integer.parseInt(statsMap.get("datalength"));
@@ -137,19 +154,9 @@ public class MultiKeyIndex {
 					   term.length(), datalength, recordnum );
     if (entry != null) {
       readPostings(extentsRaf, postingsRaf, resultList, entry);
-    } else {
-      resultList.add("\"" + term + "\" entry is " + entry);
-    }
-    termDictionaryRaf.close();
-    extentsRaf.close();
-    postingsRaf.close();
+    } 
     return resultList;
   }
-
-
-
-
-
 
   public static String sha1(String input) throws NoSuchAlgorithmException {
     MessageDigest mDigest = MessageDigest.getInstance("SHA1");
@@ -220,7 +227,7 @@ public class MultiKeyIndex {
    * @return long containing address of posting, -1 if not found.
    */
   public static DictionaryEntry
-    dictionaryBinarySearch(RandomAccessFile bsfp, String word, 
+    dictionaryBinarySearch(MappedByteBuffer bsfp, String word, 
 			   int wordlen, long datalen, long numrecs)
     throws IOException
   {
@@ -235,8 +242,8 @@ public class MultiKeyIndex {
     while ( low < high )
       {
 	mid = low + (high- low) / 2;
-	bsfp.seek(mid * (wordlen+datalen));
-	bsfp.read(wordbuf);
+	bsfp.position((int)(mid * (wordlen+datalen)));
+	bsfp.get(wordbuf);
 	tstword = new String(wordbuf);
 	// System.out.println("index: " + mid + ", address: " + (mid * (wordlen+datalen)) + ", tstword: " + tstword + ", word: " + word);
 	cond = word.compareTo(tstword);
@@ -245,8 +252,8 @@ public class MultiKeyIndex {
 	} else if (cond > 0) {
 	  low = mid + 1;
 	} else {
-	  long count = bsfp.readLong();
-	  long address = bsfp.readLong();
+	  long count = bsfp.getLong();
+	  long address = bsfp.getLong();
 	  return new DictionaryEntry(tstword, count, address);
 	}
       }
@@ -267,17 +274,17 @@ public class MultiKeyIndex {
     return newMap;
   }
 
-  public static void readPostings(RandomAccessFile extentsRaf, RandomAccessFile postingsRaf, 
+  public static void readPostings(MappedByteBuffer extentsRaf, MappedByteBuffer postingsRaf, 
 			   List<String> newList, DictionaryEntry entry) 
     throws IOException
   {
-    extentsRaf.seek(entry.getAddress());
+    extentsRaf.position((int)entry.getAddress());
     for (int i = 0; i < entry.getNumberOfPostings(); i++) {
-      long offset = extentsRaf.readLong();
-      long length = extentsRaf.readLong();
+      long offset = extentsRaf.getLong();
+      long length = extentsRaf.getLong();
       byte[] buf = new byte[(int)length];
-      postingsRaf.seek(offset);
-      postingsRaf.read(buf);
+      postingsRaf.position((int)offset);
+      postingsRaf.get(buf);
       newList.add(new String(buf));
     }
   }

@@ -180,7 +180,7 @@ public class MultiKeyIndexGeneration {
   }
 
 
-  public List<String> lookup(String workingDir, String indexname, int column, String term)
+  public List<String> lookup(String workingDir, String indexname,  String term, int column)
     throws IOException, FileNotFoundException
   {
     List<String> resultList = new ArrayList<String>();
@@ -207,15 +207,28 @@ public class MultiKeyIndexGeneration {
       MultiKeyIndex.dictionaryBinarySearch(termDictionaryRaf, term, 
 			     term.length(), datalength, recordnum );
     if (entry != null) {
-      resultList.add(entry.toString());
       MultiKeyIndex.readPostings(extentsRaf, postingsRaf, resultList, entry);
-    } else {
-      resultList.add("\"" + term + "\" entry is " + entry);
     }
     termDictionaryRaf.close();
     extentsRaf.close();
     postingsRaf.close();
     return resultList;
+  }
+
+  public static String renderColumns(int[] columns) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("[");
+    sb.append(columns[0]);
+    for (int i = 1; i<columns.length; i++) {
+      sb.append(",").append(columns[i]);
+    }
+    sb.append("]");
+    return sb.toString();
+  }
+
+  public static void usage() {
+    System.out.println("Usage: build workingdir indexname");
+    System.out.println("       lookup workingdir indexname term");
   }
 
   /**
@@ -228,15 +241,13 @@ public class MultiKeyIndexGeneration {
   public static void main(String[] args)
     throws FileNotFoundException, IOException, NoSuchAlgorithmException
   {
-    if (args.length > 4) {
+    if (args.length > 2) {
       String option = args[0];
       String workingDir = args[1];
       String indexName = args[2];
-      String column = args[3];
       System.out.println("option: " + option);
       System.out.println("workingDir: " + workingDir);
       System.out.println("indexname: " + indexName);
-      System.out.println("column: " + column);
 
       Map<String,String []> tableConfig = Config.loadConfig(workingDir + "/tables/ifconfig");
       String[] tableFields = tableConfig.get(indexName);
@@ -252,7 +263,7 @@ public class MultiKeyIndexGeneration {
 	  System.out.println("loading table for " + indexName + " from file: " + tableFilename + ".");
 	  List<MultiKeyIndex.Record> recordTable = MultiKeyIndex.loadTable(workingDir + "/tables/" + tableFilename);
 	  MultiKeyIndexGeneration instance = new MultiKeyIndexGeneration();
-	  System.out.println("Generating maps for columns " + columns ); 
+	  System.out.println("Generating maps for columns " + renderColumns(columns) ); 
 	  instance.generateMaps(recordTable, columns);
 	  Map<String,Extent> digestExtentMap = instance.writePostings(workingDir, indexName);
 	  instance.writePartitions(workingDir, indexName, digestExtentMap);
@@ -260,23 +271,30 @@ public class MultiKeyIndexGeneration {
 	  System.out.println("table entry for index " + indexName + " is not present in configuration file: ifconfig.");
 	}
       } else if (option.equals("lookup")) {
-	StringBuilder termBuf = new StringBuilder();
-	for (int i = 4; i < args.length; i++) {
-	  termBuf.append(args[i]).append(" ");
+	if (args.length > 5) {
+	  String column = args[3];
+	  System.out.println("column: " + column);
+	  StringBuilder termBuf = new StringBuilder();
+	  for (int i = 4; i < args.length; i++) {
+	    termBuf.append(args[i]).append(" ");
+	  }
+	  String term = termBuf.toString().trim();
+	  System.out.println("term: " + term);
+	  MultiKeyIndexGeneration instance = new MultiKeyIndexGeneration();
+	  List<String> resultList = instance.lookup(workingDir, indexName, term.toLowerCase(), Integer.parseInt(column));
+	  for (String result: resultList) {
+	    System.out.println(result);
+	  }
+	} else {
+	  System.out.println("missing arguments for lookup.");
+	  usage();
 	}
-	String term = termBuf.toString().trim();
-	System.out.println("term: " + term);
-	MultiKeyIndexGeneration instance = new MultiKeyIndexGeneration();
-	List<String> resultList = instance.lookup(workingDir, indexName, Integer.parseInt(column), term);
-	for (String result: resultList) {
-	  System.out.println(result);
-	}
-	
       } else {
 	System.out.println("Unknown option.");
-	System.out.println("Usage: build workingdir indexname");
-	System.out.println("       lookup workingdir indexname term");
+	usage();
       }
+    } else {
+      usage();
     }
   }
 }
