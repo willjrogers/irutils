@@ -1,5 +1,3 @@
-
-//
 package irutils;
 
 import java.util.List;
@@ -31,11 +29,15 @@ public class MappedMultiKeyIndex {
 
   String indexname;
   String indexDirectoryName;
-  MappedByteBuffer postingsByteBuffer;
+  MappedByteBuffer postingsRaf = null;
   /** random access file name cache as Map, filename -> random access file. */
   Map<String,MappedByteBuffer> byteBufCache = new HashMap<String,MappedByteBuffer>(); 
+  /** map of term dictionary byte buffers for each partition, partitionName -> StatsMap */
+  Map<String,MappedByteBuffer> mapOfTermDictionaryRafs = new HashMap<String,MappedByteBuffer>();
+  /** map of extents byte buffers for each partition, partitionName -> StatsMap */
+  Map<String,MappedByteBuffer> mapOfExtentsRafs = new HashMap<String,MappedByteBuffer>();
   /** map of stats maps for each partition, partitionName -> StatsMap */
-  Map<String,Map<String,String>> MapOfStatMaps = new HashMap<String,Map<String,String>>();
+  Map<String,Map<String,String>> mapOfStatMaps = new HashMap<String,Map<String,String>>();
 
   public MappedMultiKeyIndex(String indexDirectoryName)
     throws FileNotFoundException, IOException
@@ -43,12 +45,13 @@ public class MappedMultiKeyIndex {
     this.indexDirectoryName = indexDirectoryName;
     String[] fields = indexDirectoryName.split("/");
     this.indexname = fields[fields.length - 1];
-
-    FileChannel postingsFileChannel = 
-	(new FileInputStream(new File (indexDirectoryName + "/postings"))).getChannel();
-      int sz = (int)postingsFileChannel.size();
-      this.postingsByteBuffer = 
-	postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+    FileInputStream postingsInputStream =
+      new FileInputStream(new File (indexDirectoryName + "/postings"));
+    FileChannel postingsFileChannel = postingsInputStream.getChannel();
+    int sz = (int)postingsFileChannel.size();
+    this.postingsRaf = 
+      postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+    postingsInputStream.close();
   }
 
   public MappedMultiKeyIndex(String workingDirectoryName, String indexname)
@@ -57,11 +60,13 @@ public class MappedMultiKeyIndex {
     this.indexDirectoryName = workingDirectoryName +  "/indices/" + indexname ;
     this.indexname = indexname;
 
-    FileChannel postingsFileChannel = 
-	(new FileInputStream(new File (indexDirectoryName + "/postings"))).getChannel();
-      int sz = (int)postingsFileChannel.size();
-      this.postingsByteBuffer = 
-	postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+    FileInputStream postingsInputStream =
+      new FileInputStream(new File (indexDirectoryName + "/postings"));
+    FileChannel postingsFileChannel = postingsInputStream.getChannel();
+    int sz = (int)postingsFileChannel.size();
+    this.postingsRaf = 
+      postingsFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+    postingsInputStream.close();
   }
 
   public MappedByteBuffer openMappedByteBuffer(String filename) 
@@ -76,6 +81,7 @@ public class MappedMultiKeyIndex {
       MappedByteBuffer byteBuffer = 
 	fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
       byteBufCache.put(filename, byteBuffer);
+      fileChannel.close();
       return byteBuffer;
     }
   }
@@ -96,7 +102,6 @@ public class MappedMultiKeyIndex {
       columnString + "-" + termLengthString + suffix;
   }
 
-
   public static String partitionPath(String indexDirectoryName, 
 				     String columnString, String termLengthString, String suffix) {
     String[] fields = indexDirectoryName.split("/");
@@ -105,13 +110,28 @@ public class MappedMultiKeyIndex {
       columnString + "-" + termLengthString + suffix;
   }
 
-
   public MappedByteBuffer openTermDictionaryFile(String columnString, String termLengthString)
     throws IOException
   {
-    return openMappedByteBuffer(partitionPath
-				(this.indexDirectoryName,
-				 columnString, termLengthString, "-term-dictionary"));
+    MappedByteBuffer termDictionaryByteBuffer = openMappedByteBuffer
+      (partitionPath
+       (this.indexDirectoryName,
+	columnString, termLengthString, "-term-dictionary"));
+    return termDictionaryByteBuffer;
+  }
+
+  public MappedByteBuffer getTermDictionaryFile(String columnString, String termLengthString)
+    throws IOException
+  {
+    MappedByteBuffer termDictionaryByteBuffer;
+    String partitionKey = columnString + "|" + termLengthString;
+    if (this.mapOfTermDictionaryRafs.containsKey(partitionKey)) {
+       termDictionaryByteBuffer = this.mapOfTermDictionaryRafs.get(partitionKey);
+    } else {
+      termDictionaryByteBuffer = this.openTermDictionaryFile(columnString, termLengthString);
+      this.mapOfTermDictionaryRafs.put(partitionKey, termDictionaryByteBuffer);
+    }
+    return termDictionaryByteBuffer;
   }
 
   public MappedByteBuffer openExtentsFile(String columnString, String termLengthString)
@@ -122,10 +142,24 @@ public class MappedMultiKeyIndex {
 				 columnString, termLengthString, "-postings-offsets"));
   }
 
-  public MappedByteBuffer getPostingsFile() {
-    return this.postingsByteBuffer;
+  public MappedByteBuffer getExtentsFile(String columnString, String termLengthString)
+    throws IOException
+  {
+    MappedByteBuffer extentsByteBuffer;
+    String partitionKey = columnString + "|" + termLengthString;
+    if (this.mapOfExtentsRafs.containsKey(partitionKey)) {
+       extentsByteBuffer = this.mapOfExtentsRafs.get(partitionKey);
+    } else {
+      extentsByteBuffer = this.openExtentsFile(columnString, termLengthString);
+      this.mapOfExtentsRafs.put(partitionKey, extentsByteBuffer);
+    }
+    return extentsByteBuffer;
   }
- 
+
+  public MappedByteBuffer getPostingsFile() {
+    return this.postingsRaf;
+  }
+
   public Map<String,String> readStatsFile(String columnString, String termLengthString)
     throws IOException
   {
@@ -134,18 +168,30 @@ public class MappedMultiKeyIndex {
 			  columnString, termLengthString, "-term-dictionary-stats.txt"));
   }
 
+  public Map<String,String> getStatsMap(String columnString, String termLengthString)
+    throws FileNotFoundException, IOException
+  {
+    Map<String,String> statsMap;
+    String partitionKey = columnString + "|" + termLengthString;
+    if (this.mapOfStatMaps.containsKey(partitionKey)) {
+      statsMap = this.mapOfStatMaps.get(partitionKey);
+    } else {
+      statsMap = this.readStatsFile(columnString, termLengthString);
+      this.mapOfStatMaps.put(partitionKey, statsMap);
+    }
+    return statsMap;
+  }
+ 
   public List<String> lookup(int column, String term)
     throws IOException, FileNotFoundException
   {
     List<String> resultList = new ArrayList<String>();
     String termLengthString = Integer.toString(term.length());
     String columnString = Integer.toString(column);
-
-    MappedByteBuffer termDictionaryRaf = this.openTermDictionaryFile(columnString, termLengthString);
-    MappedByteBuffer extentsRaf = this.openExtentsFile(columnString, termLengthString);
-    MappedByteBuffer postingsRaf = this.getPostingsFile();
-    Map<String,String> statsMap = this.readStatsFile(columnString, termLengthString);
-
+    String partitionKey = columnString + "|" + termLengthString;
+    MappedByteBuffer termDictionaryRaf = this.getTermDictionaryFile(columnString, termLengthString);
+    MappedByteBuffer extentsRaf = this.getExtentsFile(columnString, termLengthString);
+    Map<String,String> statsMap = this.getStatsMap(columnString, termLengthString);
     int datalength = Integer.parseInt(statsMap.get("datalength"));
     int recordnum = Integer.parseInt(statsMap.get("recordnum"));
     
@@ -153,7 +199,7 @@ public class MappedMultiKeyIndex {
       dictionaryBinarySearch(termDictionaryRaf, term, 
 					   term.length(), datalength, recordnum );
     if (entry != null) {
-      readPostings(extentsRaf, postingsRaf, resultList, entry);
+      readPostings(extentsRaf, this.postingsRaf, resultList, entry);
     } 
     return resultList;
   }
@@ -185,7 +231,6 @@ public class MappedMultiKeyIndex {
     String [] getFields() { return this.fields; }
     String getDigest() { return this.digest; }
   }
-
 
   /**
    * Load Table

@@ -34,6 +34,9 @@ public class MultiKeyIndexGeneration {
     </ol>
   */
 
+  /** map of stats maps for each partition, partitionName -> StatsMap */
+  Map<String,Map<String,String>> mapOfStatMaps = new HashMap<String,Map<String,String>>();
+
   /** start a new digest list for term using map from column -> termLength 
    * @param newMap string -> digest -list map
    * @param term   term to be indexed
@@ -179,7 +182,7 @@ public class MultiKeyIndexGeneration {
     }
   }
 
-
+  /** For testing indexes only */
   public List<String> lookup(String workingDir, String indexname,  String term, int column)
     throws IOException, FileNotFoundException
   {
@@ -190,16 +193,23 @@ public class MultiKeyIndexGeneration {
 	new RandomAccessFile(MultiKeyIndex.partitionPath(workingDir, indexname,
 					   columnString, termLengthString, "-term-dictionary"), "r");
     RandomAccessFile extentsRaf = 
-      new RandomAccessFile(MultiKeyIndex.partitionPath(workingDir, indexname,
-					 columnString, termLengthString, "-postings-offsets"), "r");
+      new RandomAccessFile(MultiKeyIndex.partitionPath
+			   (workingDir, indexname,
+			    columnString, termLengthString, "-postings-offsets"), "r");
     RandomAccessFile postingsRaf = 
       new RandomAccessFile(workingDir + "/indices/" + indexname + "/postings", "r");
 
-    Map<String,String> statsMap =
-      MultiKeyIndex.readStatsFile(MultiKeyIndex.partitionPath
+    Map<String,String> statsMap;
+    String statMapKey = columnString + "|" + termLengthString;
+    if (this.mapOfStatMaps.containsKey(statMapKey)) {
+      statsMap = this.mapOfStatMaps.get(statMapKey);
+    } else {
+      statsMap = MultiKeyIndex.readStatsFile(MultiKeyIndex.partitionPath
 		    (workingDir, indexname,
 		     columnString, termLengthString, "-term-dictionary-stats.txt"));
-
+      this.mapOfStatMaps.put(statMapKey, statsMap);
+    }
+    
     int datalength = Integer.parseInt(statsMap.get("datalength"));
     int recordnum = Integer.parseInt(statsMap.get("recordnum"));
     
