@@ -62,11 +62,17 @@ public class MappedPostingsList extends AbstractList<String> implements List<Str
   {
     return this.count;
   }
+
+  @Override
   public void     add(int index, String element) {  }
+  @Override
   public boolean  add(String o)  { return false; }
+  @Override
   public boolean  addAll(int index, Collection<? extends String> c) { return false; }
+  @Override
   public void     clear() {}
   public boolean  equals(String o) { return false; }
+
   /** 
    * get posting at index. 
    *  @return a posting (A String object)
@@ -84,6 +90,7 @@ public class MappedPostingsList extends AbstractList<String> implements List<Str
       return null;
     }
   } 
+  @Override
   public int      hashCode() { return 0; }
   public int      indexOf(String o) { return 0;}
 
@@ -91,6 +98,7 @@ public class MappedPostingsList extends AbstractList<String> implements List<Str
    * get an iterator over the current posting list.
    * @return iterator over postings list.
    */
+  @Override
   public Iterator<String> iterator()
   { 
     try {
@@ -106,6 +114,8 @@ public class MappedPostingsList extends AbstractList<String> implements List<Str
    * get an list iterator over the current posting list.
    * @return list iterator over postings.
    */
+
+    @Override
   public ListIterator<String> listIterator() 
   {
     try {
@@ -122,6 +132,7 @@ public class MappedPostingsList extends AbstractList<String> implements List<Str
    * @param index index to start iterating at.
    * @return list iterator over postings.
    */
+  @Override
   public ListIterator<String> listIterator(int index) { 
     try {
       return new MappedPostingsListIterator(this.buffer, 
@@ -133,19 +144,26 @@ public class MappedPostingsList extends AbstractList<String> implements List<Str
       return null; 
     } 
   }
+
+  @Override
   public String remove(int index) {
     // not implemented
     return get(index); 
   }
+    @Override
   protected void removeRange(int fromIndex, int toIndex) 
   {
     // not implemented
   }
+
+  @Override
   public String set(int index, String element) 
   {
     // not implemented
     return null;
   }
+
+  @Override
   public List<String> subList(int fromIndex, int toIndex) 
   { 
     try {

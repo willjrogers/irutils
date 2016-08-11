@@ -149,7 +149,7 @@ public class InvertedFileContainer {
     BufferedReader reader = 
       new BufferedReader(new FileReader( this.tableRoot + File.separator + CONFIG_FILENAME ));
     if ( (line = reader.readLine()) != null ) {
-      this.numTables = Integer.parseInt((String)utils.StringUtils.getToken(line, " ", 1));
+      this.numTables = Integer.parseInt(utils.StringUtils.getToken(line, " ", 1));
     } else {
       // should throw an exception here...
       System.err.println("invalid config file, first line: \"NUM_TABLES: <n>\" missing");
@@ -170,7 +170,7 @@ public class InvertedFileContainer {
   * Get map of tables and their corresponding configurations.
   * @return map containing tables and configurations.
   */
-  public Map getTableConfigMap()
+  public Map<String,String> getTableConfigMap()
   {
     return this.tableMap;
   }
@@ -193,6 +193,13 @@ public class InvertedFileContainer {
     this.tableRoot = root;
   }
 
+  String getSerializedInfoFilename(String indexname) {
+    StringBuffer strbuf = new StringBuffer();
+    strbuf.append(indexRoot).append(File.separator).append(indexname).append
+      (File.separator).append(InvertedFile.canonicalSerializedName);
+    return strbuf.toString();
+  }
+
   /** 
    * get index object for index specified by indexname.
    * @param indexname name of index to be instantiated.
@@ -203,18 +210,15 @@ public class InvertedFileContainer {
            ClassNotFoundException, OptionalDataException
   {
     /** index open? if so then use it. */
-    InvertedFile invertedFile = (InvertedFile)this.openIndexMap.get(indexname);
+    InvertedFile invertedFile = this.openIndexMap.get(indexname);
     if (invertedFile != null)
       return invertedFile;
 
     /** otherwise instantiate index */
-    String line = (String)this.tableMap.get(indexname);
+    String line = this.tableMap.get(indexname);
     if (line != null) {
       List<String> formatList = utils.StringUtils.split(line, "|");
-      StringBuffer strbuf = new StringBuffer();
-      strbuf.append(indexRoot).append(File.separator).append(indexname).append
-	(File.separator).append(InvertedFile.canonicalSerializedName);
-      String serializedInfo =  strbuf.toString();
+      String serializedInfo = getSerializedInfoFilename(indexname);
       if ( new File(serializedInfo).exists() ) {
 	// System.out.println(" loading " + serializedInfo);
 	FileInputStream istream = new FileInputStream(serializedInfo);
@@ -227,8 +231,8 @@ public class InvertedFileContainer {
 	return index;
       } else {
 	InvertedFile index = 
-	  new InvertedFile((String)formatList.get(1), 
-			   this.tableRoot + File.separator + (String)formatList.get(0),
+	  new InvertedFile(formatList.get(1), 
+			   this.tableRoot + File.separator + formatList.get(0),
 			   this.indexRoot,
 			   formatList);
 	this.openIndexMap.put(indexname, index);
@@ -247,7 +251,7 @@ public class InvertedFileContainer {
     out.println("Table Root: " + this.tableRoot);
     out.println("Index Root: " + this.indexRoot);
     out.println("Tables list:");
-    Iterator iter = this.tableMap.values().iterator();
+    Iterator<String> iter = this.tableMap.values().iterator();
     while (iter.hasNext()) {
       out.println(iter.next());
     }
@@ -271,7 +275,7 @@ public class InvertedFileContainer {
     sb.append("Table Root: ").append(this.tableRoot).append("\n");
     sb.append("Index Root: ").append(this.indexRoot).append("\n");
     sb.append("Tables list:").append("\n");
-    Iterator iter = this.tableMap.values().iterator();
+    Iterator<String> iter = this.tableMap.values().iterator();
     while (iter.hasNext()) {
       sb.append(iter.next()).append("\n");
     }
@@ -284,9 +288,9 @@ public class InvertedFileContainer {
   protected void finalize()
     throws Throwable
   {
-    for (Iterator iterator = openIndexMap.keySet().iterator(); 
+    for (Iterator<InvertedFile> iterator = openIndexMap.values().iterator(); 
 	 iterator.hasNext(); 
-	 ((InvertedFile)iterator.next()).finalize());
+	 iterator.next().finalize());
     super.finalize();
   }
 

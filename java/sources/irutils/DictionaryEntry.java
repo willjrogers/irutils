@@ -17,16 +17,16 @@ public class DictionaryEntry
   //  +------------------------+--------------------+-------------------+
   //  | term                   | number of postings |     address       |
   //  +------------------------+--------------------+-------------------+
-  //  |<---- term length ----->|<---- 4 bytes ----->|<---- 4 bytes ---->|
+  //  |<---- term length ----->|<---- 8 bytes ----->|<---- 8 bytes ---->|
   //  |<-------------------------- record length ---------------------->|
   //
   //  Term Length, # of postings And addr are the same for all records in a partition.
 
   String term;
-  int numberOfPostings;
-  int address;
+  long numberOfPostings;
+  long address;
   
-  public DictionaryEntry (String term, int numberOfPostings, int address)
+  public DictionaryEntry (String term, long numberOfPostings, long address)
   {
     this.term = term;
     this.numberOfPostings = numberOfPostings;
@@ -38,13 +38,16 @@ public class DictionaryEntry
     return this.term;
   }
 
-  public int getNumberOfPostings()
+  public long getNumberOfPostings()
   {
     return this.numberOfPostings;
   }
-  public int getAddress()
+  public long getAddress()
   {
     return this.address;
+  }
+  public String toString() {
+    return term + "\t" + numberOfPostings + "\t" + address;
   }
 }// DictionaryEntry
 
