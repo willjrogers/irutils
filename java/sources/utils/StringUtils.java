@@ -72,7 +72,7 @@ public final class StringUtils extends Object
     StringTokenizer st = new StringTokenizer(textstring, delimitchars, true); 
     String previousToken = "";
     while (st.hasMoreTokens()) {
-      String tok = (String)st.nextToken();
+      String tok = st.nextToken();
 
       if (tok.indexOf(delimitchars) < 0 ) {
 	if (i == pos) {
@@ -105,11 +105,11 @@ public final class StringUtils extends Object
   public static String list(List<String> list)
   {
     StringBuffer sb = new StringBuffer();
-    Iterator it = list.iterator();
+    Iterator<String> it = list.iterator();
     sb.append("{");
     while ( it.hasNext() )
       {
-	String token = (String)it.next();
+	String token = it.next();
 	if (token.length() == 0 || token.indexOf(" ") > -1 ) {
 	  // if token contains spaces or is of length zero 
 	  // then encapsulate token with braces.
@@ -136,7 +136,7 @@ public final class StringUtils extends Object
   public static String join(List<String> list, String joinString)
   {
     StringBuffer sb = new StringBuffer();
-    Iterator it = list.iterator();
+    Iterator<String> it = list.iterator();
     while ( it.hasNext() )
       {
 	sb.append(it.next());

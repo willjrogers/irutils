@@ -106,7 +106,7 @@ public class TemporaryPostingsPool implements Serializable {
     return aList;
   }
 
-  public List getv2(int address)
+  public List<String> getv2(int address)
   {
     return new TemporaryPostingsList(this.postingsRAF, address);
   }
@@ -134,8 +134,8 @@ public class TemporaryPostingsPool implements Serializable {
   }
 
 
-  private class TemporaryPostingsList extends AbstractList 
-    implements List
+  private class TemporaryPostingsList extends AbstractList<String>
+    implements List<String>
   {
     int address;
     RandomAccessFile postingsRAF;
@@ -146,7 +146,7 @@ public class TemporaryPostingsPool implements Serializable {
       this.postingsRAF = raf;
       this.address = newAddress;
     }
-    public Object get(int index)
+    public String get(int index)
     {
       int i = 0;
       int length = 0;
@@ -188,7 +188,7 @@ public class TemporaryPostingsPool implements Serializable {
     }
   }
 
-  private class PostingsListIterator implements Iterator, ListIterator
+  private class PostingsListIterator implements Iterator<String>, ListIterator<String>
   {
     int index = 0;
     int link;
@@ -202,12 +202,12 @@ public class TemporaryPostingsPool implements Serializable {
       this.link = newAddress;
     }
 
-    public void 	add(Object o) { }
+    public void 	add(String o) { }
     public boolean 	hasNext() {
       return this.link != -1;
     }
     public boolean 	hasPrevious() { return false; }
-    public Object 	next()
+    public String 	next()
     {
       try {
 	this.postingsRAF.seek(link);
@@ -223,14 +223,14 @@ public class TemporaryPostingsPool implements Serializable {
     public int 	nextIndex() {
       return index;
     }
-    public Object previous() {
+    public String previous() {
       return null;
     }
     public int previousIndex() {
       return index - 1;
     }
     public void remove() { }
-    public void set(Object o) {}
+    public void set(String o) {}
 
   }
 

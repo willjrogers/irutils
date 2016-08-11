@@ -14,7 +14,8 @@ import java.util.Iterator;
  */
 
 public class Test {
-  public final static void main(String[] args)
+
+  public static void test_TemporaryPostingsPool()
   {
     int[] address = new int[20];
     TemporaryPostingsPool pool = new TemporaryPostingsPool();
@@ -22,9 +23,14 @@ public class Test {
     for (int i = 1; i < 20; i++) {
       link = pool.add("postings" + i, link);
     }
-    Iterator iter = pool.get(link).iterator();
+    Iterator<String> iter = pool.get(link).iterator();
     while (iter.hasNext()) {
       System.out.println("+ " + iter.next());
     }
+  }
+
+  public final static void main(String[] args)
+  {
+    test_TemporaryPostingsPool();
   }  
 }// Test

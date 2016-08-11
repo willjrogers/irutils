@@ -14,7 +14,7 @@ import java.io.*;
  * @version $Id: PostingsList.java,v 1.2 2008/04/25 15:07:49 wrogers Exp $
  */
 
-public class PostingsList extends AbstractList implements List {
+public class PostingsList extends AbstractList<String> implements List<String> {
 
   /** offset in file to beginning of postings list */
   private int address;
@@ -62,20 +62,20 @@ public class PostingsList extends AbstractList implements List {
     return this.count;
   }
   /** not supported */
-  public void     add(int index, Object element) {  }
+  public void     add(int index, String element) {  }
   /** not supported */
-  public boolean  add(Object o)  { return false; }
+  public boolean  add(String o)  { return false; }
   /** not supported */
-  public boolean  addAll(int index, Collection c) { return false; }
+  public boolean  addAll(int index, Collection<? extends String> c) { return false; }
   /** not supported */
   public void     clear() {}
   /** not supported */
-  public boolean  equals(Object o) { return false; }
+  public boolean  equals(String o) { return false; }
   /** 
    * get posting at index. 
    *  @return a posting (A String object)
    */
-  public Object   get(int index) 
+  public String   get(int index) 
   { 
     try {
       this.file.seek(this.offsets[index] );
@@ -89,13 +89,13 @@ public class PostingsList extends AbstractList implements List {
     }
   } 
   public int      hashCode() { return 0; }
-  public int      indexOf(Object o) { return 0;}
+  public int      indexOf(String o) { return 0;}
 
   /** 
    * get an iterator over the current posting list.
    * @return iterator over postings list.
    */
-  public Iterator iterator()
+  public Iterator<String> iterator()
   { 
     try {
       return new PostingsListIterator(this.file, 
@@ -104,13 +104,13 @@ public class PostingsList extends AbstractList implements List {
       return null; 
     } 
   }
-  public int      lastIndexOf(Object o) { return 0;  }
+  public int      lastIndexOf(String o) { return 0;  }
 
   /** 
    * get an list iterator over the current posting list.
    * @return list iterator over postings.
    */
-  public ListIterator    listIterator() 
+  public ListIterator<String> listIterator() 
   {
     try {
       return new PostingsListIterator(this.file, 
@@ -126,7 +126,7 @@ public class PostingsList extends AbstractList implements List {
    * @param index index to start iterating at.
    * @return list iterator over postings.
    */
-  public ListIterator    listIterator(int index) { 
+  public ListIterator<String> listIterator(int index) { 
     try {
       return new PostingsListIterator(this.file, 
 				      this.address, this.count, this.offsets,
@@ -137,7 +137,7 @@ public class PostingsList extends AbstractList implements List {
       return null; 
     } 
   }
-  public Object	 remove(int index) {
+  public String	 remove(int index) {
     // not implemented
     return get(index); 
   }
@@ -145,12 +145,12 @@ public class PostingsList extends AbstractList implements List {
   {
     // not implemented
   }
-  public Object	  set(int index, Object element) 
+  public String	  set(int index, String element) 
   {
     // not implemented
     return null;
   }
-  public List	   subList(int fromIndex, int toIndex) 
+  public List<String> subList(int fromIndex, int toIndex) 
   { 
     try {
       return new PostingsList(file, this.offsets[fromIndex], toIndex - fromIndex);
@@ -161,7 +161,7 @@ public class PostingsList extends AbstractList implements List {
     }
   }
 
-  private class PostingsListIterator implements Iterator, ListIterator
+  private class PostingsListIterator implements Iterator<String>, ListIterator<String>
     {
       /** offset in file to beginning of postings list */
       int address;
@@ -198,7 +198,7 @@ public class PostingsList extends AbstractList implements List {
 	file.seek(offsets[index]);
       }
       /** non-implementation of interface ListIterator */
-      public void add(Object o)
+      public void add(String o)
       {
 	// not implemented
       }
@@ -218,7 +218,7 @@ public class PostingsList extends AbstractList implements List {
       }
 
       /** implementation of interface Iterator */
-      public Object next()
+      public String next()
 	throws NoSuchElementException
       {
 	if (this.index == this.count)
@@ -242,7 +242,7 @@ public class PostingsList extends AbstractList implements List {
 	return this.index + 1;
       }
       /** implementation of interface ListIterator */
-      public Object previous()
+      public String previous()
 	throws NoSuchElementException
       {
 	if (this.index == 0)
@@ -270,7 +270,7 @@ public class PostingsList extends AbstractList implements List {
       {
 	// not implemented
       }
-      public void set(Object o)
+      public void set(String o)
       {
 	// not implemented
       }

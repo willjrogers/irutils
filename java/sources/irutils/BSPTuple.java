@@ -1,5 +1,7 @@
 package irutils;
 
+import java.util.List;
+
 /**
  * BSPTuple.java
  *
@@ -10,15 +12,15 @@ package irutils;
  * @version $Id: BSPTuple.java,v 1.6 2001/09/07 13:32:20 wrogers Exp $
  */
 
-public class BSPTuple {
+public class BSPTuple<E> {
   private String key;
-  private Object value;
+  private E value;
   /**
    * instantiate new key/value pair object (tuple)
    * @param key   key for tuple.
    * @param value value for key
    */
-  public BSPTuple (String key, Object value)
+  public BSPTuple (String key, E value)
   {
     this.key = key;
     this.value = value;
@@ -29,14 +31,14 @@ public class BSPTuple {
     return this.key;
   }
 
-  public Object getValue()
+  public E getValue()
   {
     return this.value;
   }
 
   /**
    * Implementation of toString to override default implementation in
-   * java.lang.Object.
+   * java.lang.List<String>.
    * @return string representation of tuple object.
    */  
   public String toString()

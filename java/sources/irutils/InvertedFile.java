@@ -126,7 +126,7 @@ public class InvertedFile implements Serializable
 
   /** flag to use Memory Mapped version */
   private boolean useMappedFile = 
-    Boolean.parseBoolean(System.getProperty("ifread.mapped","false"));
+    Boolean.parseBoolean(System.getProperty("ifread.mapped","true"));
 
   boolean invfLowerCaseKeys = 
     Boolean.parseBoolean(System.getProperty("ifbuild.lowercase.keys","false"));
@@ -153,11 +153,11 @@ public class InvertedFile implements Serializable
     this.tablefilename = tablefilename;
     this.indexParentDirectoryPath = indexParentDir;
     this.indexFormat = format;
-    List keyList = utils.StringUtils.split((String)format.get(3), ",");
+    List<String> keyList = utils.StringUtils.split(format.get(3), ",");
     // convert key indices to Integer.
     this.keyIndices = new ArrayList<Integer>();
     for (int i = 0; i < keyList.size(); i++) {
-      keyIndices.add(new Integer((String)keyList.get(i)));
+      keyIndices.add(new Integer(keyList.get(i)));
     }
   }
 
@@ -193,16 +193,16 @@ public class InvertedFile implements Serializable
 	  if (lineList.size() > 0) {
 	    if (this.keyIndices == null || 
 		(this.keyIndices.size() == 1 && 
-		 ((Integer)this.keyIndices.get(0)).intValue() == 0)) {
+		 (this.keyIndices.get(0)).intValue() == 0)) {
 	      if (invfLowerCaseKeys) {
 		key = lineList.get(0).toLowerCase();
 	      } else {
-		key = (String)lineList.get(0);
+		key = lineList.get(0);
 	      }
 	    } else {
 	      StringBuffer strBuf = new StringBuffer();
 	      for (int j = 0; j < keyIndices.size(); j++) {
-		int col = ((Integer)keyIndices.get(j)).intValue();
+		int col = keyIndices.get(j).intValue();
 		if (invfLowerCaseKeys) {
 		  strBuf.append(lineList.get(col).toLowerCase());
 		} else {
@@ -229,7 +229,7 @@ public class InvertedFile implements Serializable
 	  {
 	    /*	    List postings = (List)bucket.get(key);
 		    postings.add(line);*/
-	    int link = ((Integer)bucket.get(key)).intValue();
+	    int link = bucket.get(key).intValue();
 	    bucket.put(key, new Integer(pool.add(line, link)));
 	  }
 	else
@@ -251,9 +251,9 @@ public class InvertedFile implements Serializable
       System.out.println("# of input lines: " + i );
       System.out.println("# of buckets: " + hashlist.size());
     }
-    Iterator iter = hashlist.values().iterator();
+    Iterator<Map<String,Integer>> iter = hashlist.values().iterator();
     while (iter.hasNext()) {
-      Map bucket = (Map)iter.next();
+      Map<String,Integer> bucket = iter.next();
       if (this.verbose) {
 	System.out.println("bucket, size: " + bucket.size());
       }
@@ -271,7 +271,7 @@ public class InvertedFile implements Serializable
   {
     RunLengthPostingsWriter postingsWriter = null;
     List<String> dictDataFormat = new ArrayList<String>(1);
-    int rowLen = Integer.parseInt((String)indexFormat.get(2));
+    int rowLen = Integer.parseInt(indexFormat.get(2));
     List<String> typeList = new ArrayList<String>(rowLen);
 
     this.dataLength = new HashMap<String,Integer>(5);
@@ -299,7 +299,7 @@ public class InvertedFile implements Serializable
     List<String> dataFormatList = new ArrayList<String>(10);
     for (int i = 1; i < rowLen; i++ )
       {
-        String fieldtype = (String)typeList.get(i);
+        String fieldtype = typeList.get(i);
         dataFormatList.add(binFormats.get(fieldtype));
       }
     
@@ -345,17 +345,17 @@ public class InvertedFile implements Serializable
     rcfp.println( "#  bsp_map::partition <mapname> <term length> <partitionfilename> <num of records>" );
  
     
-    Iterator iter = this.hashlist.keySet().iterator();
+    Iterator<String> iter = this.hashlist.keySet().iterator();
     while (iter.hasNext()) 
       {
-	String key = (String)iter.next();
-	Map map = (Map)hashlist.get(key);
+	String key = iter.next();
+	Map<String,Integer> map = hashlist.get(key);
 	
 	buildInvertedFile(dictDataFormat, map, key, postingsWriter);
 	int keylength = 0;
-	Iterator mapIter = map.keySet().iterator();
+	Iterator<String> mapIter = map.keySet().iterator();
 	if (mapIter.hasNext()) {
-	  keylength = ((String)mapIter.next()).length();
+	  keylength = (mapIter.next()).length();
 	}
 	statfp.println( "partition_" + key + " " + 
 			keylength + " " + map.size());
@@ -390,8 +390,8 @@ public class InvertedFile implements Serializable
    * @param partitionId     partition identifier.
    * @param postingsWriter  postings file writer.
    */
-  private void buildInvertedFile( List dataFormat, 
-				  Map aTermMap, 
+  private void buildInvertedFile( List<String> dataFormat, 
+				  Map<String,Integer> aTermMap, 
 				  String partitionId, 
 				  RunLengthPostingsWriter postingsWriter)
     throws IOException
@@ -402,22 +402,22 @@ public class InvertedFile implements Serializable
       new DictionaryBinSearchMap ( indexParentDirectoryPath + File.separator +
 				   this.indexname + File.separator + "partition_" + partitionId, 
 				   BinSearchMap.WRITE );
-    Iterator keyIter = aTermMap.keySet().iterator();
+    Iterator<String> keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
-      String termKey = (String)keyIter.next();
+      String termKey = keyIter.next();
       if (this.verbose) {
 	System.out.println("termKey: " + termKey );
       }
       /* List postings = (List)aTermMap.get(termKey);*/
-      int link = ((Integer)aTermMap.get(termKey)).intValue();
-      List postings = pool.getv2(link);
+      int link = (aTermMap.get(termKey)).intValue();
+      List<String> postings = pool.getv2(link);
       if (this.verbose) {
 	System.out.println("postings size: " + postings.size());
       }
-      Iterator postingIter = postings.iterator();
+      Iterator<String> postingIter = postings.iterator();
       if (postingIter.hasNext()) 
 	{
-	  String dataRecord = (String)postingIter.next();
+	  String dataRecord = postingIter.next();
 	  if (this.verbose) {
 	    System.out.println("dataRecord: " + dataRecord);
 	  }
@@ -425,7 +425,7 @@ public class InvertedFile implements Serializable
 	  nextpost = postingsWriter.writeString(dataRecord);
 	  while (postingIter.hasNext()) 
 	    {
-	      dataRecord = (String)postingIter.next();
+	      dataRecord = postingIter.next();
 	      // write posting
 	      postingsWriter.writeString(dataRecord);
 	    }
@@ -498,7 +498,7 @@ public class InvertedFile implements Serializable
    * @exception FileNotFoundException if an error occurs
    * @exception IOException if an error occurs
    */
-  public BSPTuple lookup(String word)
+  public BSPTuple<List<String>> lookup(String word)
     throws FileNotFoundException, IOException
   {
     return lookup(word, false); // don't load everything at once.
@@ -513,7 +513,7 @@ public class InvertedFile implements Serializable
    * @exception FileNotFoundException if an error occurs
    * @exception IOException if an error occurs
    */
-  public BSPTuple lookup(String targetWord, boolean loadAllData)
+  public BSPTuple<List<String>> lookup(String targetWord, boolean loadAllData)
     throws FileNotFoundException, IOException
   {
     RandomAccessFile dictionaryRAFFile;
@@ -555,7 +555,7 @@ public class InvertedFile implements Serializable
       }
       entry =
 	MappedFileBinarySearch.dictionaryBinarySearch(dictionaryByteBuffer, word, word.length(), 
-						      ((Integer)this.numrecs.get(key)).intValue() );
+						      (this.numrecs.get(key)).intValue() );
     } else {
       // if (this.verbose) {
       // 	System.out.println("lookup(): opening file for random access");
@@ -575,13 +575,13 @@ public class InvertedFile implements Serializable
 	  } 
 	entry = 
 	  DiskBinarySearch.dictionaryBinarySearch(dictionaryRAFFile, word, word.length(), 
-						  ((Integer)this.numrecs.get(key)).intValue() );
+						  (this.numrecs.get(key)).intValue() );
       } catch (FileNotFoundException exception) {
-	return new BSPTuple(word, new ArrayList(0)); // partition not found, return an empty list
+	return new BSPTuple<List<String>>(word, new ArrayList<String>(0)); // partition not found, return an empty list
       }
     }
     if (entry == null) {
-      return new BSPTuple(word, new ArrayList(0)); // entry not found, return an empty list
+      return new BSPTuple<List<String>>(word, new ArrayList<String>(0)); // entry not found, return an empty list
     }
     int count = entry.getNumberOfPostings();
     int address = entry.getAddress();
@@ -649,7 +649,7 @@ public class InvertedFile implements Serializable
 	postings = new PostingsList(postingsFile, address, count);
       }
     }
-    return new BSPTuple(word, postings );
+    return new BSPTuple<List<String>>(word, postings);
   }
 
   /**
@@ -670,9 +670,9 @@ public class InvertedFile implements Serializable
   public void release() 
     throws IOException
   {
-    Iterator partIter = this.partitionFiles.keySet().iterator();
+    Iterator<String> partIter = this.partitionFiles.keySet().iterator();
     while (partIter.hasNext()) {
-      String key = (String)partIter.next();
+      String key = partIter.next();
       if (! useMappedFile) {
 	RandomAccessFile raFile = (RandomAccessFile)this.partitionFiles.get(key);
 	raFile.close();
@@ -697,14 +697,14 @@ public class InvertedFile implements Serializable
    *
    * @return a <code>List</code> value
    */
-  public List listKeys()
+  public List<String> listKeys()
   {
-    Iterator iter = this.partitionFiles.values().iterator();
+    Iterator<Object> iter = this.partitionFiles.values().iterator();
     while (iter.hasNext()) 
       {
  	RandomAccessFile dictionaryFile = (RandomAccessFile)iter.next();
       }
-    return new ArrayList();
+    return new ArrayList<String>();
   }
 
   

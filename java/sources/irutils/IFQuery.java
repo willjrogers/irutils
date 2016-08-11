@@ -74,9 +74,9 @@ public class IFQuery {
     }
 
     // lookup term in index.
-    BSPTuple result = index.lookup(wordsb.toString().trim());
-    List list = (List)result.getValue();
-    for (Iterator j = list.iterator(); j.hasNext(); ) {
+    BSPTuple<List<String>> result = index.lookup(wordsb.toString().trim());
+    List<String> list = result.getValue();
+    for (Iterator<String> j = list.iterator(); j.hasNext(); ) {
       System.out.println(j.next());
     }
     index.release();
