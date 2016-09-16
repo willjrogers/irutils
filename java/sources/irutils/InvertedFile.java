@@ -559,6 +559,9 @@ public class InvertedFile implements Serializable
 	      dictionaryFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
 	    this.partitionFiles.put(key, dictionaryByteBuffer);
 	    dictionaryFileChannel.close();
+	  } else {
+	    // partition doesn't exist.
+	    return new BSPTuple<List<String>>(word, new ArrayList<String>(0));
 	  }
 	}
       if (this.verbose) {
