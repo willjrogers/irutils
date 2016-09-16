@@ -323,7 +323,7 @@ public class InvertedFile implements Serializable
 	  }
       }
     dictDataFormat.add(binFormats.get("PTR"));
-    postingsWriter = new NioRunLengthPostingsWriter 
+    postingsWriter = new FileRunLengthPostingsWriter 
       (indexParentDirectoryPath + File.separator + this.indexname );
     PrintWriter statfp = new PrintWriter
       (new BufferedWriter(new FileWriter( indexParentDirectoryPath + File.separator +
@@ -547,16 +547,20 @@ public class InvertedFile implements Serializable
 	}
       else 
 	{
-	  FileChannel dictionaryFileChannel = 
-	    (new FileInputStream(new File ( indexParentDirectoryPath + File.separator +
-					    indexname + File.separator +
-					    "partition_" + key))).getChannel();
-	  int sz = (int)dictionaryFileChannel.size();
-	  dictionaryByteBuffer = 
-	    dictionaryFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
-	  this.partitionFiles.put(key, dictionaryByteBuffer);
-	  dictionaryFileChannel.close();
-	} 
+	  File partitionFile = 
+	    new File ( indexParentDirectoryPath + File.separator +
+		       indexname + File.separator +
+		       "partition_" + key );
+	  if (partitionFile.exists()) {
+	    FileChannel dictionaryFileChannel = 
+	      new FileInputStream(partitionFile).getChannel();
+	    int sz = (int)dictionaryFileChannel.size();
+	    dictionaryByteBuffer = 
+	      dictionaryFileChannel.map(FileChannel.MapMode.READ_ONLY, 0, sz);
+	    this.partitionFiles.put(key, dictionaryByteBuffer);
+	    dictionaryFileChannel.close();
+	  }
+	}
       if (this.verbose) {
 	System.out.println("mapping file");
       }
