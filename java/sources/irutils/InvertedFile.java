@@ -524,7 +524,7 @@ public class InvertedFile implements Serializable
     throws FileNotFoundException, IOException
   {
     RandomAccessFile dictionaryRAFFile;
-    MappedByteBuffer dictionaryByteBuffer;
+    MappedByteBuffer dictionaryByteBuffer = null;
     File dictionaryFile;
     DictionaryEntry entry;
     String word;
