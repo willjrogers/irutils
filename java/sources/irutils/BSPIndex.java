@@ -232,7 +232,7 @@ public class BSPIndex implements Serializable
 	break;
       case INVERTED_FILE:
 	dictDataFormat.add(binFormats.get("PTR"));
-	postingsWriter = new RunLengthPostingsWriter 
+	postingsWriter = new FileRunLengthPostingsWriter 
 	  (indexParentDirectoryPath + File.separator + this.indexname );
 	break;
       }

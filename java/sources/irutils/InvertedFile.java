@@ -1,6 +1,8 @@
 package irutils;
 
 import java.util.*;
+import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -128,8 +130,13 @@ public class InvertedFile implements Serializable
   private boolean useMappedFile = 
     Boolean.parseBoolean(System.getProperty("ifread.mapped","true"));
 
+  /** lowercase all keys */
   boolean invfLowerCaseKeys = 
     Boolean.parseBoolean(System.getProperty("ifbuild.lowercase.keys","false"));
+
+  /** flag to use MappedByteBuffer to build index (Memory Mapped version) */
+  boolean useMappedByteBuffer = 
+    Boolean.getBoolean(System.getProperty("ifbuild.usemappedbytebuffer", "false"));
 
   /** default constructor for serialization purposes only. */
   public InvertedFile()
@@ -316,7 +323,7 @@ public class InvertedFile implements Serializable
 	  }
       }
     dictDataFormat.add(binFormats.get("PTR"));
-    postingsWriter = new RunLengthPostingsWriter 
+    postingsWriter = new NioRunLengthPostingsWriter 
       (indexParentDirectoryPath + File.separator + this.indexname );
     PrintWriter statfp = new PrintWriter
       (new BufferedWriter(new FileWriter( indexParentDirectoryPath + File.separator +
@@ -398,8 +405,8 @@ public class InvertedFile implements Serializable
   {
     int nextpost = 0;
     TemporaryPostingsPool pool = new TemporaryPostingsPool(this.indexname + "_tposts", "r");
-    DictionaryBinSearchMap intPartition = 
-      new DictionaryBinSearchMap ( indexParentDirectoryPath + File.separator +
+    NioDictionaryBinSearchMap intPartition = 
+      new NioDictionaryBinSearchMap ( indexParentDirectoryPath + File.separator +
 				   this.indexname + File.separator + "partition_" + partitionId, 
 				   BinSearchMap.WRITE );
     Iterator<String> keyIter = aTermMap.keySet().iterator();
