@@ -2,9 +2,8 @@ README - readme about IR Utils for different platforms
 
 * Platforms
 
-Java and Tcl are the most mature implementations.  The beginings of C
-and Python versions are there as well.
-
+The Java version is the most mature implementation.  The
+implementations are not currently being developed.
 
 * Building an Index 
 

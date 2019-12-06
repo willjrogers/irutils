@@ -1,65 +1,78 @@
 *Title: README - Readme about Java version of IR Utils
 *Author: Willie Rogers
 
+* What is this?
+
+A library for constructing read-only dictionaries using inverted
+files.
+
 * Partial Manifest
 
-build.xml   -  buildfile for Jakarta ANT java build tool.
+	[pom.xml]     -  Maven project file
+	[build.xml]   -  buildfile for Jakarta ANT java build tool.
                (http://jakarta.apache.org/)
-indices     -  empty index generation directory (used by utils.CL)
-apidoc      -  java api documentation.
-tables      -  sample tables 
-sources     -  java source files 
+	[prj.e]       -  project file for JDEE (https://github.com/jdee-emacs/jdee)
+	[indices]     -  empty index generation directory (used by utils.CL)
+	[apidoc]      -  java api documentation.
+	[tables]      -  sample tables 
+	[sources]     -  java source files 
 
-irutils.jar -  a jar of class files 
+	[irutils.jar] -  a jar of class files 
  
 * Example Use
 
 Add irutils.jar to your java classpath.
 
 On unix (csh):
-  $ setenv CLASSPATH ${CLASSPATH}:<dist dir>/irutils/java/irutils.jar
+
+	$ setenv CLASSPATH ${CLASSPATH}:<dist dir>/irutils/java/irutils.jar
 
 If you want to try the sample program (irutils.CL):
 
-  $ cd <dist dir>/irutils/java
-  $ java -classpath ./lib/irutils.jar irutils.CL
+	$ cd <dist dir>/irutils/java
+	$ java -classpath ./lib/irutils.jar irutils.CL
   
-The source to irutils.CL is in <dist dir>/irutils/java/irutils/CL.java
+The source to |irutils.CL| is in |<dist dir>/irutils/java/irutils/CL.java|
+
+If you only have the sources (from GITHUB) you'll need to generated
+the jar file first.
 
 
 * Building an Index 
 
 ** Using irutils.IFBuild
 
-To build the index word_signal in /Users/will/Library/jdindex  from the
-table word_signal.txt in /Users/will/Library/jdtables
+To build the index word_signal in |/Users/will/Library/jdindex|  from the
+table |word_signal.txt| in |/Users/will/Library/jdtables|
 
 If the table word_signal.txt is of the form:
 
+^<<
 addision|3.145623
 adrenal|2.39843	
 ...
-
+^>>
 
 Then create an ifconfig file in /Users/will/Library/jdtables of the
 form:
 
+^<<
 NUM_TABLES: 1
 #
 word_signal.txt|word_signal|2|0|word|weight|TXT|INT
-
+^>>
 
 The format of |ifconfig| is:
 
-  input_file|tablename|num_fields|key fields|fieldname1|...|N|fieldtype1|...|N|
+	input_file|tablename|num_fields|key fields|fieldname1|...|N|fieldtype1|...|N|
 
 Field Types are:
 
-     TXT  -- data you wish to be accessed as text (or floats)
-     INT  -- data you wish to be accessed as integers
+	[TXT] data you wish to be accessed as text (or floats)
+	[INT] data you wish to be accessed as integers
 
 Key Fields: a comma separated list of columns to be used as key,
-             currently must be type TXT
+currently must be type TXT
 
 Annotated example of a config entry:
 ^<<
@@ -107,16 +120,31 @@ For example:
 	# cd classes
 	$ jar cvf ../irutils.jar irutils/*.class utils/*.class
 
+  or if you have Maven installed:
+  
+	$ cd <dist dir>/irutils/java
+	$ mvn compile
+
   or if you have ANT installed:
 
 	$ cd <dist dir>/irutils/java
 	$ ant archive
 
-* building distibution using ant
+* building distibution
+
+using Maven
+
+	$ cd <dist dir>/irutils/java
+	$ mvn package
+
+using ant
+
 
 	$ cd <dist dir>/irutils/java
 	$ ant distrib
-      or
+
+or
+
 	$ ant all
 
 * TODO 
@@ -143,6 +171,64 @@ For example:
 ** Organization of Postings file
 
 TBD
+
+
+* 2.0 changes
+
+Multiple keys per index
+
+Previous organization (cuisourceinfo with key cui (column 0):
+
+One partition of terms, for cui key column, each 8 characters long.
+
+^<<
+  /export/home/wjrogers/studio/clojure/entityrec/data/strict/indices/cuisourceinfo:
+  total used in directory 209048 available 88996488
+  drwxr-xr-x  2 wjrogers nls      4096 Mar 25  2014 .
+  drwxr-xr-x 17 wjrogers nls      4096 May 19  2014 ..
+  -rw-r--r--  1 wjrogers nls       656 Mar 25  2014 InvertedFileInfo.ser
+  -rw-r--r--  1 wjrogers nls       544 Mar 25  2014 mapinforc.tcl
+  -rw-r--r--  1 wjrogers nls  34639376 Mar 25  2014 partition_cuisourceinfo8
+  -rw-r--r--  1 wjrogers nls       181 Mar 25  2014 partition.stats
+  -rw-r--r--  1 wjrogers nls 179396946 Mar 25  2014 postings
+^>>
+
+New organization
+
+"partition<length>" file becomes "<colname>_partition<length>"
+
+^<<
+  /export/home/wjrogers/studio/clojure/entityrec/data/strict/indices/cuisourceinfo:
+  total used in directory 209048 available 88996488
+  drwxr-xr-x  2 wjrogers nls      4096 Mar 25  2014 .
+  drwxr-xr-x 17 wjrogers nls      4096 May 19  2014 ..
+  -rw-r--r--  1 wjrogers nls       656 Mar 25  2014 InvertedFileInfo.ser
+  -rw-r--r--  1 wjrogers nls       544 Mar 25  2014 mapinforc.tcl
+  -rw-r--r--  1 wjrogers nls  34639376 Mar 25  2014 cui_partition_cuisourceinfo8
+  -rw-r--r--  1 wjrogers nls       181 Mar 25  2014 cui_partition.stats
+  -rw-r--r--  1 wjrogers nls 179396946 Mar 25  2014 postings
+^>>
+
+Add str key column with variable term lengths:
+
+^<<
+  /export/home/wjrogers/studio/clojure/entityrec/data/strict/indices/cuisourceinfo:
+  total used in directory 209048 available 88996488
+  drwxr-xr-x  2 wjrogers nls      4096 Mar 25  2014 .
+  drwxr-xr-x 17 wjrogers nls      4096 May 19  2014 ..
+  -rw-r--r--  1 wjrogers nls       656 Mar 25  2014 InvertedFileInfo.ser
+  -rw-r--r--  1 wjrogers nls       544 Mar 25  2014 mapinforc.tcl
+  -rw-r--r--  1 wjrogers nls  34639376 Mar 25  2014 cui_partition_cuisourceinfo8
+  -rw-r--r--  1 wjrogers nls       181 Mar 25  2014 cui_partition.stats
+  -rw-r--r--  1 wjrogers nls    606240 Mar 25  2014 str_partition_conceptcui10
+  -rw-r--r--  1 wjrogers nls     31428 Mar 25  2014 str_partition_conceptcui100
+  -rw-r--r--  1 wjrogers nls     38695 Mar 25  2014 str_partition_conceptcui101
+  -rw-r--r--  1 wjrogers nls     30470 Mar 25  2014 str_partition_conceptcui102
+
+   ... other partitions omitted ...
+
+  -rw-r--r--  1 wjrogers nls 179396946 Mar 25  2014 postings
+^>>
 
 --  
 Will Rogers
