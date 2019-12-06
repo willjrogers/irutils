@@ -1,4 +1,9 @@
-# README - readme about IR Utils for different platforms
+# README - Libraries for constructing read-only dictionaries
+
+# What is this?
+
+A set of libraries for constructing read-only dictionaries using inverted
+files.
 
 # Platforms
 
