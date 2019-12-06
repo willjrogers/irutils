@@ -1,16 +1,16 @@
-README - readme about IR Utils for different platforms
+# README - readme about IR Utils for different platforms
 
-* Platforms
+# Platforms
 
 The Java version is the most mature implementation.  The other
 implementations are not currently being developed.
 
-* Building an Index 
+# Building an Index 
 
-** Using irutils.IFBuild
+## Using irutils.IFBuild
 
-To build the index word_signal in /Users/will/Library/jdindex  from the
-table word_signal.txt in /Users/will/Library/jdtables
+To build the index word\_signal in /Users/will/Library/jdindex  from the
+table word\_signal.txt in /Users/will/Library/jdtables
 
 If the table word_signal.txt is of the form:
 
@@ -58,7 +58,7 @@ then use the command:
 	       -Dtable.path=/Users/will/Library/jdtables irutils.IFBuild word_signal
 
 
-** IFBuild usage
+## IFBuild usage
 
 	usage: irutils.IFBuild <indexname>
 	properties: 
@@ -67,19 +67,31 @@ then use the command:
 
 
 
-* building the irutils.jar file (in parent directory)
+# building the irutils.jar file (in parent directory)
 
 	$ cd <dist dir>/irutils/java
 	$ javac -d classes source/*/*.java
 	$ cd classes
 	$ jar cvf ../irutils.jar irutils/*.class utils/*.class
 
+  or if you have Maven installed:
+
+	$ cd <dist dir>/irutils/java
+	$ mvn compile
+
   or if you have ANT installed:
 
 	$ cd <dist dir>/irutils/java
 	$ ant archive
 
-* building distibution using ant
+# building distibution
+
+using Maven
+
+	$ cd <dist dir>/irutils/java
+	$ mvn package
+
+using ANT
 
 	$ cd <dist dir>/irutils/java
 	$ ant distrib
@@ -87,16 +99,16 @@ then use the command:
 	$ ant all
 
 
-* TODO 
+# TODO 
 
 1. Build Unit tests for critical sections of classes.
 
 
-* Appendix 1 - Inverted File Organization
+# Appendix 1 - Inverted File Organization
 
-** Dictionary
+## Dictionary
 
-*** Organization of one dictionary record:
+### Organization of one dictionary record:
 
 	+------------------------+--------------------+-------------------+
 	| term                   | number of postings |address of postings|
@@ -107,20 +119,20 @@ then use the command:
 
 Term Length, # of postings And addr are the same for all records in a partition.
 
-** Organization of Postings file
+## Organization of Postings file
 
 TBD
 
 
-* Multi-key indexes
+# Multi-key indexes
 
-** usage
+## usage
 
-*** build
+### build
 
 	mvn exec:exec -DclassName=irutils.MultiKeyIndexLookup -DoptionArg=build -DworkingDirArg=/net/lhcdevfiler/vol/cgsb5/ind/II_Group_WorkArea/wjrogers/data/mult-key-index/strict -DindexnameArg=cuisourceinfo
 
-*** lookup 
+### lookup 
 
 	mvn exec:exec -DclassName=irutils.MultiKeyIndexLookup -DoptionArg=lookup -DworkingDirArg=/net/lhcdevfiler/vol/cgsb5/ind/II_Group_WorkArea/wjrogers/data/mult-key-index/strict -DindexnameArg=cuisourceinfo -DcolumnArg=3 -DtermArg="Heart Attack"
 
