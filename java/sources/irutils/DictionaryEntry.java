@@ -17,8 +17,8 @@ public class DictionaryEntry
   //  +------------------------+--------------------+-------------------+
   //  | term                   | number of postings |     address       |
   //  +------------------------+--------------------+-------------------+
-  //  |<---- term length ----->|<---- 8 bytes ----->|<---- 8 bytes ---->|
-  //  |<-------------------------- record length ---------------------->|
+  //  |<<--- term length ---->>|<<--- 8 bytes ---->>|<<--- 8 bytes --->>|
+  //  |<<------------------------- record length --------------------->>|
   //
   //  Term Length, # of postings And addr are the same for all records in a partition.
 

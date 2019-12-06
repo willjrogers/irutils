@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 
 /**
  * Implementation of Binary Search Partition Inverted File.
@@ -79,6 +80,9 @@ public class InvertedFile implements Serializable
      binFormats.put("PTR", "i1");
    }
 
+  /** use charset */
+  transient Charset charset = Charset.forName("ASCII");
+
   /** hashlist of hash or tree maps for generating new indices. */
   // transient Map<String,Map<String,Integer>> hashlist = new HashMap<String,Map<String,Integer>>(350, 0.96f);
   transient Map<String,Map<String,Integer>> hashlist = new TreeMap<String,Map<String,Integer>>();
@@ -128,7 +132,7 @@ public class InvertedFile implements Serializable
 
   /** flag to use Memory Mapped version */
   private boolean useMappedFile = 
-    Boolean.parseBoolean(System.getProperty("ifread.mapped","true"));
+    Boolean.parseBoolean(System.getProperty("ifread.mapped","false"));
 
   /** lowercase all keys */
   boolean invfLowerCaseKeys = 
@@ -358,7 +362,7 @@ public class InvertedFile implements Serializable
 	String key = iter.next();
 	Map<String,Integer> map = hashlist.get(key);
 	
-	buildInvertedFile(dictDataFormat, map, key, postingsWriter);
+	this.buildInvertedFile(dictDataFormat, map, key, postingsWriter);
 	int keylength = 0;
 	Iterator<String> mapIter = map.keySet().iterator();
 	if (mapIter.hasNext()) {
@@ -399,16 +403,24 @@ public class InvertedFile implements Serializable
    */
   private void buildInvertedFile( List<String> dataFormat, 
 				  Map<String,Integer> aTermMap, 
-				  String partitionId, 
+				  String partitionId,
 				  RunLengthPostingsWriter postingsWriter)
     throws IOException
   {
     int nextpost = 0;
     TemporaryPostingsPool pool = new TemporaryPostingsPool(this.indexname + "_tposts", "r");
-    NioDictionaryBinSearchMap intPartition = 
+    DiskBasedBinSearchMap intPartition;
+    if (this.useMappedByteBuffer) {
+    intPartition = 
       new NioDictionaryBinSearchMap ( indexParentDirectoryPath + File.separator +
 				   this.indexname + File.separator + "partition_" + partitionId, 
 				   BinSearchMap.WRITE );
+    } else {
+      intPartition = 
+	new DictionaryBinSearchMap ( indexParentDirectoryPath + File.separator +
+				   this.indexname + File.separator + "partition_" + partitionId, 
+				   BinSearchMap.WRITE );
+    }
     Iterator<String> keyIter = aTermMap.keySet().iterator();
     while (keyIter.hasNext()) {
       String termKey = keyIter.next();
@@ -569,7 +581,7 @@ public class InvertedFile implements Serializable
       }
       entry =
 	MappedFileBinarySearch.dictionaryBinarySearch(dictionaryByteBuffer, word, word.length(), 
-						      (this.numrecs.get(key)).intValue() );
+						      (this.numrecs.get(key)).intValue(), this.charset );
     } else {
       // if (this.verbose) {
       // 	System.out.println("lookup(): opening file for random access");

@@ -3,6 +3,7 @@ import java.io.*;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 
 /**
  * Dictionary Binary Search Map.
@@ -25,7 +26,7 @@ import java.nio.channels.FileChannel;
  * @version $Id: DictionaryBinSearchMap.java,v 1.5 2008/04/25 15:02:56 wrogers Exp $
  */
 
-public class NioDictionaryBinSearchMap implements BinSearchMap, Serializable {
+public class NioDictionaryBinSearchMap implements DiskBasedBinSearchMap, Serializable {
  
   /** length of integer in bytes */
   public static final int DATALENGTH = 4; /* is this right? */
@@ -104,7 +105,7 @@ public class NioDictionaryBinSearchMap implements BinSearchMap, Serializable {
       }
       return MappedFileBinarySearch.dictionaryBinarySearch
 	(this.mapByteBuffer, 
-	 term, term.length(), this.numberOfRecords);
+	 term, term.length(), this.numberOfRecords, Charset.forName("ASCII"));
   }
 
   /** 
