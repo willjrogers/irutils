@@ -130,11 +130,19 @@ TBD
 
 ### build
 
-	mvn exec:exec -DclassName=irutils.MultiKeyIndexLookup -DoptionArg=build -DworkingDirArg=/net/lhcdevfiler/vol/cgsb5/ind/II_Group_WorkArea/wjrogers/data/mult-key-index/strict -DindexnameArg=cuisourceinfo
+    mvn exec:exec -DclassName=irutils.MultiKeyIndexLookup \
+      -DoptionArg=build \
+      -DworkingDirArg=/data/mult-key-index/strict \
+      -DindexnameArg=cuisourceinfo
 
 ### lookup 
 
-	mvn exec:exec -DclassName=irutils.MultiKeyIndexLookup -DoptionArg=lookup -DworkingDirArg=/net/lhcdevfiler/vol/cgsb5/ind/II_Group_WorkArea/wjrogers/data/mult-key-index/strict -DindexnameArg=cuisourceinfo -DcolumnArg=3 -DtermArg="Heart Attack"
+    mvn exec:exec -DclassName=irutils.MultiKeyIndexLookup
+      -DoptionArg=lookup \
+      -DworkingDirArg=/data/mult-key-index/strict \
+      -DindexnameArg=cuisourceinfo \
+      -DcolumnArg=3 \
+      -DtermArg="Heart Attack"
 
 --  
 Will Rogers
