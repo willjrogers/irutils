@@ -105,7 +105,7 @@ public class NioDictionaryBinSearchMap implements DiskBasedBinSearchMap, Seriali
       }
       return MappedFileBinarySearch.dictionaryBinarySearch
 	(this.mapByteBuffer, 
-	 term, term.length(), this.numberOfRecords, Charset.forName("ASCII"));
+	 term, term.length(), this.numberOfRecords);
   }
 
   /** 

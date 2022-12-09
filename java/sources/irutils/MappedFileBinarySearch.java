@@ -1,6 +1,7 @@
 package irutils;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * MappedFileBinarySearch.java
@@ -117,6 +118,58 @@ public final class MappedFileBinarySearch extends Object
     int mid;
     byte[] tstwordbytes = new byte[wordlen];
     byte[] wordbytes = word.getBytes();
+
+    while ( low < high )
+      {
+	mid = low + (high- low) / 2;
+	byteBuf.position(mid * (wordlen+datalen));
+	byteBuf.get(tstwordbytes);
+	// System.out.println(" byte array comparison, both byte arrays must be equal.");
+	int i = 0;
+	while (i < wordlen) {
+	  if ( wordbytes[i] != tstwordbytes[i] ) {
+	    cond = wordbytes[i] - tstwordbytes[i];
+	    break;
+	  } else {
+	    cond = 0;
+	  }
+	  i++;
+	}
+	if (cond < 0) {
+	  high = mid;
+	} else if (cond > 0) {
+	  low = mid + 1;
+	} else {
+	  int count = byteBuf.getInt();
+	  int address = byteBuf.getInt();
+	  return new DictionaryEntry(word, count, address);
+	}
+      }
+    return null;
+  }
+
+  /**
+   *  MappedFile based binary search implementation
+   *
+   * @param byteBuf       file pointer for binary search table
+   * @param word       search word
+   * @param wordlen    wordlength
+   * @param numrecs    number of records in table
+   * @param charset    character set (UTF-8, ASCII, etc.)
+   * @return int containing address of posting, -1 if not found.
+   */
+  public static DictionaryEntry
+    dictionaryBinarySearch(ByteBuffer byteBuf, String word, 
+			   int wordlen, int numrecs, Charset charset)
+    throws IOException
+  {
+    int datalen = 8; // postings (integer[4 bytes]) + address (integer[4 bytes])
+    int low = 0;
+    int high = numrecs;
+    int cond = -1;
+    int mid;
+    byte[] tstwordbytes = new byte[wordlen];
+    byte[] wordbytes = word.getBytes(charset);
 
     while ( low < high )
       {

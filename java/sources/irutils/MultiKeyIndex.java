@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -17,6 +19,7 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.nio.charset.Charset;
 
 /**
  * 
@@ -179,6 +182,28 @@ public class MultiKeyIndex {
     String getDigest() { return this.digest; }
   }
 
+  /**
+   * Load Table
+   * @param tablefilename name of file containing table of records with pipe-separated fields.
+   * @param charset Character Set: ASCII, UTF-8, etc.
+   * @return list of records instances.
+   * @throws FileNotFoundException
+   * @throws IOException
+   * @throws NoSuchAlgorithmException 
+   */
+  public static List<Record> loadTable(String tablefilename, Charset charset) 
+    throws FileNotFoundException, IOException, NoSuchAlgorithmException {
+    List<Record> newList = new ArrayList<Record>();
+    BufferedReader br = new BufferedReader
+      (new InputStreamReader(new FileInputStream(tablefilename), charset));
+    String line;
+    while ((line = br.readLine()) != null) {
+      String[] fields = line.split("\\|");
+      String digest = sha1(line);
+      newList.add(new Record(line, fields, digest));
+    }
+    return newList;
+  }
 
   /**
    * Load Table
@@ -268,7 +293,7 @@ public class MultiKeyIndex {
   }
 
   public static void readPostings(RandomAccessFile extentsRaf, RandomAccessFile postingsRaf, 
-			   List<String> newList, DictionaryEntry entry) 
+				  List<String> newList, DictionaryEntry entry, Charset charset) 
     throws IOException
   {
     extentsRaf.seek(entry.getAddress());
@@ -278,7 +303,14 @@ public class MultiKeyIndex {
       byte[] buf = new byte[(int)length];
       postingsRaf.seek(offset);
       postingsRaf.read(buf);
-      newList.add(new String(buf));
+      newList.add(new String(buf, charset));
     }
+  }
+
+  public static void readPostings(RandomAccessFile extentsRaf, RandomAccessFile postingsRaf, 
+				  List<String> newList, DictionaryEntry entry) 
+    throws IOException {
+    readPostings(extentsRaf, postingsRaf, newList, entry,
+		 Charset.forName("utf-8"));
   }
 }

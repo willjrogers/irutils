@@ -24,7 +24,7 @@ import java.nio.channels.FileChannel;
  * @version $Id: DictionaryBinSearchMap.java,v 1.5 2008/04/25 15:02:56 wrogers Exp $
  */
 
-public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
+public class DictionaryBinSearchMap implements DiskBasedBinSearchMap, Serializable {
  
   /** length of integer in bytes */
   public static final int DATALENGTH = 4; /* is this right? */
@@ -137,7 +137,7 @@ public class DictionaryBinSearchMap implements BinSearchMap, Serializable {
    */
   public int getDataLength()
   {
-    return this.DATALENGTH;
+    return DATALENGTH;
   }
 
   /** close resources used by this map. */

@@ -2,7 +2,6 @@ package irutils;
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 
 /**
  * Dictionary Binary Search Map.
@@ -114,7 +113,7 @@ public class FileDictionaryBinSearchMap implements DiskBasedBinSearchMap, Serial
       }
       return MappedFileBinarySearch.dictionaryBinarySearch
 	(this.mapByteBuffer, 
-	 term, term.length(), this.numberOfRecords, Charset.forName("ASCII"));
+	 term, term.length(), this.numberOfRecords);
     } else {
       if (this.mapRAFile == null ) {
 	this.mapRAFile = new RandomAccessFile ( this.filename, "r");
@@ -138,7 +137,7 @@ public class FileDictionaryBinSearchMap implements DiskBasedBinSearchMap, Serial
    */
   public int getDataLength()
   {
-    return this.DATALENGTH;
+    return DATALENGTH;
   }
 
   /** close resources used by this map. */

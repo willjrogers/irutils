@@ -581,7 +581,7 @@ public class InvertedFile implements Serializable
       }
       entry =
 	MappedFileBinarySearch.dictionaryBinarySearch(dictionaryByteBuffer, word, word.length(), 
-						      (this.numrecs.get(key)).intValue(), this.charset );
+						      (this.numrecs.get(key)).intValue() );
     } else {
       // if (this.verbose) {
       // 	System.out.println("lookup(): opening file for random access");
@@ -748,7 +748,7 @@ public class InvertedFile implements Serializable
     } catch (IOException exception) {
       throw new java.lang.RuntimeException(exception.getMessage());
     }
-    super.finalize();
+    // super.finalize();
   }
 
   public String getIndexName() {
