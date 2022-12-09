@@ -1,15 +1,15 @@
-# Terms and Conditions for Use of MetaMapLite
+# Terms and Conditions for Use of IRutils
 
 # Informational Notice:
 
-This software, “Custom Taxonomy Builder” (CTB) was developed and
-funded by the National Library of Medicine, part of the National
-Institutes of Health, and agency of the United States Department of
-Health and Human Services, which is making the software available to
-the public for any commercial or non-commercial purpose under the
-following open-source BSD license.
+This software, “IRutils” (IRutils) was developed and funded by the
+National Library of Medicine, part of the National Institutes of
+Health, and agency of the United States Department of Health and Human
+Services, which is making the software available to the public for any
+commercial or non-commercial purpose under the following open-source
+BSD license.
 
-NOTE: Users of the data distributed with CTB are
+NOTE: Users of the data distributed with IRutils are
 responsible for compliance with the UMLS Metathesaurus License
 Agreement which requires you to respect the copyrights of the
 constituent vocabularies and to file a brief annual report on your use
@@ -36,7 +36,7 @@ met:
   this software without specific prior written permission.  The
   U.S. Government retains an unlimited, royalty-free right to use,
   distribute or modify the software.
-* Please acknowledge NLM as the source of the CTB software by
+* Please acknowledge NLM as the source of the IRutils software by
   including the phrase “Courtesy of the U.S. National Library of
   Medicine” or “Source: U.S. National Library of Medicine.”
 
